@@ -54,5 +54,28 @@ export const useAlarmsStore = create((set) => ({
         loadingStates: { ...state.loadingStates, fetchAlarmsByUser: false }
       }));
     }
+  },
+  
+  fetchAlarmsByLocation: async (locationId) => {
+    if (!locationId) return;
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchAlarms: true },
+      error: null
+    }));
+
+    try {
+      const alarms = await alarmsService.getAllByLocation(locationId);
+      
+      set(state => ({
+        alarms,
+        loadingStates: { ...state.loadingStates, fetchAlarms: false }
+      }));
+    } catch (error) {
+      set(state => ({
+        error: 'Error fetching location alarms',
+        loadingStates: { ...state.loadingStates, fetchAlarms: false }
+      }));
+    }
   }
 }));

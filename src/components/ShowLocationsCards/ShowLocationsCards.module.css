@@ -1,0 +1,34 @@
+.controlsContainer {
+  margin-bottom: 2rem;
+}
+
+.cardsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+.dataloggersList {
+  margin-top: 1rem;
+}
+
+.dataloggerItems {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dataloggerItem {
+  margin: 0;
+}
+
+.noDataloggers {
+  color: #666;
+  font-style: italic;
+  margin: 0.5rem 0;
+}

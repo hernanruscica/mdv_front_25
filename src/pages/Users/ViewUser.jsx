@@ -1,27 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
+import { Title2 } from '../../components/Title2/Title2';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useUsersStore } from '../../store/usersStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useLocationUsersStore } from '../../store/locationUsersStore';
+import { useDataloggersStore } from '../../store/dataloggersStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import CardImage from '../../components/CardImage/CardImage';
 import styles from './ViewUser.module.css';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
-import CardInfo from '../../components/CardInfo/CardInfo';
-import cardInfoStyles from '../../components/CardInfo/CardInfo.module.css';
-import { getIconFileName } from '../../utils/iconsDictionary';
+import { filterEntitiesByStatus } from '../../utils/entityFilters';
+import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
 
 const ViewUser = () => {  
+  const [searchTerm, setSearchTerm] = useState('');
   const { id } = useParams();
   const { fetchUserById,  
          users, isLoading: isLoadingUsers, error: errorUsers 
    } = useUsersStore();
   const { fetchAlarmsByUser, alarms, isLoading: isLoadingAlarms, error: errorAlarms } = useAlarmsStore();
-  const { fetchLocationUsers, locationUsers, isLoading : isLoadingLocations } = useLocationUsersStore();
+  const { fetchLocationUsers, locationUsers, isLoading : isLoadingLocations, error: errorLocationsUsers } = useLocationUsersStore();
+  const { dataloggers, isLoading: isLoadingDataloggers, fetchDataloggers, error: errorDataloggers } = useDataloggersStore();
 
+  const user = users.find(user => user.id === parseInt(id));
   const [currentUser, setCurrentUser] = useState(null);
 
   // Efecto para cargar el usuario
@@ -44,22 +48,24 @@ const ViewUser = () => {
       if (currentUser) {
         await fetchAlarmsByUser(currentUser); 
         await fetchLocationUsers(currentUser);
+        await fetchDataloggers(currentUser);
       }
     };
 
     loadData();
   }, [currentUser]); // Se ejecutará cuando currentUser cambie
 
-  if (isLoadingUsers ||  isLoadingLocations) {
+  if (isLoadingUsers ||  isLoadingLocations || isLoadingDataloggers) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-  if (errorUsers || errorAlarms) {
-    return <div>Error: {errorUsers || errorAlarms }</div>;
+  if (errorUsers ||  errorLocationsUsers || errorDataloggers) {
+    return <div className={styles.error}>Error: {errorUsers || errorLocationsUsers || errorDataloggers }</div>;
   }
 
-  console.log('Alarmas del usuario:', alarms?.length);
-  console.log('ubicaciones para el usuario', locationUsers?.length);
+  //console.log('Alarmas del usuario:', alarms?.length);
+  //console.log('1 ubicacion para el usuario', locationUsers[0]);
+  //console.log('dataloggers para el usuario', dataloggers?.length);
 
   const userButtons = (
     <>
@@ -77,6 +83,10 @@ const ViewUser = () => {
       />
     </>
   );
+
+  const activeLocations = filterEntitiesByStatus(locationUsers);
+  const activeDataloggers = filterEntitiesByStatus(dataloggers);
+
   return (
     <>
       <Title1 
@@ -109,44 +119,26 @@ const ViewUser = () => {
                     url={`/panel/usuarios/${currentUser.id}/alarmas`}
                   />
                 )}
+                { errorAlarms && <p className={styles.error}>{errorAlarms}</p> }
               </p>
             </div>
           </CardImage>
 
-          <div className={styles.locationsContainer}>
-            {isLoadingLocations ? (
-              <LoadingSpinner message="Cargando ubicaciones..." />
-            ) : locationUsers?.length > 0 ? (
-              locationUsers.map(location => (
-                <CardInfo
-                  key={location.ubicaciones_id}
-                  iconSrc={`/icons/${getIconFileName('ubicaciones')}`}
-                  title={location.ubicaciones_nombre}
-                  url={`/panel/ubicaciones/${location.ubicaciones_id}`}
-                >
-                  <div className={cardInfoStyles.description}>
-                    <p className={cardInfoStyles.paragraph}>
-                      {location.ubicaciones_descripcion}
-                    </p>
-                    <p className={cardInfoStyles.paragraph}>
-                      <strong>Dirección:</strong>{" "}
-                      {location.ubicaciones_calle} {location.ubicaciones_calle_numero}
-                    </p>
-                    <p className={cardInfoStyles.paragraph}>
-                      <strong>Teléfono:</strong>{" "}
-                      {location.ubicaciones_tel}
-                    </p>
-                    <p className={cardInfoStyles.paragraph}>
-                      <strong>Email:</strong>{" "}
-                      {location.ubicaciones_email}
-                    </p>
-                  </div>
-                </CardInfo>
-              ))
-            ) : (
-              <p className={styles.noLocations}>Este usuario no tiene ubicaciones asignadas</p>
-            )}
-          </div>
+          <Title2 text={`Ubicaciones para el usuario ${currentUser.nombre_1} ${currentUser.apellido_1}`} type="ubicaciones"/>
+
+          {isLoadingLocations ? (
+            <LoadingSpinner message="Cargando ubicaciones..." />
+          ) : locationUsers?.length > 0 ? (
+            <ShowLocationsCards
+              locations={activeLocations}
+              dataloggers={activeDataloggers}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              showAddButton={false}
+            />
+          ) : (
+            <p className={styles.noLocations}>Este usuario no tiene ubicaciones asignadas</p>
+          )}
         </>
       )}
     </>

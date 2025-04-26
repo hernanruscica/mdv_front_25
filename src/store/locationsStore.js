@@ -33,5 +33,31 @@ export const useLocationsStore = create((set) => ({
         loadingStates: { ...state.loadingStates, fetchLocations: false }
       }));
     }
+  },
+
+  fetchLocationById: async (locationId) => {
+    if (!locationId) return null;
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchLocation: true },
+      error: null
+    }));
+
+    try {
+      const location = await locationsService.getById(locationId);
+      
+      set(state => ({
+        selectedLocation: location,
+        loadingStates: { ...state.loadingStates, fetchLocation: false }
+      }));
+
+      return location;
+    } catch (error) {
+      set(state => ({
+        error: 'Error al obtener la ubicación',
+        loadingStates: { ...state.loadingStates, fetchLocation: false }
+      }));
+      return null;
+    }
   }
 }));

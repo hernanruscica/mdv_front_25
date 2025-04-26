@@ -19,5 +19,15 @@ export const alarmsService = {
       console.error('Get assigned alarms error:', error);
       return null;
     }
+  },
+  
+  getAllByLocation: async (locationId) => {
+    try {
+      const { data } = await axiosClient.get(`/api/alarms/bylocation/${locationId}`);
+      return data.alarms;
+    } catch (error) {
+      console.error('Get location alarms error:', error);
+      return null;
+    }
   }
 };

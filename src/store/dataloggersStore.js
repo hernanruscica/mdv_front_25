@@ -33,5 +33,28 @@ export const useDataloggersStore = create((set) => ({
         loadingStates: { ...state.loadingStates, fetchDataloggers: false }
       }));
     }
+  },
+
+  fetchDataloggersByLocation: async (locationId) => {
+    if (!locationId) return;
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchDataloggers: true },
+      error: null
+    }));
+
+    try {
+      const dataloggers = await dataloggersService.getAllByLocation(locationId);
+        
+      set(state => ({
+        dataloggers,
+        loadingStates: { ...state.loadingStates, fetchDataloggers: false }
+      }));
+    } catch (error) {
+      set(state => ({
+        error: 'Error al obtener los dataloggers de la ubicación',
+        loadingStates: { ...state.loadingStates, fetchDataloggers: false }
+      }));
+    }
   }
 }));

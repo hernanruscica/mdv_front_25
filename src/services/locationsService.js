@@ -19,5 +19,15 @@ export const locationsService = {
       console.error('Get assigned locations error:', error);
       return null;
     }
+  },
+
+  getById: async (locationId) => {
+    try {
+      const { data } = await axiosClient.get(`/api/locations/${locationId}`);
+      return data.location;
+    } catch (error) {
+      console.error('Get location by id error:', error);
+      return null;
+    }
   }
 };

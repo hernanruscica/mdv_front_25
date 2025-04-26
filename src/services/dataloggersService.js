@@ -19,5 +19,15 @@ export const dataloggersService = {
       console.error('Get assigned dataloggers error:', error);
       return null;
     }
+  },
+
+  getAllByLocation: async (locationId) => {
+    try {
+      const { data } = await axiosClient.get(`/api/dataloggers/bylocation/${locationId}`);
+      return data.dataloggers;
+    } catch (error) {
+      console.error('Get location dataloggers error:', error);
+      return null;
+    }
   }
 };
