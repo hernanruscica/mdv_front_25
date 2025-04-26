@@ -1,0 +1,29 @@
+.navbarBtn {
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    width: fit-content;   
+    height: fit-content; 
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 15px;
+    border-radius: 15px;    
+    background-color: #F6B510;
+    color: #000;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.navbarBtnIcon {
+    width: 20px;
+    height: auto;
+}
+
+.navbarBtnText {
+    width: 100%;
+}
+
+.navbarBtn--danger {
+    background-color: #DE6528;
+}

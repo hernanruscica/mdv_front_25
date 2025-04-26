@@ -1,0 +1,22 @@
+.cardBtnSmall {
+  font-size: 0.95em;
+  text-decoration: none;
+  text-transform: capitalize;    
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #362702;
+  background-color: #F6B510;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-block;
+  width: fit-content;
+  border: none;
+  cursor: pointer;
+  margin: 8px 12px;
+  text-align: left;
+  
+}
+
+.cardBtnSmall:hover {
+  background-color: #d39b0e;
+}

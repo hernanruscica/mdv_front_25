@@ -1,0 +1,25 @@
+
+.cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px;
+}
+
+.filterControl {
+  padding: 1rem;
+  text-align: center;
+}
+
+.inactiveCount {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.error {
+  color: #dc3545;
+  text-align: center;
+  padding: 1rem;
+}
+
