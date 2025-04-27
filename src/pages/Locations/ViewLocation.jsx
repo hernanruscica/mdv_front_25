@@ -58,8 +58,8 @@ const ViewLocation = () => {
 
   useEffect(() => {
     const loadData = async () => {      
-      await fetchChannels(user);        
       if (currentLocation) {
+        await fetchChannels(user);        
         await fetchAlarmsByLocation(currentLocation.id);
         await fetchDataloggersByLocation(currentLocation.id);
       }     

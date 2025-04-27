@@ -1,0 +1,34 @@
+.controlsContainer {
+  margin-bottom: 2rem;
+}
+
+.cardsContainer {
+  display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+.alarmsList {
+  margin-top: 1rem;
+}
+
+.alarmItems {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.alarmItem {
+  margin: 0;
+}
+
+.noAlarms {
+  color: #666;
+  font-style: italic;
+  margin: 0.5rem 0;
+}

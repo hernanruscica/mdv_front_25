@@ -6,7 +6,18 @@
   overflow: hidden;
   box-shadow: 2px 2px 6px 0px rgba(0,0,0,0.5);    
   max-width: 360px;
-  min-width: 320px;
+  min-width: 340px;
+  width: 90%;
+}
+.cardLarge {
+  display: flex;
+  flex-direction: column;   
+  justify-content: space-between; 
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 2px 2px 6px 0px rgba(0,0,0,0.5);    
+  max-width: 560px;
+  min-width: 340px;
   width: 90%;
 }
 
@@ -63,4 +74,59 @@
 
 .btnSmall:hover {
   background-color: #333;
+}
+
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.cardImage {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.cardImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 768px) {
+  .cardContent {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .cardContent >  .cardImage {
+    width: 50%;
+    height: auto;
+    min-height: 100%;
+  }
+
+  .cardContent > .description {
+    width: 50%;
+  }
+}
+
+.cardGraphic {
+  width: 96%;
+  margin: 20px auto;
+  background-color: #EDEFF0;  
+  
+}
+
+.graphicContainer {
+  width: 100%;
+  height: 300px;
+  background-color: #fff;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

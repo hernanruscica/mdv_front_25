@@ -1,6 +1,18 @@
+.dataloggerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.description {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #666;
+}
+
 .error {
   color: #dc3545;
-  padding: 20px;
+  padding: 1rem;
   text-align: center;
   font-weight: bold;
 }

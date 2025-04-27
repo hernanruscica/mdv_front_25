@@ -4,9 +4,9 @@ import CardTitle from '../CardTitle/CardTitle';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import styles from './CardInfo.module.css';
 
-const CardInfo = ({ iconSrc, title, url, children }) => {
+const CardInfo = ({ iconSrc, title, url, children, size = 'normal' }) => {
   return (
-    <div className={styles.card}>
+    <div className={(size === 'large') ? styles.cardLarge : styles.card}>
       <CardTitle 
         iconSrc={iconSrc}
         text={title}

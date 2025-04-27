@@ -56,5 +56,31 @@ export const useDataloggersStore = create((set) => ({
         loadingStates: { ...state.loadingStates, fetchDataloggers: false }
       }));
     }
+  },
+
+  fetchDataloggerById: async (id) => {
+    if (!id) return;
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchDatalogger: true },
+      error: null
+    }));
+
+    try {
+      const datalogger = await dataloggersService.getById(id);
+        
+      set(state => ({
+        selectedDatalogger: datalogger,
+        loadingStates: { ...state.loadingStates, fetchDatalogger: false }
+      }));
+
+      return datalogger;
+    } catch (error) {
+      set(state => ({
+        error: 'Error al obtener el datalogger',
+        loadingStates: { ...state.loadingStates, fetchDatalogger: false }
+      }));
+      return null;
+    }
   }
 }));

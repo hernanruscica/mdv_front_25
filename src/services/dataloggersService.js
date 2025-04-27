@@ -29,5 +29,15 @@ export const dataloggersService = {
       console.error('Get location dataloggers error:', error);
       return null;
     }
+  },
+
+  getById: async (id) => {
+    try {
+      const { data } = await axiosClient.get(`/api/dataloggers/${id}`);
+      return data.datalogger;
+    } catch (error) {
+      console.error('Get datalogger by id error:', error);
+      return null;
+    }
   }
 };
