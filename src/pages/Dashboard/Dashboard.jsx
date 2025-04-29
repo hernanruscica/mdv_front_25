@@ -100,7 +100,7 @@ const Dashboard = () => {
         text="Panel de Control" 
       />
       <Breadcrumb />
-      <div className={styles.filterControl}>
+      {/* <div className={styles.filterControl}>
         <label>
           <input
             type="checkbox"
@@ -109,7 +109,7 @@ const Dashboard = () => {
           />
           Mostrar solo activos
         </label>
-      </div>
+      </div> */}
       <div className={styles.cardsContainer}>
         <CardInfo
           iconSrc={`/icons/${getIconFileName('usuarios')}`}
@@ -129,7 +129,7 @@ const Dashboard = () => {
                 url='/panel/usuarios/agregar'
               />
             )}            
-            {showActiveOnly && users?.length > activeUsers.length && (
+            {user.espropietario === 1 && showActiveOnly && users?.length > activeUsers.length && (
               <span className={styles.inactiveCount}>
                 ({users.length - activeUsers.length} inactivos)
               </span>
@@ -155,7 +155,7 @@ const Dashboard = () => {
                 url='/panel/ubicaciones/agregar'
               />
             )}
-            {showActiveOnly && locations?.length > activeLocations.length && (
+            {user.espropietario === 1 && showActiveOnly && locations?.length > activeLocations.length && (
               <span className={styles.inactiveCount}>
                 ({locations.length - activeLocations.length} inactivas)
               </span>
@@ -181,7 +181,7 @@ const Dashboard = () => {
                 url='/panel/dataloggers/agregar'
               />
             )}
-            {showActiveOnly && dataloggers?.length > activeDataloggers.length && (
+            {user.espropietario === 1 && showActiveOnly && dataloggers?.length > activeDataloggers.length && (
               <span className={styles.inactiveCount}>
                 ({dataloggers.length - activeDataloggers.length} inactivos)
               </span>

@@ -11,23 +11,25 @@ const App = () => {
   return (    
     <Router>
       <Header />
-      <Routes>
-        {routes.map((route) => (
-          <Route
-            key={route.path}
-            path={route.path}
-            element={
-              route.private ? (
-                <PrivateRoute>
-                  {route.element}
-                </PrivateRoute>
-              ) : (
-                route.element
-              )
-            }
-          />
-        ))}
-      </Routes>
+      <main className="main-content">
+        <Routes>
+          {routes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                route.private ? (
+                  <PrivateRoute>
+                    {route.element}
+                  </PrivateRoute>
+                ) : (
+                  route.element
+                )
+              }
+            />
+          ))}
+        </Routes>
+      </main>
       <Footer />
     </Router>     
   );

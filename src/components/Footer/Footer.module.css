@@ -7,8 +7,7 @@ footer {
     align-items: flex-start; /* Alinea las secciones en la parte superior */
     padding: 20px; /* Aumenta el padding para mejor espaciado en general */
     background-color: #333; /* Cambia a un gris más oscuro para mejor contraste con el texto */
-    color: #fff; /* Cambia el color del texto a blanco o un gris claro */
-    z-index: 100;
+    color: #fff; /* Cambia el color del texto a blanco o un gris claro */    
     flex-wrap: wrap; /* Permite que las secciones se envuelvan en pantallas más pequeñas */
 }
 

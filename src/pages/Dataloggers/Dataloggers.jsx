@@ -60,6 +60,8 @@ const Dataloggers = () => {
     return <div className={styles.error}>{error}</div>;
   }
 
+  console.log(dataloggers);
+
   return (
     <>
       <Title1 

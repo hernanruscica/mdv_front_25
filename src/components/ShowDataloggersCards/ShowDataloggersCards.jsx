@@ -1,13 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import ReactModal from 'react-modal';
 import CardInfo from '../CardInfo/CardInfo';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
+import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
 import ButtonsBar from '../ButtonsBar/ButtonsBar';
 import SearchBar from '../SearchBar/SearchBar';
 import { getIconFileName } from "../../utils/iconsDictionary";
-import { filterEntitiesByStatus } from '../../utils/entityFilters';
 import styles from './ShowDataloggersCards.module.css';
 import cardInfoStyles from '../CardInfo/CardInfo.module.css';
+import CustomTag from '../CustomTag/CustomTag';
 
 const ShowDataloggersCards = ({ 
   dataloggers, 
@@ -16,34 +17,38 @@ const ShowDataloggersCards = ({
   locations,
   showAddButton = false 
 }) => {
+  const [showArchived, setShowArchived] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalContent, setModalContent] = useState({
     isOpen: false,
     type: null,
     dataloggerId: null,
-    title: ''
+    itemsCount: 0,
+    dataloggerName: ''
   });
 
-  const openModal = useCallback((type, dataloggerId, itemCount, dataloggerName) => {
+  const openModal = (type, dataloggerId, itemsCount, dataloggerName) => {
     setModalContent({
       isOpen: true,
       type,
       dataloggerId,
-      title: `${dataloggerName} - ${type === 'channels' ? 'Canales' : 'Alarmas'} (${itemCount})`
+      itemsCount,
+      dataloggerName
     });
-  }, []);
+  };
 
-  const closeModal = useCallback(() => {
+  const closeModal = () => {
     setModalContent({
       isOpen: false,
       type: null,
       dataloggerId: null,
-      title: ''
+      itemsCount: 0,
+      dataloggerName: ''
     });
-  }, []);
+  };
 
   const getModalContent = () => {
-    if (!modalContent.dataloggerId) return null;
+    if (!modalContent.type || !modalContent.dataloggerId) return null;
 
     const items = modalContent.type === 'channels' 
       ? channels.filter(channel => channel.datalogger_id === modalContent.dataloggerId)
@@ -54,28 +59,39 @@ const ShowDataloggersCards = ({
 
     return (
       <div className={styles.modalContent}>
-        <h2>{modalContent.title}</h2>
-        <div className={styles.modalItems}>
-          {items.map(item => (
-            <CardBtnSmall
-              key={modalContent.type === 'channels' ? item.canales_id : item.id}
-              title={modalContent.type === 'channels' ? item.canales_nombre : item.nombre}
-              url={`/panel/${modalContent.type}/${modalContent.type === 'channels' ? item.canales_id : item.id}`}
-            />
-          ))}
-        </div>
+        <h2>{modalContent.type === 'channels' ? 'Canales' : 'Alarmas'} de {modalContent.dataloggerName}</h2>
+        {items.length > 0 ? (
+          <ul className={styles.modalList}>
+            {items.map(item => (
+              <li key={item.id} className={styles.modalItem}>
+                <CardBtnSmall
+                  title={modalContent.type === 'channels' ? item.canales_nombre : item.nombre}
+                  url={modalContent.type === 'channels' 
+                    ? `/panel/dataloggers/${modalContent.dataloggerId}/canales/${item.canales_id}`
+                    : `/panel/dataloggers/${modalContent.dataloggerId}/canales/${item.canal_id}/alarmas/${item.id}`
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No hay {modalContent.type === 'channels' ? 'canales' : 'alarmas'} para mostrar</p>
+        )}
       </div>
     );
   };
 
-  const activeDataloggers = filterEntitiesByStatus(dataloggers);
-  const filteredDataloggers = activeDataloggers.filter(datalogger => {
-    const searchTermLower = searchTerm.toLowerCase();
-    return (
-      datalogger.nombre?.toLowerCase().includes(searchTermLower) ||
-      datalogger.descripcion?.toLowerCase().includes(searchTermLower)
-    );
-  });
+  const filteredDataloggers = dataloggers
+    .filter(datalogger => !showArchived ? datalogger.estado === 1 : true)
+    .filter(datalogger => {
+      const searchTermLower = searchTerm.toLowerCase();
+      return (
+        datalogger.nombre.toLowerCase().includes(searchTermLower) ||
+        datalogger.descripcion?.toLowerCase().includes(searchTermLower)
+      );
+    });
+
+    console.log(locations)
 
   return (
     <>
@@ -85,11 +101,23 @@ const ShowDataloggersCards = ({
           itemsQty={filteredDataloggers.length}
           showAddButton={showAddButton}
         >
-          <SearchBar
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            placeholder="Buscar dataloggers..."
-          />
+          <div className={styles.controls}>
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              placeholder="Buscar dataloggers..."
+            />
+            {showAddButton && (
+              <label className={styles.checkboxContainer}>
+                <input
+                  type="checkbox"
+                  checked={showArchived}
+                  onChange={(e) => setShowArchived(e.target.checked)}
+                />
+                <span>Mostrar también los archivados</span>
+              </label>
+            )}
+          </div>
         </ButtonsBar>
       </div>
 
@@ -102,6 +130,15 @@ const ShowDataloggersCards = ({
             url={`/panel/dataloggers/${datalogger.id}`}   
           >
             <div className={cardInfoStyles.description}>
+              {
+                datalogger.estado === 0 && (
+                  <CustomTag 
+                    text="Archivado"
+                    type="archive"
+                    icon="/icons/archive-solid.svg"
+                  />
+                )
+              }
               <p className={cardInfoStyles.paragraph}>
                 <strong>{datalogger.descripcion}</strong>
               </p>
@@ -109,7 +146,9 @@ const ShowDataloggersCards = ({
                 <p className={cardInfoStyles.paragraph}>                
                   Instalado en: {' '}
                   <CardBtnSmall 
-                    title={locations.find(loc => loc.ubicaciones_id === datalogger.ubicacion_id || loc.id === datalogger.ubicacion_id)?.nombre || 'Sin ubicación'}
+                    title={locations.find(loc => loc.ubicaciones_id === datalogger.ubicacion_id || loc.id === datalogger.ubicacion_id)?.ubicaciones_nombre || 
+                           locations.find(loc => loc.ubicaciones_id === datalogger.ubicacion_id || loc.id === datalogger.ubicacion_id)?.nombre || 
+                           'Sin ubicación'}
                     url={`/panel/ubicaciones/${datalogger.ubicacion_id}`}       
                   />       
                 </p>
@@ -154,9 +193,12 @@ const ShowDataloggersCards = ({
         overlayClassName={styles.modalOverlay}
       >
         {getModalContent()}
-        <button className={styles.closeButton} onClick={closeModal}>
-          Cerrar
-        </button>
+        
+        <BtnCallToAction 
+          text="Cerrar ventana"
+          icon="times-solid.svg"
+          onClick={closeModal}
+        />
       </ReactModal>
     </>
   );

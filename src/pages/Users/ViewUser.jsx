@@ -93,7 +93,7 @@ const ViewUser = () => {
         text={`Perfil de ${currentUser?.nombre_1} ${currentUser?.apellido_1}`}
         type="usuarios"
       />
-      <Breadcrumb />
+      <Breadcrumb usuario={`${currentUser?.nombre_1} ${currentUser?.apellido_1}`}/>
       {currentUser && (
         <>
           <CardImage

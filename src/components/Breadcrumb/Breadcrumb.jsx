@@ -1,33 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { iconsDictionary, getIconFileName } from '../../utils/iconsDictionary';
-import { useUsersStore } from '../../store/usersStore';
-import { useDataloggersStore } from '../../store/dataloggersStore';
-import { useLocationsStore } from '../../store/locationsStore';
 import styles from './Breadcrumb.module.css';
 
-const Breadcrumb = () => {
+const Breadcrumb = ({ usuario, datalogger, ubicacion, canal, alarma }) => {
   const location = useLocation();
   const [breadcrumbs, setBreadcrumbs] = useState([]);
-  
-  const { selectedUser } = useUsersStore();
-  const { selectedDatalogger } = useDataloggersStore();
-  const { selectedLocation } = useLocationsStore();
-
-  const getEntityName = (type, id) => {
-    switch(type) {
-      case 'usuarios':
-        return selectedUser?.nombre_1 
-          ? `${selectedUser.nombre_1} ${selectedUser.apellido_1}`
-          : id;
-      case 'dataloggers':
-        return selectedDatalogger?.nombre || id;
-      case 'ubicaciones':
-        return selectedLocation?.nombre || id;
-      default:
-        return id;
-    }
-  };
 
   const getPathName = (path) => {
     switch(path) {
@@ -43,13 +21,24 @@ const Breadcrumb = () => {
     }
   };
 
+  const getCustomName = (path, index, paths) => {
+    // Si el path anterior es uno de los tipos conocidos, verificamos si tenemos un prop correspondiente
+    const prevPath = paths[index - 1];
+    
+    if (prevPath === 'usuarios' && usuario) return usuario;
+    if (prevPath === 'dataloggers' && datalogger) return datalogger;
+    if (prevPath === 'ubicaciones' && ubicacion) return ubicacion;
+    if (prevPath === 'canales' && canal) return canal;
+    if (prevPath === 'alarmas' && alarma) return alarma;
+    
+    return getPathName(path);
+  };
+
   useEffect(() => {
     const paths = location.pathname.split('/').filter(path => path);
     const breadcrumbItems = paths.map((path, index) => {
-      const isId = path.match(/^[0-9a-fA-F-]+$/);
-      // Fix: Use current path for type if it exists in iconsDictionary
       const type = iconsDictionary[path] ? path : paths[index - 1] || path;
-      const name = isId ? getEntityName(type, path) : getPathName(path);
+      const name = getCustomName(path, index, paths);
       const icon = getIconFileName(type);
       const url = `/${paths.slice(0, index + 1).join('/')}`;
       
@@ -62,7 +51,7 @@ const Breadcrumb = () => {
     });
 
     setBreadcrumbs(breadcrumbItems);
-  }, [location, selectedUser, selectedDatalogger, selectedLocation]);
+  }, [location, usuario, datalogger, ubicacion, canal, alarma]);
 
   return (
     <div className={styles.breadcrumbContainer}>

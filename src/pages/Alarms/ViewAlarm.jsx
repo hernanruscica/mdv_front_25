@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useAlarmLogsStore } from '../../store/alarmLogsStore';
+import { useChannelsStore } from '../../store/channelsStore';
+import { useDataloggersStore } from '../../store/dataloggersStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { Title1 } from '../../components/Title1/Title1';
@@ -15,18 +17,35 @@ import { valueOrDefault } from 'chart.js/helpers';
 const ViewAlarm = () => {
   const { alarmId } = useParams();
   const [currentAlarm, setCurrentAlarm] = useState(null);
+  const [alarmLogs, setAlarmLogs] = useState([]);
+  const [currentChannel, setCurrentChannel] = useState(null);
+  const [currentDatalogger, setCurrentDatalogger] = useState(null);
+  
   const { 
     fetchAlarmById,
     loadingStates: { fetchAlarm: isLoading },
     error 
   } = useAlarmsStore();
 
-  const [alarmLogs, setAlarmLogs] = useState([]);
   const { 
     fetchAlarmLogsByAlarmId,
     loadingStates: { fetchAlarmLogs: isLoadingLogs },
     error: errorLogs 
   } = useAlarmLogsStore();
+
+  const {
+    channels, selectedChannel,
+    fetchChannelById,
+    loadingStates: { fetchChannel: isLoadingChannel },
+    error: errorChannel
+  } = useChannelsStore();
+
+  const {
+    dataloggers, selectedDatalogger,
+    fetchDataloggerById,
+    loadingStates: { fetchChannel: isLoadingDatalogger },
+    error: errorDatalogger
+  } = useDataloggersStore();
 
   useEffect(() => {
     const loadAlarm = async () => {
@@ -40,22 +59,58 @@ const ViewAlarm = () => {
   }, [alarmId]);
 
   useEffect(() => {
-    const loadAlarmLogs = async () => {
+    const loadChannelAndLogs = async () => {
       if (currentAlarm) {
+        // Primero cargamos los logs
         const logs = await fetchAlarmLogsByAlarmId(currentAlarm.id);
         setAlarmLogs(logs || []);
+
+        // Luego buscamos el canal
+        const channelFromStore = channels.find(c => c.canales_id === currentAlarm.canal_id);
+        if (channelFromStore) {
+          setCurrentChannel(channelFromStore);
+        } else {
+          try {
+            const fetchedChannel = await fetchChannelById(currentAlarm.canal_id);
+            setCurrentChannel(fetchedChannel);
+          } catch (error) {
+            console.error('Error al cargar el canal:', error);
+          }
+        }
       }
     };
     
-    loadAlarmLogs();
-  }, [currentAlarm]);
+    loadChannelAndLogs();
+  }, [currentAlarm, channels]);
 
-  if (isLoading) {
+  useEffect(() => {
+    const loadDatalogger = async () => {
+      if (currentChannel?.datalogger_id) {
+        const dataloggerFromStore = dataloggers.find(d => d.id === currentChannel.datalogger_id);
+        if (dataloggerFromStore) {
+          setCurrentDatalogger(dataloggerFromStore);
+        } else {
+          try {
+            const fetchedDatalogger = await fetchDataloggerById(currentChannel.datalogger_id);
+            setCurrentDatalogger(fetchedDatalogger);
+          } catch (error) {
+            console.error('Error al cargar el datalogger:', error);
+          }
+        }
+      }
+    };
+
+    loadDatalogger();
+  }, [currentChannel, dataloggers]);
+
+  if (isLoading || isLoadingLogs || isLoadingChannel || isLoadingDatalogger) {
     return <LoadingSpinner message="Cargando detalles de la alarma..." />;
   }
 
-  if (error) {
-    return <div className={styles.error}>{error}</div>;
+  if (error || errorLogs || errorChannel || errorDatalogger) {
+    return <div className={styles.error}>
+      {error || errorLogs || errorChannel || errorDatalogger}
+    </div>;
   }
 
   if (!currentAlarm) {
@@ -96,7 +151,7 @@ const ViewAlarm = () => {
     mensaje: log.mensaje
   }));
 
-  console.log(currentAlarm, alarmLogs)
+  console.log(currentDatalogger)
 
   return (
     <>
@@ -104,7 +159,11 @@ const ViewAlarm = () => {
         type="alarmas"
         text={`Alarma: ${currentAlarm.nombre}`}
       />
-      <Breadcrumb />
+      <Breadcrumb 
+        datalogger={currentDatalogger?.nombre}
+        canal={currentChannel?.nombre}
+        alarma={currentAlarm.nombre}
+      />
       <CardImage
         image="/images/default_channel.png"
         title={currentAlarm.nombre}

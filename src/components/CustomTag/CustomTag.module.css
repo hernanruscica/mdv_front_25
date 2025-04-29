@@ -1,0 +1,39 @@
+.tag {
+  padding: 8px 16px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 18px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #EDEFF0;  
+  cursor: default;
+}
+
+.tag img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Tipos de tags predefinidos */
+.tag[data-type="archive"] {
+  background-color: #DE6528;
+}
+
+.tag[data-type="warning"] {
+  background-color: #F6B510;
+}
+
+.tag[data-type="success"] {
+  background-color: #28a745;
+}
+
+.tag[data-type="danger"] {
+  background-color: #dc3545;
+}
+
+.tag[data-type="info"] {
+  background-color: #17a2b8;
+}

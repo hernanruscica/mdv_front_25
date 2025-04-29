@@ -150,9 +150,10 @@ const ViewDatalogger = () => {
     canalId: alarm.canal_id,
     id: alarm.id  // Aquí está el cambio clave
   }));
-  console.log('alarms',alarms);
-  console.log('dataloggerAlarms',dataloggerAlarms);
-  console.log('preparedAlarms',preparedAlarms);
+  console.log('dataloggersAlarms',dataloggerAlarms);
+  console.log(currentDatalogger);
+  //console.log('dataloggerAlarms',dataloggerAlarms);
+ // console.log('preparedAlarms',preparedAlarms);
 
   return (
     <>
@@ -160,7 +161,7 @@ const ViewDatalogger = () => {
         type="dataloggers"
         text={currentDatalogger.nombre}
       />
-      <Breadcrumb />
+      <Breadcrumb datalogger={currentDatalogger.nombre}/>
       <CardImage
         image={currentDatalogger.foto ? `${import.meta.env.VITE_IMAGE_URL}/${currentDatalogger.foto}` : '/images/default-datalogger.webp'}
         title={currentDatalogger.nombre}

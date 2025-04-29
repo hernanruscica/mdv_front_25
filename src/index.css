@@ -36,11 +36,27 @@ h1, h2{
   margin: 0 auto;
   background-color: #f9f9f9;
   color: #1a1a1a;
+  position: relative;
 }
 
 .loading{
   min-height: 100vh;  
 }
+
 .section{
   width: 100%;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.main-content {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2em;  
+  margin: 0 auto;
 }

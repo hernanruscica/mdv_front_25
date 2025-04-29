@@ -14,7 +14,16 @@ const ShowChannelsCards = ({
   onSearchChange,
   showAddButton = false 
 }) => {
-  const filteredChannels = channels.filter(channel => {
+  // Validación inicial para eliminar duplicados
+  const uniqueChannels = channels.filter((channel, index, self) =>
+    index === self.findIndex((c) => c.canales_id === channel.canales_id)
+  );
+
+  const uniqueAlarms = alarms.filter((alarm, index, self) =>
+    index === self.findIndex((a) => a.id === alarm.id)
+  );
+
+  const filteredChannels = uniqueChannels.filter(channel => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
       channel.canales_nombre.toLowerCase().includes(searchTermLower) ||
@@ -40,8 +49,8 @@ const ShowChannelsCards = ({
 
       <div className={styles.cardsContainer}>
         {filteredChannels.map(channel => {
-          const channelAlarms = alarms.filter(
-            alarm => alarm.canal_id === channel.canales_id
+          const channelAlarms = uniqueAlarms.filter(
+            alarm => alarm.canal_id == channel.canales_id
           );
 
           return (

@@ -93,15 +93,15 @@ const ViewChannel = () => {
     nombreAlarma: alarm.nombre,
     nombreCanal: currentChannel?.nombre || 'Canal no encontrado',
     condicion: alarm.condicion || 'Sin condición',
-    id: alarm.alarma_id
+    id: alarm.id
   }));
 
-  console.log(currentChannel)
+  console.log(channelAlarms)
 
   return (
     <>
       <Title1 type="canales" text={`Canal ${currentChannel?.nombre}`}/>
-      <Breadcrumb />
+      <Breadcrumb datalogger={currentChannel?.datalogger_nombre} canal={currentChannel?.nombre}/>
       
       <div className={styles.cardsContainer}>
         <CardImage

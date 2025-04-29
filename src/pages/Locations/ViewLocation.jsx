@@ -108,7 +108,7 @@ const ViewLocation = () => {
         text={`Ubicación: ${currentLocation.nombre}`}
         type="ubicaciones"
       />
-      <Breadcrumb />
+      <Breadcrumb ubicacion={currentLocation.nombre}/>
       <CardImage
         image={currentLocation.foto ? `${import.meta.env.VITE_IMAGE_URL}/${currentLocation.foto}` : '/images/default-location.png'}
         title={currentLocation.nombre}
