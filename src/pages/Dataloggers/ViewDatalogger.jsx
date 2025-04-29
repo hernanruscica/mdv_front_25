@@ -14,11 +14,14 @@ import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import styles from './ViewDatalogger.module.css';
 import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCards';
+import Table from '../../components/Table/Table';
+import { useNavigate } from 'react-router-dom';
 
 const ViewDatalogger = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { id } = useParams();
   const user = useAuthStore(state => state.user);
+  const navigate = useNavigate();
   
   const { 
     dataloggers, 
@@ -79,20 +82,12 @@ const ViewDatalogger = () => {
   if (isLoadingChannels || isLoadingDatalogger || isLoadingAlarms) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
-/*
-  if (error) {
-    return <div className={styles.error}>{error}</div>;
-  }
-*/
-  //const datalogger = dataloggers?.find(d => d.id === parseInt(id));
+
 
   if (!currentDatalogger) {
     return <div className={styles.error}>Datalogger no encontrado</div>;
   }
-
-  console.log(currentDatalogger, channels, alarms)
   
-  console
   const location = locations?.find(loc => loc.ubicaciones_id === currentDatalogger?.ubicacion_id);
   
   // Función para contar canales analógicos y digitales
@@ -132,6 +127,32 @@ const ViewDatalogger = () => {
       />
     </>
   );
+
+  const getChannelName = (channelId) => {
+    const channel = channels?.find(ch => ch.canales_id === channelId);
+    return channel ? channel.canales_nombre : 'Canal no encontrado';
+  };
+
+  const columns = [
+    { label: 'NOMBRE DE LA ALARMA', accessor: 'nombreAlarma' },
+    { label: 'NOMBRE DEL CANAL', accessor: 'nombreCanal' },
+    { label: 'CONDICIÓN', accessor: 'condicion' }
+  ];
+
+  const handleAlarmClick = (row) => {
+    navigate(`/panel/dataloggers/${currentDatalogger.id}/canales/${row.canalId}/alarmas/${row.id}`);
+  };
+
+  const preparedAlarms = dataloggerAlarms.map(alarm => ({
+    nombreAlarma: alarm.nombre,
+    nombreCanal: getChannelName(alarm.canal_id),
+    condicion: alarm.condicion || 'Sin condición',
+    canalId: alarm.canal_id,
+    id: alarm.id  // Aquí está el cambio clave
+  }));
+  console.log('alarms',alarms);
+  console.log('dataloggerAlarms',dataloggerAlarms);
+  console.log('preparedAlarms',preparedAlarms);
 
   return (
     <>
@@ -176,6 +197,19 @@ const ViewDatalogger = () => {
         onSearchChange={setSearchTerm}
         showAddButton={user?.espropietario === 1}
       />
+
+      <Title2 
+        text={`Alarmas programadas en ${currentDatalogger.nombre}`}
+        type="alarmas"
+      />
+      
+      <div className={styles.tableContainer}>
+        <Table 
+          columns={columns}
+          data={preparedAlarms}
+          onRowClick={handleAlarmClick}
+        />
+      </div>
     </>
   );
 };

@@ -33,5 +33,31 @@ export const useChannelsStore = create((set) => ({
         loadingStates: { ...state.loadingStates, fetchChannels: false }
       }));
     }
+  },
+
+  fetchChannelById: async (channelId) => {
+    if (!channelId) return;
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchChannel: true },
+      error: null
+    }));
+
+    try {
+      const channel = await channelsService.getById(channelId);
+      
+      set(state => ({
+        selectedChannel: channel,
+        loadingStates: { ...state.loadingStates, fetchChannel: false }
+      }));
+      
+      return channel;
+    } catch (error) {
+      set(state => ({
+        error: 'Error al obtener el canal',
+        loadingStates: { ...state.loadingStates, fetchChannel: false }
+      }));
+      return null;
+    }
   }
 }));

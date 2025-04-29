@@ -37,13 +37,34 @@ tr:hover {
 .pagination {
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-top: 10px;
+  gap: 5px;
 }
 
 .pagination button {
-  margin: 0 5px;
+  margin: 0 2px;
   padding: 5px 10px;
   cursor: pointer;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.pagination button:hover {
+  background-color: #f0f0f0;
+}
+
+.pagination span {
+  margin: 0 5px;
+}
+
+.activePage {
+  font-weight: bold;
+  background-color: #F6B510 !important;
+  color: white !important;
+  border-color: #F6B510 !important;
 }
 
 .activePage {

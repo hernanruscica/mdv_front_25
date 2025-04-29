@@ -52,29 +52,107 @@ const Table = ({ columns, data, onRowClick }) => {
     }
   };
 
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    
+    // Botón Anterior
+    if (currentPage > 1) {
+      buttons.push(
+        <button key="prev" onClick={() => setCurrentPage(prev => prev - 1)}>
+          Anterior
+        </button>
+      );
+    }
+
+    // Página actual y páginas cercanas
+    if (currentPage === 1) {
+      // Si estamos en la primera página
+      buttons.push(
+        <button key={1} className={styles.activePage}>1</button>
+      );
+      
+      // Mostrar las siguientes páginas
+      for (let i = 2; i <= Math.min(4, totalPages); i++) {
+        buttons.push(
+          <button key={i} onClick={() => setCurrentPage(i)}>
+            {i}
+          </button>
+        );
+      }
+    } else if (currentPage === totalPages) {
+      // Si estamos en la última página
+      buttons.push(
+        <button key={1} onClick={() => setCurrentPage(1)}>1</button>
+      );
+      
+      if (totalPages > 4) {
+        buttons.push(<span key="dots">...</span>);
+      }
+      
+      // Mostrar las últimas páginas
+      for (let i = Math.max(totalPages - 3, 2); i < totalPages; i++) {
+        buttons.push(
+          <button key={i} onClick={() => setCurrentPage(i)}>
+            {i}
+          </button>
+        );
+      }
+      
+      // Última página seleccionada
+      buttons.push(
+        <button key={totalPages} className={styles.activePage}>
+          {totalPages}
+        </button>
+      );
+    } else {
+      // Si estamos en una página intermedia
+      buttons.push(
+        <button key={1} onClick={() => setCurrentPage(1)}>1</button>
+      );
+
+      // Páginas alrededor de la página actual
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(currentPage + 2, totalPages - 1); i++) {
+        buttons.push(
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i)}
+            className={currentPage === i ? styles.activePage : ''}
+          >
+            {i}
+          </button>
+        );
+      }
+      
+      // Última página
+      if (totalPages > 4 && currentPage < totalPages - 2) {
+        buttons.push(<span key="dots">...</span>);
+        buttons.push(
+          <button key={totalPages} onClick={() => setCurrentPage(totalPages)}>
+            {totalPages}
+          </button>
+        );
+      }
+    }
+
+    // Botón Siguiente
+    if (currentPage < totalPages) {
+      buttons.push(
+        <button key="next" onClick={() => setCurrentPage(prev => prev + 1)}>
+          Siguiente
+        </button>
+      );
+    }
+
+    return buttons;
+  };
+
   return (
     <div>
       <div className={styles.controls}>
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} placeholder="Buscar..." />
         <span>Mostrando {filteredData.length} resultados</span>
         <div className={styles.pagination}>
-          Páginas: 
-            {currentPage > 1 && (
-            <button onClick={() => setCurrentPage(prev => prev - 1)}>Anterior</button>
-            )}
-            {[...Array(totalPages)].map((_, index) => (
-            <button
-                key={index}
-                onClick={() => setCurrentPage(index + 1)}
-                disabled={currentPage === index + 1}
-                className={currentPage === index + 1 ? styles.activePage : ''}
-            >
-                {index + 1}
-            </button>
-            ))}
-            {currentPage < totalPages && (
-            <button onClick={() => setCurrentPage(prev => prev + 1)}>Siguiente</button>
-            )}
+          Páginas: {renderPaginationButtons()}
         </div>
       </div>
       <table className={styles.table}>

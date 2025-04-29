@@ -19,5 +19,15 @@ export const channelsService = {
       console.error('Get assigned channels error:', error);
       return null;
     }
+  },
+
+  getById: async (channelId) => {
+    try {
+      const { data } = await axiosClient.get(`/api/channels/${channelId}`);
+      return data.channel;
+    } catch (error) {
+      console.error('Get channel by id error:', error);
+      return null;
+    }
   }
 };

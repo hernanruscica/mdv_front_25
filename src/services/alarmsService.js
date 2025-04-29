@@ -29,5 +29,15 @@ export const alarmsService = {
       console.error('Get location alarms error:', error);
       return null;
     }
+  },
+  
+  getById: async (alarmId) => {
+    try {
+      const { data } = await axiosClient.get(`/api/alarms/${alarmId}`);
+      return data.alarm;
+    } catch (error) {
+      console.error('Get alarm by id error:', error);
+      return null;
+    }
   }
 };

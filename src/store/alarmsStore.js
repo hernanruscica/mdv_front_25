@@ -34,7 +34,7 @@ export const useAlarmsStore = create((set) => ({
     }
   },
   fetchAlarmsByUser: async (currentUser) => {
-    console.log("desde el store alarm:", currentUser)
+    //console.log("desde el store alarm:", currentUser)
     if (!currentUser) return;
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchAlarmsByUser: true },
@@ -76,6 +76,32 @@ export const useAlarmsStore = create((set) => ({
         error: 'Error fetching location alarms',
         loadingStates: { ...state.loadingStates, fetchAlarms: false }
       }));
+    }
+  },
+  
+  fetchAlarmById: async (alarmId) => {
+    if (!alarmId) return;
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchAlarm: true },
+      error: null
+    }));
+
+    try {
+      const alarm = await alarmsService.getById(alarmId);
+      
+      set(state => ({
+        selectedAlarm: alarm,
+        loadingStates: { ...state.loadingStates, fetchAlarm: false }
+      }));
+      
+      return alarm;
+    } catch (error) {
+      set(state => ({
+        error: 'Error fetching alarm details',
+        loadingStates: { ...state.loadingStates, fetchAlarm: false }
+      }));
+      return null;
     }
   }
 }));

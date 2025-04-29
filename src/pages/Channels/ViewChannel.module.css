@@ -1,0 +1,96 @@
+.error {
+  color: #dc3545;
+  padding: 1rem;
+  text-align: center;
+  font-weight: bold;
+  margin: 1rem 0;
+}
+
+.cardsContainer {
+  display: flex;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.channelInfo,
+.alarmInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.gaugePlaceholder {
+  height: 200px;
+  width: 100%;
+  background-color: #EDEFF0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.gaugeDemo {
+  color: #6c757d;
+  font-size: 1.2rem;
+}
+
+.chartContainer {
+  margin: 2rem 0;
+}
+
+.chartPlaceholder {
+  height: 400px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 1.2rem;
+}
+
+.tableContainer {
+  margin: 2rem 0;
+}
+
+.alarmsTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alarmsTable th,
+.alarmsTable td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.alarmsTable th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #495057;
+}
+
+.alarmsTable tr:hover {
+  background-color: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+  .cardsContainer {
+    flex-direction: column;
+  }
+
+  .alarmsTable {
+    font-size: 0.9rem;
+  }
+
+  .alarmsTable th,
+  .alarmsTable td {
+    padding: 0.75rem;
+  }
+}
