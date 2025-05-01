@@ -4,6 +4,7 @@ import { Header, Footer } from './components';
 import { PrivateRoute } from './components/PrivateRoute/PrivateRoute';
 import { routes } from './routes/routes';
 import Modal from 'react-modal';
+import FloatingButtons from './components/FloatingButtons/FloatingButtons';
 
 Modal.setAppElement('#root');
 
@@ -12,6 +13,7 @@ const App = () => {
     <Router>
       <Header />
       <main className="main-content">
+        <FloatingButtons />
         <Routes>
           {routes.map((route) => (
             <Route

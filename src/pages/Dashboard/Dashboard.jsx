@@ -13,6 +13,7 @@ import cardInfoStyles from "../../components/CardInfo/CardInfo.module.css";
 import CardBtnSmall from "../../components/CardBtnSmall/CardBtnSmall";
 import {getIconFileName} from "../../utils/iconsDictionary";
 
+
 const Dashboard = () => {
   const [showActiveOnly, setShowActiveOnly] = useState(true);
   const user = useAuthStore(state => state.user);
@@ -94,22 +95,12 @@ const Dashboard = () => {
   }
 
   return (
-    <>
+    <>      
       <Title1 
         type="panel"
         text="Panel de Control" 
       />
-      <Breadcrumb />
-      {/* <div className={styles.filterControl}>
-        <label>
-          <input
-            type="checkbox"
-            checked={showActiveOnly}
-            onChange={(e) => setShowActiveOnly(e.target.checked)}
-          />
-          Mostrar solo activos
-        </label>
-      </div> */}
+      <Breadcrumb />      
       <div className={styles.cardsContainer}>
         <CardInfo
           iconSrc={`/icons/${getIconFileName('usuarios')}`}

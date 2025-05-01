@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from './Login.module.css';
 import { Title1 } from '../../components/Title1/Title1.jsx';
@@ -13,20 +13,27 @@ const Login = () => {
   const login = useAuthStore(state => state.login);
   const showToast = useToastStore(state => state.showToast);
   const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   const resetForm = () => {
     setUsername('');
     setPassword('');
   };
 
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const isLoggedIn = await login(username, password);    
       if (isLoggedIn) {
-        navigate('/panel');
+        navigate('/');
       } else {
         showToast('DNI y/o contraseña incorrectos', 'error');
         resetForm();

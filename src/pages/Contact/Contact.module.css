@@ -1,0 +1,93 @@
+.pageMaincontent {
+  width: 90%;
+  max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;    
+    row-gap: 1em;
+}
+
+.loginContainer { 
+  display: flex; 
+  flex-direction: column; 
+  row-gap: 2em;
+}
+
+.loginContainerTitle { 
+  font-size: 1.4em; 
+  text-transform: uppercase;
+}
+
+.loginForm { 
+  width: 96%; 
+  max-width: 400px; 
+  display: flex; 
+  flex-direction: column; 
+  gap: .5em; 
+  background-color: #edeff0; 
+  padding: 1.5em; 
+  border-radius: 20px; 
+  box-shadow: 2px 2px 6px #00000080;
+}
+
+.input,
+.button { 
+  padding: .5em 1em; 
+  border: none; 
+  font-size: 1.2em; 
+  border-radius: 10px;
+}
+
+.loginForm { 
+  display: flex; 
+  flex-direction: column; 
+  row-gap: 1.2em;
+}
+
+.loginFormParagraph { 
+  font-size: 1.2em; 
+  font-weight: 300; 
+  line-height: 1.4em;
+}
+
+.loginFormLink { 
+  text-decoration: none; 
+  font-weight: 500; 
+  color: #170bb8;
+}
+
+.loginFormLink:hover { 
+  color: #584cff;
+}
+
+.loginFormInputRow { 
+  display: flex; 
+  flex-direction: column; 
+  row-gap: .2em;
+}
+
+.loginFormLabel { 
+  cursor: pointer; 
+  font-size: 1em;
+}
+
+.loginFormBtn { 
+  background-color: #f6b510; 
+  font-weight: 700; 
+  cursor: pointer;
+  padding: .5em 1em; 
+  border: none; 
+  font-size: 1.2em; 
+  border-radius: 10px;
+}
+
+.textarea {
+  width: 100%; 
+  max-width: 100%; 
+  height: 120px; 
+  resize: none;
+  font-size: 1.4em;    
+  padding: 0.6em;
+  border-radius: 10px;
+}
+  

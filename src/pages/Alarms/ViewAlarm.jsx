@@ -135,11 +135,11 @@ const ViewAlarm = () => {
   );
 
   const columns = [
-    { label: 'DIA Y HORA DEL EVENTO', accessor: 'fecha' },
-    { label: 'USUARIO', accessor: 'usuario' },
-    { label: 'EVENTO', accessor: 'evento' },
-    { label: 'VALOR', accessor: 'valor' },
-    { label: 'VISTA', accessor: 'vista' }
+    { label: 'DIA Y HORA DEL EVENTO', accessor: 'fecha', icon: '/icons/clock-regular.svg' },
+    { label: 'USUARIO', accessor: 'usuario', icon: '/icons/user-regular.svg' },
+    { label: 'EVENTO', accessor: 'evento', icon: '/icons/flag-regular.svg' },
+    { label: 'VALOR', accessor: 'valor', icon: '/icons/code-branch-solid.svg' },
+    { label: 'VISTA', accessor: 'vista', icon: '/icons/eye-regular.svg' }
   ];
 
   const preparedLogs = alarmLogs.map(log => ({
@@ -151,7 +151,7 @@ const ViewAlarm = () => {
     mensaje: log.mensaje
   }));
 
-  console.log(currentDatalogger)
+  //console.log(currentDatalogger)
 
   return (
     <>

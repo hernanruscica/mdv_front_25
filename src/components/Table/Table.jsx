@@ -55,63 +55,9 @@ const Table = ({ columns, data, onRowClick }) => {
   const renderPaginationButtons = () => {
     const buttons = [];
     
-    // Botón Anterior
-    if (currentPage > 1) {
-      buttons.push(
-        <button key="prev" onClick={() => setCurrentPage(prev => prev - 1)}>
-          Anterior
-        </button>
-      );
-    }
-
-    // Página actual y páginas cercanas
-    if (currentPage === 1) {
-      // Si estamos en la primera página
-      buttons.push(
-        <button key={1} className={styles.activePage}>1</button>
-      );
-      
-      // Mostrar las siguientes páginas
-      for (let i = 2; i <= Math.min(4, totalPages); i++) {
-        buttons.push(
-          <button key={i} onClick={() => setCurrentPage(i)}>
-            {i}
-          </button>
-        );
-      }
-    } else if (currentPage === totalPages) {
-      // Si estamos en la última página
-      buttons.push(
-        <button key={1} onClick={() => setCurrentPage(1)}>1</button>
-      );
-      
-      if (totalPages > 4) {
-        buttons.push(<span key="dots">...</span>);
-      }
-      
-      // Mostrar las últimas páginas
-      for (let i = Math.max(totalPages - 3, 2); i < totalPages; i++) {
-        buttons.push(
-          <button key={i} onClick={() => setCurrentPage(i)}>
-            {i}
-          </button>
-        );
-      }
-      
-      // Última página seleccionada
-      buttons.push(
-        <button key={totalPages} className={styles.activePage}>
-          {totalPages}
-        </button>
-      );
-    } else {
-      // Si estamos en una página intermedia
-      buttons.push(
-        <button key={1} onClick={() => setCurrentPage(1)}>1</button>
-      );
-
-      // Páginas alrededor de la página actual
-      for (let i = Math.max(2, currentPage - 1); i <= Math.min(currentPage + 2, totalPages - 1); i++) {
+    // Si hay 5 o menos páginas, mostrar todas
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
         buttons.push(
           <button
             key={i}
@@ -122,28 +68,50 @@ const Table = ({ columns, data, onRowClick }) => {
           </button>
         );
       }
-      
-      // Última página
-      if (totalPages > 4 && currentPage < totalPages - 2) {
-        buttons.push(<span key="dots">...</span>);
-        buttons.push(
-          <button key={totalPages} onClick={() => setCurrentPage(totalPages)}>
-            {totalPages}
-          </button>
-        );
-      }
+      return buttons;
     }
 
-    // Botón Siguiente
-    if (currentPage < totalPages) {
-      buttons.push(
-        <button key="next" onClick={() => setCurrentPage(prev => prev + 1)}>
-          Siguiente
+    // Si hay más de 5 páginas, implementar lógica dinámica
+    let pagesToShow = new Set();
+    
+    // Siempre agregar la página actual
+    pagesToShow.add(currentPage);
+
+    // Si estamos en la primera página o carga inicial
+    if (currentPage === 1) {
+      pagesToShow.add(2);
+      pagesToShow.add(3);
+      pagesToShow.add(4);
+      pagesToShow.add(totalPages);
+    } 
+    // Si estamos en la última página
+    else if (currentPage === totalPages) {
+      pagesToShow.add(1);
+      pagesToShow.add(2);
+      pagesToShow.add(totalPages - 2);
+      pagesToShow.add(totalPages - 1);
+    }
+    // Si estamos en cualquier otra página
+    else {
+      pagesToShow.add(1);
+      pagesToShow.add(2);
+      if (currentPage > 2) pagesToShow.add(currentPage - 1);
+      if (currentPage < totalPages - 1) pagesToShow.add(currentPage + 1);
+      pagesToShow.add(totalPages);
+    }
+
+    // Convertir el Set a Array y ordenar
+    return Array.from(pagesToShow)
+      .sort((a, b) => a - b)
+      .map(pageNum => (
+        <button
+          key={pageNum}
+          onClick={() => setCurrentPage(pageNum)}
+          className={currentPage === pageNum ? styles.activePage : ''}
+        >
+          {pageNum}
         </button>
-      );
-    }
-
-    return buttons;
+      ));
   };
 
   return (
@@ -152,7 +120,8 @@ const Table = ({ columns, data, onRowClick }) => {
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} placeholder="Buscar..." />
         <span>Mostrando {filteredData.length} resultados</span>
         <div className={styles.pagination}>
-          Páginas: {renderPaginationButtons()}
+          <span>Páginas: </span>
+          {renderPaginationButtons()}
         </div>
       </div>
       <table className={styles.table}>
@@ -173,7 +142,9 @@ const Table = ({ columns, data, onRowClick }) => {
               className={styles.clickableRow}
             >
               {columns.map(column => (
-                <td key={column.accessor}>{row[column.accessor]}</td>
+                <td key={column.accessor} data-label={column.label}>
+                  {renderCellContent(row, column)}
+                </td>
               ))}
             </tr>
           ))}
@@ -185,3 +156,19 @@ const Table = ({ columns, data, onRowClick }) => {
 };
 
 export default Table;
+
+
+const renderCellContent = (row, column) => {
+  const content = row[column.accessor];
+  
+  return (
+    <div className={styles.cellContent}>
+      {column.icon && <img 
+        src={column.icon} 
+        alt={content}
+        className={styles.cellIcon}
+      />}
+      <span className={styles.cellText}>{content}</span>
+    </div>
+  );
+};

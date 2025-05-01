@@ -33,6 +33,9 @@ const Header = () => {
                 className={`${styles.headerIcon} ${styles.closeMenuBtn}`}
               />
             </button>
+            <Link to="/" className={`${styles.headerLink} ${location.pathname === '/' ? styles.headerLinkSelected : ''}`} id='inicio' onClick={menuBtnHandler}>
+              INICIO
+            </Link>
             <Link to="/panel" className={`${styles.headerLink} ${location.pathname === '/panel' ? styles.headerLinkSelected : ''}`} id='panel' onClick={menuBtnHandler}>
               PANEL DE CONTROL
             </Link>

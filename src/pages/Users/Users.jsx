@@ -63,9 +63,21 @@ const Users = () => {
   });
 
   const columns = [
-    { label: 'NOMBRE Y APELLIDO', accessor: 'nombreCompleto' },
-    { label: 'CORREO ELECTRONICO', accessor: 'email' },
-    { label: 'UBICACION/ES', accessor: 'ubicaciones' }
+    { 
+      label: 'NOMBRE Y APELLIDO', 
+      accessor: 'nombreCompleto',
+      icon: '/icons/user-regular.svg' // Icono por defecto para usuarios
+    },
+    { 
+      label: 'CORREO ELECTRONICO', 
+      accessor: 'email',
+      icon: '/icons/envelope-regular.svg' // Icono por defecto para email
+    },
+    { 
+      label: 'UBICACION/ES', 
+      accessor: 'ubicaciones',
+      icon: '/icons/building-regular.svg' // Icono por defecto para ubicaciones
+    }
   ];
 
   const handleRowClick = (row) => {

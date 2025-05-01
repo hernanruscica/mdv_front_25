@@ -23,6 +23,7 @@
 
 .headerBtnIcon{    
     display: none;
+    border: none;
 }
 
 .headerLink{

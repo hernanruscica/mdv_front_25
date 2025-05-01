@@ -1,9 +1,11 @@
+/* Estilos base de la tabla */
 .table {
   width: 100%;
   border-collapse: collapse;
   background-color: white;
 }
 
+/* Estilos de celdas y encabezados */
 th, td {
   padding: 12px;
   border-bottom: 1px solid #ddd;
@@ -16,6 +18,7 @@ th {
   color: #333;
 }
 
+/* Estilos de filas */
 tr:nth-child(even) {
   background-color: #f5f5f5;
 }
@@ -26,30 +29,61 @@ tr:hover {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos del contenido de las celdas */
+.cellContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cellText {
+  display: inline;
+}
+
+.cellIcon {
+  display: none;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* Controles de la tabla */
 .controls {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  row-gap: 16px;
+  padding: 24px 0px;
 }
 
+/* Estilos de paginación */
 .pagination {
   display: flex;
   justify-content: center;
-  align-items: center;
-  margin-top: 10px;
+  align-items: center;  
   gap: 5px;
+  width: 100%;
 }
 
 .pagination button {
   margin: 0 2px;
-  padding: 5px 10px;
+  padding: 10px 15px;
   cursor: pointer;
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 4px;
   transition: all 0.2s ease;
+  text-transform: uppercase;
 }
 
 .pagination button:hover {
@@ -65,17 +99,58 @@ tr:hover {
   background-color: #F6B510 !important;
   color: white !important;
   border-color: #F6B510 !important;
-}
-
-.activePage {
-  font-weight: bold;
   cursor: default;
 }
 
-.clickableRow {
-  cursor: pointer;
-}
+/* Estilos para móvil */
+@media screen and (max-width: 768px) {
+  /* Ocultar encabezados en móvil */
+  thead {
+    display: none;
+  }
 
-.clickableRow:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  /* Ajustes de filas y celdas */
+  tr {
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    border-bottom: 2px solid #ddd;
+  }
+
+  tr:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  td {
+    border: none;
+    padding: 0.5em;
+    display: flex;
+    align-items: center;
+  }
+
+  td::before {
+    display: none;  /* Ocultar labels en móvil */
+  }
+
+  /* Ajustes de contenido en móvil */
+  .cellContent {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .cellIcon {
+    display: inline-block;
+  }
+
+  .cellText {
+    display: inline-block;    
+    margin-left: 8px;
+    word-break: break-word;
+  }
+
+  /* Ajustes de controles en móvil */
+  .controls {    
+    justify-content: center;
+  }
 }
