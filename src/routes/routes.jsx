@@ -36,10 +36,17 @@ export const routes = [
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/edicion", element: <EditPage />, private: true },
 
   // Alarms routes
+  // Alarmas routes / dataloggers
   { path: "/panel/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
+  // Alarmas routes / locations
   { path: "/panel/ubicaciones/:locationId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/ubicaciones/:locationId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
+  // Alarmas routes / users
   { path: "/panel/usuarios/:userId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/usuarios/:userId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
+  // Alarmas routes / channels
+  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/agregar", element: <CreatePage />, private: true },
   { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm /> },
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
