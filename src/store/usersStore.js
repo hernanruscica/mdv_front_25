@@ -56,7 +56,8 @@ export const useUsersStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const updatedUser = await usersService.update(id, userData);
-      if (updatedUser) {
+      //console.log('updated User', updatedUser);
+      if (updatedUser.success) {
         set(state => ({
           users: state.users.map(user => 
             user.id === id ? updatedUser : user

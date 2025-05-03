@@ -72,7 +72,7 @@ const Channels = () => {
     return <div>Error: {errorDatalogger || errorChannels || errorAlarms}</div>
   }
 
-  console.log(currentChannels)
+  //console.log(currentChannels)
 
   return (
     <>

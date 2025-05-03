@@ -128,7 +128,7 @@ const Alarms = () => {
   if (isLoadingUser || isLoadingAlarms) {
     return <LoadingSpinner message='Cargando datos'/>;
   }   
-  console.log(alarms, currentChannel)
+  //console.log(alarms, currentChannel)
 
   return (
     <>

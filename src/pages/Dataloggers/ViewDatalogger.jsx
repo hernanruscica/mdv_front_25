@@ -150,8 +150,8 @@ const ViewDatalogger = () => {
     canalId: alarm.canal_id,
     id: alarm.id  // Aquí está el cambio clave
   }));
-  console.log('dataloggersAlarms',dataloggerAlarms);
-  console.log(currentDatalogger);
+  //console.log('dataloggersAlarms',dataloggerAlarms);
+  //console.log(currentDatalogger);
   //console.log('dataloggerAlarms',dataloggerAlarms);
  // console.log('preparedAlarms',preparedAlarms);
 

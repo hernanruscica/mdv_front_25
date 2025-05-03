@@ -21,6 +21,29 @@ export const useAuthStore = create(
       logout: () => {
         localStorage.removeItem('token');
         set({ user: null, token: null });
+      },
+      
+      sendActivationEmail: async (email) => {
+        try {
+          const response = await authService.sendActivationEmail(email);
+          return response;
+        } catch (error) {
+          console.error('Error sending activation email:', error);
+          return null;
+        }
+      },
+      
+      activateUser: async (token) => {
+        try {
+          const response = await authService.activateUser(token);
+          if (response?.token) {
+            set({ token: response.token });
+          }
+          return response;
+        } catch (error) {
+          console.error('Error activating user:', error);
+          return null;
+        }
       }
     }),
     {

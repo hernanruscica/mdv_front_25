@@ -1,0 +1,58 @@
+.form{
+    width: 100%;
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+}
+
+.form_input_group{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2em;
+    padding: 0.5em 0;    
+}
+
+.form_input{
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+    min-width: 300px;
+    gap: 0.2em;    
+}
+
+.password-input-container{
+    display: flex;
+    flex-direction: row;
+    column-gap: 16px;
+}
+
+.password-input-container>input{
+    width: 100%;
+    max-width: 340px;
+    border: #646464 solid 1px;
+}
+
+.password-toggle-button{
+    padding: 6px 6px 0px 6px;
+    border: solid #222 1px;
+    background-color: #f3e3bb;
+    cursor: pointer;
+}
+
+.pass-btn-icon{
+    width: 25px;
+    height: auto;
+}
+
+.password-input-message{
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    
+}
