@@ -39,6 +39,7 @@ const ShowChannelsCards = ({
           itemsQty={filteredChannels.length}
           showAddButton={showAddButton}
         >
+          
           <SearchBar
             searchTerm={searchTerm}
             onSearchChange={onSearchChange}

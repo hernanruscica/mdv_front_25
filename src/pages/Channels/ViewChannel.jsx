@@ -158,6 +158,17 @@ const ViewChannel = () => {
       </div>
 
       <Title2 text="Alarmas Configuradas" type="alarmas"/>
+
+      {/*Si es propietario puede agregar alarmas al canal */
+      (user.espropietario == 1) &&      
+       <BtnCallToAction
+            text="Agregar alarma"
+            icon="plus-circle-solid.svg"
+            type="normal"
+            url={`/panel/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
+        />
+      }
+
       <div className={styles.tableContainer}>
         <Table 
           columns={columns}

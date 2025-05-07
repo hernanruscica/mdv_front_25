@@ -1,0 +1,95 @@
+.cardLocationDetails {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+    background-color: #EDEFF0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: "Roboto", sans-serif;
+    margin: 0 auto;
+}
+  
+.locationDetailsContainer {
+    width: 50%;    
+}
+
+.locationDetailsContainerImage {
+    width: 100%;    
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+  
+.locationDetailsInfo {
+    width: 50%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.cardLocationDetailsInfoTitle {
+    font-family: "Montserrat", sans-serif;
+    font-size: 24px;
+    text-transform: uppercase;
+    margin-bottom: 1em;
+}  
+
+.cardLocationDetailsBtnContainer {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+}
+  
+.dataloggers, .alarms {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+  
+.dataloggerButton, .alarmButton {
+    background-color: #FFA500;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 5px 10px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+  
+.paragraph {
+    margin: 5px 0;
+}
+  
+.actionButtons {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 20px;
+}
+  
+.editButton, .deleteButton {
+    font-family: "Montserrat", sans-serif;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 10px;
+    color: black;
+    cursor: pointer;
+    margin-right: 10px;    
+    display: flex;
+    justify-content: center;
+    align-items: center;    
+    gap: 1em;
+}
+  
+.editButton {
+    background-color: #F6B510;
+}
+  
+.deleteButton {
+    background-color: #FF6347;
+}

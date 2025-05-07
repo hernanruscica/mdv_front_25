@@ -17,7 +17,7 @@ import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocation
 
 const ViewUser = () => {  
   const [searchTerm, setSearchTerm] = useState('');
-  const { id } = useParams();
+  const { userId } = useParams();
   const { fetchUserById,  
          users, isLoading: isLoadingUsers, error: errorUsers 
    } = useUsersStore();
@@ -25,22 +25,22 @@ const ViewUser = () => {
   const { fetchLocationUsers, locationUsers, isLoading : isLoadingLocations, error: errorLocationsUsers } = useLocationUsersStore();
   const { dataloggers, isLoading: isLoadingDataloggers, fetchDataloggers, error: errorDataloggers } = useDataloggersStore();
 
-  const user = users.find(user => user.id === parseInt(id));
+  const user = users.find(user => user.id === parseInt(userId));
   const [currentUser, setCurrentUser] = useState(null);
 
   // Efecto para cargar el usuario
   useEffect(() => {
     const loadUser = async () => {
-      const currentUSer = await fetchUserById(id);   
+      const currentUSer = await fetchUserById(userId);   
       setCurrentUser(currentUSer);
     };      
 
     if (!users || users.length === 0) {
       loadUser();         
     } else {      
-      setCurrentUser(users.find(user => user.id === parseInt(id)));
+      setCurrentUser(users.find(user => user.id === parseInt(userId)));
     }     
-  }, [id]);
+  }, [userId]);
 
   // Nuevo efecto para cargar las alarmas cuando el usuario esté disponible
   useEffect(() => {

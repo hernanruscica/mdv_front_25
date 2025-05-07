@@ -190,19 +190,36 @@ const ViewDatalogger = () => {
         text={`Canales del datalogger ${currentDatalogger.nombre}`}
         type="canales"
       />
-
+      
+      {/*Si es propietario puede agregar canales al datalogger */
+      (user.espropietario == 1) &&      
+       <BtnCallToAction
+            text="Agregar canal"
+            icon="plus-circle-solid.svg"
+            type="normal"
+            url={`/panel/dataloggers/${currentDatalogger.id}/canales/agregar`}
+        />
+      }
       <ShowChannelsCards
         channels={channels.filter(channel => channel.datalogger_id === currentDatalogger.id)}
         alarms={alarms}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        showAddButton={user?.espropietario === 1}
+        showAddButton={false}//{user?.espropietario === 1}
       />
 
       <Title2 
         text={`Alarmas programadas en ${currentDatalogger.nombre}`}
         type="alarmas"
       />
+      
+      
+      <BtnCallToAction
+            text={`Ver ${dataloggerAlarms.length} alarmas`}
+            icon="bell-regular.svg"
+            type="normal"
+            url={`/panel/dataloggers/${currentDatalogger.id}/alarmas`}
+        />
       
       <div className={styles.tableContainer}>
         <Table 

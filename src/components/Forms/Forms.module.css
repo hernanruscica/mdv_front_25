@@ -1,0 +1,102 @@
+.form{
+    width: 100%;
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+}
+
+.formInputGroup{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2em;
+    padding: 0.5em 0;    
+}
+
+.formInput{
+    display: flex;
+    flex-direction: column;
+    width: 45%;
+    min-width: 300px;
+    gap: 0.2em;    
+}
+
+.formInput>label {
+    cursor: pointer;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.formInput>input, .formInput>textarea, .formInput>select{
+    
+    width: 100%;
+    padding: 10px 20px 10px 10px; /* Add padding to make room for the icon */
+    font-size: 16px;
+    font-family: "Roboto", sans-serif;
+    border: 1px solid #646464;
+    border-radius: 10px;
+    box-sizing: border-box;
+      
+}
+
+.formBtn{
+    font-size: 0.95em;
+    text-decoration: none;
+    text-transform: uppercase;    
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #362702;
+    background-color: #F6B510;
+    padding: 16px 28px;
+    border-radius: 5px;
+    display: inline-block;
+    width: fit-content;
+    border: none;
+    cursor: pointer;
+    margin: 8px 12px;
+    text-align: left;
+}
+.formBtn:hover {
+    background-color: #d89a00;
+}
+
+.formInputCondition{
+    width: 30%
+}
+
+.passwordInputContainer{
+    display: flex;
+    flex-direction: row;
+    column-gap: 16px;
+}
+
+.passwordInputContainer>input{
+    width: 100%;
+    max-width: 340px;
+    border: #646464 solid 1px;
+}
+
+.passwordToggleButton{
+    padding: 6px 6px 0px 6px;
+    border: solid #222 1px;
+    background-color: #f3e3bb;
+    cursor: pointer;
+}
+
+.passBtnIcon{
+    width: 25px;
+    height: auto;
+}
+
+.passwordInputMessage{
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    
+}
+
