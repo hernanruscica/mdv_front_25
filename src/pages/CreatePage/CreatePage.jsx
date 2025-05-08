@@ -8,7 +8,7 @@ import { useLocationsStore } from '../../store/locationsStore.js';
 import { useAlarmsStore } from '../../store/alarmsStore.js';
 import { useUsersStore } from '../../store/usersStore.js';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner.jsx';
-import { UserCreateForm, LocationCreateForm, DataloggerCreateForm, ChannelCreateForm, AlarmCreateForm, DefaultForm } from '../../components/Forms';
+import { UserCreateForm, LocationCreateForm, DataloggerCreateForm, ChannelCreateForm, AlarmCreateForm, DefaultForm } from '../../components/Forms/Index.jsx';
 
 const nameEntity = (path) => {  
   const action = path[path.length - 1];
