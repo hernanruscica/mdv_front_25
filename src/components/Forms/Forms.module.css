@@ -26,22 +26,37 @@
     gap: 0.2em;    
 }
 
+/* Cuando formInput es el único hijo de formInputGroup */
+.formInputGroup > .formInput:only-child {
+    width: 94%;
+}
+.formInputSmall{
+    width: 30%;
+    min-width: 200px;
+}
+
 .formInput>label {
     cursor: pointer;
     font-size: 18px;
     text-transform: uppercase;
 }
 
-.formInput>input, .formInput>textarea, .formInput>select{
-    
+.formInput>input, .formInput>textarea, .formInput>select{    
     width: 100%;
-    padding: 10px 20px 10px 10px; /* Add padding to make room for the icon */
+    padding: 10px 20px 10px 10px;
     font-size: 16px;
     font-family: "Roboto", sans-serif;
     border: 1px solid #646464;
     border-radius: 10px;
-    box-sizing: border-box;
-      
+    box-sizing: border-box;      
+}
+
+.formInputTextarea {
+    width: 100%;
+    min-height: 120px;
+    max-height: 144px; /* Aproximadamente 6 líneas de texto con el tamaño de fuente actual */
+    resize: none;
+    line-height: 1.5;
 }
 
 .formBtn{

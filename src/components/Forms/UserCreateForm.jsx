@@ -4,10 +4,10 @@ import { useAuthStore } from '../../store/authStore';
 import { useLocationUsersStore } from '../../store/locationUsersStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
 
-export const UserCreateForm = () => {
+export const UserCreateForm = ({ userId, userData, isEditing }) => {
     const { user: userStore, userRoles } = useAuthStore();
-    const [profileImage, setProfileImage] = useState("default_avatar.png"); // Imagen de perfil actual
-    const [newImage, setNewImage] = useState(""); // Nueva imagen seleccionada
+    const [profileImage, setProfileImage] = useState(userData?.foto || "default_avatar.png");
+    const [newImage, setNewImage] = useState("");
     const { 
         locationUsers, 
         fetchLocationUsers,
@@ -27,7 +27,26 @@ export const UserCreateForm = () => {
         password:"",
         estado:"",
         direcciones_id: ""
-      });    
+    });    
+
+    useEffect(() => {
+        if (isEditing && userData) {
+            setUser({
+                foto: userData.foto || "",
+                nombre_1: userData.nombre_1 || "",
+                nombre_2: userData.nombre_2 || "",
+                apellido_1: userData.apellido_1 || "",
+                apellido_2: userData.apellido_2 || "",
+                email: userData.email || "",
+                telefono: userData.telefono || "",
+                dni: userData.dni || "",
+                password: userData.password || "",
+                estado: userData.estado || "",
+                direcciones_id: userData.direcciones_id || ""
+            });
+            setProfileImage(userData.foto || "default_avatar.png");
+        }
+    }, [isEditing, userData]);
     
     useEffect(() => {
         if (userStore) {
@@ -61,22 +80,30 @@ export const UserCreateForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();    
-        // Crear formData para enviar los datos incluyendo la imagen
         const formData = new FormData();
-        // Verifica que los campos del usuario tengan valores válidos
         formData.append("nombre_1", user.nombre_1 || "");
         formData.append("nombre_2", user.nombre_2 || "");
         formData.append("apellido_1", user.apellido_1 || "");
         formData.append("apellido_2", user.apellido_2 || "");
         formData.append("email", user.email || "");
         formData.append("telefono", user.telefono || "");
-        formData.append("dni", user.dni || "");
-        formData.append("password", user.password || "P4s5_W0rD*joD1d4+joD1d4_W0rD.P4s5");
-        formData.append("estado", user.estado || "0");
-        formData.append("direcciones_id", user.direcciones_id || "1");
-        formData.append("foto", newImage || "default_avatar.png");
+        formData.append("foto", newImage || profileImage);
 
-        console.log("enviando datos")
+        try {
+            if (isEditing) {
+                formData.append("id", userId || '');
+                console.log("Actualizando usuario", userId);
+            } else {
+                // Solo agregar estos campos si es creación
+                formData.append("dni", user.dni || "");
+                formData.append("password", user.password || "P4s5_W0rD*joD1d4+joD1d4_W0rD.P4s5");
+                formData.append("estado", user.estado || "0");
+                formData.append("direcciones_id", user.direcciones_id || "1");
+                console.log("Creando nuevo usuario");
+            }
+        } catch (error) {
+            console.error("Error al procesar el usuario:", error);
+        }
     };
 
 
@@ -176,49 +203,55 @@ export const UserCreateForm = () => {
                   value={user.dni}
                   onChange={handleChange}
                   required
+                  disabled={isEditing}
                 />
               </div>
             </div>
-            <h3>Rol del usuario en una ubicación:</h3>
-            <div className={stylesForms.formInputGroup}>          
-              <div className={stylesForms.formInput}>
-                <label htmlFor="location">ubicación:</label>
-                <select 
-                  name="location" 
-                  id="location" 
-                  value={selectedLocation} 
-                  onChange={handleSelectLocationChange}
-                  required
-                >
-                  <option value="" disabled>Seleccione una ubicación</option>
-                  {locationUsers.map((location) => (
-                    <option 
-                      value={location.ubicaciones_id} 
-                      key={location.ubicaciones_id}
-                    >
-                      {location.ubicaciones_nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>      
-              <div className={stylesForms.formInput}>
-                <label htmlFor="rol">Rol:</label>
-                <select 
-                  name="rol" 
-                  id="rol" 
-                  value={selectedLocationRol} 
-                  onChange={e => setSelectedLocationRol(e.target.value)}
-                  required
-                >
-                  <option value="" disabled>Antes de seleccione un rol, elija una ubicación</option>
-                  {filteredRoles.map((rol) => (
-                    <option value={rol.id} key={rol.id}>
-                      {rol.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>      
-            </div>
+            
+            {!isEditing && (
+                <>
+                    <h3>Rol del usuario en una ubicación:</h3>
+                    <div className={stylesForms.formInputGroup}>          
+                        <div className={stylesForms.formInput}>
+                            <label htmlFor="location">ubicación:</label>
+                            <select 
+                                name="location" 
+                                id="location" 
+                                value={selectedLocation} 
+                                onChange={handleSelectLocationChange}
+                                required
+                            >
+                                <option value="" disabled>Seleccione una ubicación</option>
+                                {locationUsers.map((location) => (
+                                    <option 
+                                        value={location.ubicaciones_id} 
+                                        key={location.ubicaciones_id}
+                                    >
+                                        {location.ubicaciones_nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>      
+                        <div className={stylesForms.formInput}>
+                            <label htmlFor="rol">Rol:</label>
+                            <select 
+                                name="rol" 
+                                id="rol" 
+                                value={selectedLocationRol} 
+                                onChange={e => setSelectedLocationRol(e.target.value)}
+                                required
+                            >
+                                <option value="" disabled>Antes seleccione una ubicacion</option>
+                                {filteredRoles.map((rol) => (
+                                    <option value={rol.id} key={rol.id}>
+                                        {rol.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>      
+                    </div>
+                </>
+            )}
 
             <button type="submit" className={stylesForms.formBtn}>
               Guardar cambios

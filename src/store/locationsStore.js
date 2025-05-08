@@ -1,63 +1,117 @@
 import { create } from 'zustand';
 import { locationsService } from '../services/locationsService';
 
-export const useLocationsStore = create((set) => ({
+export const useLocationsStore = create((set, get) => ({
   locations: [],
   selectedLocation: null,
+  error: null,
   loadingStates: {
     fetchLocations: false,
     fetchLocation: false,
+    createLocation: false,
+    updateLocation: false,
+    deleteLocation: false
   },
-  error: null,
-
-  fetchLocations: async (currentUser) => {
-    if (!currentUser) return;
-    
+  
+  // Crear una nueva ubicación
+  createLocation: async (locationData) => {
     set(state => ({
-      loadingStates: { ...state.loadingStates, fetchLocations: true },
-      error: null
+      loadingStates: { ...state.loadingStates, createLocation: true }
     }));
-
     try {
-      const locations = currentUser.espropietario === 1 
-        ? await locationsService.getAll()
-        : await locationsService.getAllById(currentUser.id);
-        
+      const response = await locationsService.create(locationData);
       set(state => ({
-        locations,
-        loadingStates: { ...state.loadingStates, fetchLocations: false }
+        locations: [...state.locations, response.location],
+        error: null
+      }));
+      return response;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    } finally {
+      set(state => ({
+        loadingStates: { ...state.loadingStates, createLocation: false }
+      }));
+    }
+  },
+
+  // Actualizar una ubicación
+  updateLocation: async (locationId, locationData) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, updateLocation: true }
+    }));
+    try {
+      const response = await locationsService.update(locationId, locationData);
+      set(state => ({
+        locations: state.locations.map(loc => 
+          loc.id === locationId ? response.location : loc
+        ),
+        selectedLocation: response.location,
+        error: null
+      }));
+      return response;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    } finally {
+      set(state => ({
+        loadingStates: { ...state.loadingStates, updateLocation: false }
+      }));
+    }
+  },
+
+  // Eliminar una ubicación
+  deleteLocation: async (locationId) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, deleteLocation: true }
+    }));
+    try {
+      await locationsService.delete(locationId);
+      set(state => ({
+        locations: state.locations.filter(loc => loc.id !== locationId),
+        error: null
       }));
     } catch (error) {
+      set({ error: error.message });
+      throw error;
+    } finally {
       set(state => ({
-        error: 'Error fetching locations',
+        loadingStates: { ...state.loadingStates, deleteLocation: false }
+      }));
+    }
+  },
+  // Obtener todas las ubicaciones
+  fetchLocations: async () => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchLocations: true }
+    }));
+    try {
+      const locations = await locationsService.getAll();
+      set({ locations, error: null });
+    } catch (error) {
+      set({ error: error.message });
+    } finally {
+      set(state => ({
         loadingStates: { ...state.loadingStates, fetchLocations: false }
       }));
     }
   },
 
+  // Obtener una ubicación por ID
   fetchLocationById: async (locationId) => {
-    if (!locationId) return null;
-    
     set(state => ({
-      loadingStates: { ...state.loadingStates, fetchLocation: true },
-      error: null
+      loadingStates: { ...state.loadingStates, fetchLocation: true }
     }));
-
     try {
       const location = await locationsService.getById(locationId);
-      
-      set(state => ({
-        selectedLocation: location,
-        loadingStates: { ...state.loadingStates, fetchLocation: false }
-      }));
-
-      return location;
+      set({ selectedLocation: location, error: null });
     } catch (error) {
+      set({ error: error.message });
+    } finally {
       set(state => ({
-        error: 'Error al obtener la ubicación',
         loadingStates: { ...state.loadingStates, fetchLocation: false }
       }));
-      return null;
     }
-  }
+  },
+
 }));

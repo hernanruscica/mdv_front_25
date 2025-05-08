@@ -4,29 +4,37 @@ import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.jsx";
 import { Title1 } from "../../components/Title1/Title1.jsx";
 import { useChannelsStore } from '../../store/channelsStore.js';
 import { useDataloggersStore } from '../../store/dataloggersStore.js';
+import { useLocationsStore } from '../../store/locationsStore.js';
+import { useAlarmsStore } from '../../store/alarmsStore.js';
+import { useUsersStore } from '../../store/usersStore.js';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner.jsx';
+import { UserCreateForm, LocationCreateForm, DataloggerCreateForm, ChannelCreateForm, AlarmCreateForm, DefaultForm } from '../../components/Forms';
 
-import {UserCreateForm} from '../../components/Forms/UserCreateForm.jsx';
-import { DefaultForm } from '../../components/Forms/DefaultForm.jsx';
-
-const nameEntity = (path) => {
-  const lastEntityName = (path.length > 1 ) ? path[path.length - 2] : 'default'
-  return lastEntityName;
+const nameEntity = (path) => {  
+  const action = path[path.length - 1];
+  let entityName = 'default';
+  if (action === 'agregar') entityName = path[path.length - 2];
+  if (action === 'editar') entityName = path[path.length - 3];  
+  return entityName;
 }
 
  const formComponents = {
-    usuarios: UserCreateForm,      
+    usuarios: UserCreateForm,    
+    ubicaciones: LocationCreateForm,  
+    dataloggers: DataloggerCreateForm,
+    canales: ChannelCreateForm,
+    alarmas: AlarmCreateForm,
     default: DefaultForm,
   };
   
 
 const CreatePage = () => {
-  const { userId, locationId, dataloggerId, channelId } = useParams();
+  
+  const { userId, locationId, dataloggerId, channelId, alarmId } = useParams();
   const location = useLocation();  
   const fullPath = location.pathname.split('/').filter(path => path !== '');   
   const [currentEntityName, setCurrentEntityName] = useState(nameEntity(fullPath));
-  const [currentChannel, setCurrentChannel] = useState();
-  const [currentDatalogger, setCurrentDatalogger] = useState();
+  const [currentAction, setCurrentAction] = useState(fullPath[fullPath.length - 1]);  
 
   const { 
     fetchChannelById, 
@@ -39,6 +47,24 @@ const CreatePage = () => {
     selectedDatalogger,
     loadingStates: { fetchDatalogger: loadingDatalogger }
   } = useDataloggersStore();
+
+  const {
+    fetchLocationById,
+    selectedLocation,
+    loadingStates: { fetchLocation: loadingLocation }
+  } = useLocationsStore();
+
+  const {
+    fetchAlarmById,
+    selectedAlarm,
+    loadingStates: { fetchAlarm: loadingAlarm }
+  } = useAlarmsStore();
+
+  const {
+    fetchUserById,
+    selectedUser,
+    isLoading: loadingUser
+  } = useUsersStore();
 
   useEffect(() => {
     if (channelId) {
@@ -53,41 +79,55 @@ const CreatePage = () => {
   }, [dataloggerId]);
 
   useEffect(() => {
-    if (selectedChannel) {
-      setCurrentChannel(selectedChannel);
+    if (locationId && currentAction == 'editar') {      
+      fetchLocationById(locationId);
     }
-  }, [selectedChannel]);
+  }, [locationId]);
+  
+  useEffect(() => {
+    if (alarmId && currentAction === 'editar') {
+      fetchAlarmById(alarmId);
+    }
+  }, [alarmId, currentAction, fetchAlarmById]);
 
   useEffect(() => {
-    if (selectedDatalogger) {
-      setCurrentDatalogger(selectedDatalogger);
+    if (userId && currentAction == 'editar') {
+      fetchUserById(userId); 
     }
-  }, [selectedDatalogger]);
+  }, [userId]);
 
-  if (loadingChannel || loadingDatalogger) {
+  if (loadingChannel || loadingDatalogger || loadingLocation || loadingAlarm || loadingUser) {
     return <LoadingSpinner message='Cargando datos...' />
   }
 
   const FormComponent = formComponents[currentEntityName] || formComponents.default;
 
-  console.log("datalogger", currentDatalogger);
-  console.log("channel", currentChannel)
+  console.log(selectedUser);
 
   return (
     <>
       <Title1
         type="edicion"
-        text={`Página de creación de ${currentEntityName}`}
+        text={`Página de ${currentAction === 'editar' ? 'edición' : 'creación'} de ${currentEntityName}`}
       />
       <Breadcrumb 
-        usuario=''
-        datalogger={currentDatalogger?.nombre || ''}
-        canal={currentChannel?.nombre || ''}
-        alarma=''
+        usuario={ selectedUser ? `${selectedUser?.nombre_1} ${selectedUser?.apellido_1}` : ''}
+        datalogger={selectedDatalogger?.nombre || ''}
+        canal={selectedChannel?.nombre || ''}
+        alarma={selectedAlarm?.nombre || ''}
       />
 
-      <FormComponent />
-
+      <FormComponent 
+        userId={userId}        
+        userData={selectedUser}
+        dataloggerId={dataloggerId}
+        dataloggerData={selectedDatalogger}
+        channelId={channelId}
+        channelData={selectedChannel}
+        locationData={selectedLocation}
+        alarmData={selectedAlarm}
+        isEditing={currentAction === 'editar'}
+      />
     </>
   );
 };

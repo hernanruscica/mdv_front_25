@@ -14,7 +14,6 @@ export { default as Channels } from './Channels/Channels';
 export { default as ViewChannel } from './Channels/ViewChannel';
 export { default as Alarms } from './Alarms/Alarms';
 export { default as ViewAlarm } from './Alarms/ViewAlarm';
-export { default as EditPage } from './EditPage/EditPage';
 export { default as CreatePage } from './CreatePage/CreatePage';
 export { default as ViewStateAlarm } from './ViewStateAlarm/ViewStateAlarm';
 export { default as UnderConstruction } from './UnderConstruction/UnderContruction';

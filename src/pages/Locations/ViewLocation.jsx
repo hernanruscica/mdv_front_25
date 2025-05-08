@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
@@ -21,7 +21,8 @@ const ViewLocation = () => {
   
   const { 
     fetchLocationById,
-    isLoading: isLoadingLocations, 
+    selectedLocation: currentLocation,
+    loadingStates: { fetchLocation: isLoadingLocation },    
     error: errorLocations 
   } = useLocationsStore();
 
@@ -46,12 +47,11 @@ const ViewLocation = () => {
     error: errorAlarms
   } = useAlarmsStore(); 
 
-  const [currentLocation, setCurrentLocation] = useState(null);
+  //const [currentLocation, setCurrentLocation] = useState(null);
 
   useEffect(() => {
     const loadLocation = async () => {
-      const currentLocation = await fetchLocationById(id);   
-      setCurrentLocation(currentLocation);
+      await fetchLocationById(id);
     };
     loadLocation();
   }, [id]);
@@ -67,7 +67,7 @@ const ViewLocation = () => {
     loadData();
   }, [currentLocation]); 
 
-  if (isLoadingLocations || isLoadingDataloggers || isLoadingChannels || isLoadingAlarms) {
+  if (isLoadingLocation || isLoadingDataloggers || isLoadingChannels || isLoadingAlarms) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
@@ -75,10 +75,6 @@ const ViewLocation = () => {
     return <div className={styles.error}>
       Error: {errorLocations || errorDataloggers || errorChannels || errorAlarms}
     </div>;
-  }
-
-  if (!currentLocation || !dataloggers || !channels || !alarms) {
-    return <LoadingSpinner message="Cargando información..." />;
   }
 
   const locationButtons = (
@@ -105,22 +101,22 @@ const ViewLocation = () => {
   return (
     <>
       <Title1 
-        text={`Ubicación: ${currentLocation.nombre}`}
+        text={`Ubicación: ${currentLocation?.nombre}`}
         type="ubicaciones"
       />
-      <Breadcrumb ubicacion={currentLocation.nombre}/>
+      <Breadcrumb ubicacion={currentLocation?.nombre}/>
       <CardImage
-        image={currentLocation.foto ? `${import.meta.env.VITE_IMAGE_URL}/${currentLocation.foto}` : '/images/default-location.png'}
-        title={currentLocation.nombre}
+        image={currentLocation?.foto ? `${import.meta.env.VITE_IMAGE_URL}/${currentLocation?.foto}` : '/images/default-location.png'}
+        title={currentLocation?.nombre}
         buttons={locationButtons}
       >
         <div className={styles.locationInfo}>
-          <p><strong>Descripción:</strong> {currentLocation.descripcion}</p>
-          <p><strong>Dirección:</strong> {currentLocation.calle} {currentLocation.calle_numero}</p>
-          <p><strong>Teléfono:</strong> {currentLocation.tel}</p>
-          <p><strong>Email:</strong> {currentLocation.email}</p>
-          <p><strong>Estado:</strong> {currentLocation.estado ? 'Activo' : 'Inactivo'}</p>
-          <p><strong>Fecha de creación:</strong> {currentLocation.fecha_creacion ? new Date(currentLocation.fecha_creacion).toLocaleDateString() : 'No disponible'}</p>
+          <p><strong>Descripción:</strong> {currentLocation?.descripcion}</p>
+          <p><strong>Dirección:</strong> {currentLocation?.calle} {currentLocation?.calle_numero}</p>
+          <p><strong>Teléfono:</strong> {currentLocation?.tel}</p>
+          <p><strong>Email:</strong> {currentLocation?.email}</p>
+          <p><strong>Estado:</strong> {currentLocation?.estado ? 'Activo' : 'Inactivo'}</p>
+          <p><strong>Fecha de creación:</strong> {currentLocation?.fecha_creacion ? new Date(currentLocation?.fecha_creacion).toLocaleDateString() : 'No disponible'}</p>
           
           <p><strong>Canales Activos:</strong>{" "}
             {locationChannels.length === 0 ? (
@@ -128,7 +124,7 @@ const ViewLocation = () => {
             ) : (
               <CardBtnSmall 
                 title={`Ver ${locationChannels.length} canales`}
-                url={`/panel/ubicaciones/${currentLocation.id}/canales`}
+                url={`/panel/ubicaciones/${currentLocation?.id}/canales`}
               />
             )}
           </p>
@@ -139,14 +135,14 @@ const ViewLocation = () => {
             ) : (
               <CardBtnSmall 
                 title={`Ver ${alarms.length} alarmas`}
-                url={`/panel/ubicaciones/${currentLocation.id}/alarmas`}
+                url={`/panel/ubicaciones/${currentLocation?.id}/alarmas`}
               />
             )}
           </p>
         </div>
       </CardImage>
 
-      <Title2 text={`Dataloggers en ${currentLocation.nombre}`} type="dataloggers"/>
+      <Title2 text={`Dataloggers en ${currentLocation?.nombre}`} type="dataloggers"/>
 
       <ShowDataloggersCards
         dataloggers={dataloggers.filter(d => d.ubicacion_id === parseInt(id))}
