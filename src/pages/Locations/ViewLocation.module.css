@@ -79,3 +79,11 @@
 .closeButton:hover {
   background-color: #c82333;
 }
+
+.btnContainer{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}

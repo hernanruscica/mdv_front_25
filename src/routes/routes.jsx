@@ -42,9 +42,11 @@ export const routes = [
   // Alarmas routes / locations
   { path: "/panel/ubicaciones/:locationId/alarmas", element: <Alarms />, private: true },
   { path: "/panel/ubicaciones/:locationId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
+  { path: "/panel/ubicaciones/:locationId/alarmas/:alarmId/editar", element: <CreatePage />, private: true },
   // Alarmas routes / users
   { path: "/panel/usuarios/:userId/alarmas", element: <Alarms />, private: true },
   { path: "/panel/usuarios/:userId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
+  { path: "/panel/usuarios/:userId/alarmas/:alarmId/editar", element: <CreatePage />, private: true },
   // Alarmas routes / channels
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },
   { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm /> },

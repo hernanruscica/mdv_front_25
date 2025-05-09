@@ -1,10 +1,12 @@
-import React,{ useState, useEffect} from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
+import { useChannelsStore } from '../../store/channelsStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
 
-export const ChannelCreateForm = ({ channelData, isEditing}) => {
+export const ChannelCreateForm = ({ channelData, isEditing }) => {
     const { dataloggerId, channelId } = useParams();
     const { user: userStore } = useAuthStore();
     const [profileImage, setProfileImage] = useState(channelData?.foto || "default_channel.png");
@@ -26,9 +28,13 @@ export const ChannelCreateForm = ({ channelData, isEditing}) => {
             [e.target.name]: e.target.value,
         });
     };
+    const navigate = useNavigate();
+    const { createChannel, updateChannel } = useChannelsStore();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();    
+        setIsSubmitting(true);
         const formData = new FormData();
         formData.append("datalogger_id", channel.datalogger_id || "");
         formData.append("nombre", channel.nombre || "");
@@ -37,12 +43,31 @@ export const ChannelCreateForm = ({ channelData, isEditing}) => {
         formData.append("tiempo_a_promediar", channel.tiempo_a_promediar || "");    
         formData.append("foto", newImage || "default_channel.webp");
         formData.append("multiplicador", channel.multiplicador || "");
-        if (isEditing) {
-            formData.append("id", channelData.id);
-            console.log("enviando datos EDITADOS del canal", formData);            
-        }else{
-            console.log("enviando datos para CREAR el canal", formData);            
-        }        
+        
+        try {
+            if (isEditing) {
+                const response = await updateChannel(channelId, formData);
+                if (response.success) {
+                    toast.success(response.message);
+                    navigate(`/panel/dataloggers/${dataloggerId}/canales/${channelId}`);
+                } else {
+                    toast.error(response.message || 'Error al actualizar el canal');
+                }
+            } else {
+                const response = await createChannel(formData);                
+                if (response.success) {
+                    toast.success(response.message);
+                    navigate(`/panel/dataloggers/${dataloggerId}/canales/${channelId}`);
+                } else {
+                    toast.error(response.message || 'Error al crear el canal');
+                }
+            }
+        } catch (error) {
+            toast.error('Error al procesar el canal');
+            console.error('Error al procesar el canal:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     useEffect(() => {
@@ -59,6 +84,10 @@ export const ChannelCreateForm = ({ channelData, isEditing}) => {
         }
         
     }, [channelData, isEditing])
+    
+    if (isSubmitting) {
+        return <div>Guardando cambios...</div>;
+    }
     
     return (        
         <form onSubmit={handleSubmit} className={stylesForms.form}>
@@ -130,7 +159,7 @@ export const ChannelCreateForm = ({ channelData, isEditing}) => {
                 Guardar Canal
             </button>
         </form>
-    )
+    );
 };
 
 

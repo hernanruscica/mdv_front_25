@@ -1,11 +1,17 @@
-import React,{ useState, useEffect} from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
+import { useAlarmsStore } from '../../store/alarmsStore';
 
-export const AlarmCreateForm = ({ alarmData, isEditing}) => {
-    const { channelId, alarmId } = useParams();
+export const AlarmCreateForm = ({ alarmData, isEditing }) => {
+    const { channelId, alarmId, dataloggerId } = useParams();
     const { user } = useAuthStore();
+    const { createAlarm, updateAlarm } = useAlarmsStore();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     //deberia traerlo de la api
     const alarmTypes = [ 
@@ -54,53 +60,95 @@ export const AlarmCreateForm = ({ alarmData, isEditing}) => {
         }
     }, [alarmData, isEditing]);
 
-    const handleChange = (e) => { 
-        const { name, value } = e.target; 
-        if (name === "tipo_alarma") { 
-            const selectedAlarmType = alarmTypes.find(a => a.type === value); 
-            const newComparsionVariable = selectedAlarmType ? selectedAlarmType.variables : comparsionVariable; 
-            setComparsionVariable(newComparsionVariable); 
-            setAlarm(prev => ({ 
-                ...prev, 
-                [name]: value, 
-                nombre_variables: newComparsionVariable, 
-            })); 
-        } else { 
-            setAlarm(prev => ({ ...prev, [name]: value })); 
-        } 
-    }; 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "tipo_alarma") {
+            const selectedAlarmType = alarmTypes.find(a => a.type === value);
+            const newComparsionVariable = selectedAlarmType ? selectedAlarmType.variables : comparsionVariable;
+            setComparsionVariable(newComparsionVariable);
+            setAlarm(prev => ({
+                ...prev,
+                [name]: value,
+                nombre_variables: newComparsionVariable,
+            }));
+        } else {
+            setAlarm(prev => ({ ...prev, [name]: value }));
+        }
+    };
 
-    const handleChangeComparsion = (e) => { 
-        const { name, value } = e.target; 
-        if (name === "comparsion_operator") { 
-            setComparsionOperator(value); 
-        } else if (name === "comparsion_value") { 
-            setComparsionValue(value); 
-        } 
+    const handleChangeComparsion = (e) => {
+        const { name, value } = e.target;
+        if (name === "comparsion_operator") {
+            setComparsionOperator(value);
+            setAlarm(prev => ({
+                ...prev,
+                condicion: `${prev.nombre_variables} ${value} ${comparsionValue}`
+            }));
+        } else if (name === "comparsion_value") {
+            setComparsionValue(value);
+            setAlarm(prev => ({
+                ...prev,
+                condicion: `${prev.nombre_variables} ${comparsionOperator} ${value}`
+            }));
+        }
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();    
-        const formData = new FormData();
-        formData.append("canal_id", alarm.canal_id || "");
-        formData.append("nombre", alarm.nombre || "");
-        formData.append("descripcion", alarm.descripcion || "");
-        formData.append("periodo_tiempo", alarm.periodo_tiempo || "");
-        formData.append("nombre_variables", alarm.nombre_variables || "");       
-        formData.append("condicion", alarm.condicion || "");    
-        formData.append("estado", alarm.estado || "");   
-        formData.append("usuario_id", alarm.usuario_id || "");   
-        formData.append("tipo_alarma", alarm.tipo_alarma || "");   
+        e.preventDefault();
+        setIsSubmitting(true);
 
-        if (isEditing) {
-            formData.append("id", alarmData.id);
-            console.log("enviando datos EDITADOS de la alarma", formData);
-        } else {
-            console.log("enviando datos para CREAR la alarma", formData);
+        try {
+            if (isEditing) {
+                const response = await updateAlarm(alarmId, {
+                    canal_id: alarm.canal_id,
+                    nombre: alarm.nombre,
+                    descripcion: alarm.descripcion,
+                    periodo_tiempo: alarm.periodo_tiempo,
+                    nombre_variables: alarm.nombre_variables,
+                    condicion: alarm.condicion,
+                    usuario_id: alarm.usuario_id,
+                    tipo_alarma: alarm.tipo_alarma,
+                    estado: alarm.estado
+                });
+
+                if (response.success) {
+                    toast.success('Alarma actualizada exitosamente');
+                    navigate(location.pathname.replace(/\/editar$/, ''));
+                }
+            } else {
+                const response = await createAlarm({
+                    canal_id: alarm.canal_id,
+                    nombre: alarm.nombre,
+                    descripcion: alarm.descripcion,
+                    periodo_tiempo: alarm.periodo_tiempo,
+                    nombre_variables: alarm.nombre_variables,
+                    condicion: alarm.condicion,
+                    usuario_id: alarm.usuario_id,
+                    tipo_alarma: alarm.tipo_alarma
+                });
+
+                if (response.success) {
+                    toast.success('Alarma creada exitosamente');
+                    navigate(`/panel/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${response.alarm.id}`);
+                }
+            }
+        } catch (error) {
+            toast.error('Error al procesar la alarma');
+            console.error('Error al procesar la alarma:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
-    
-    return (        
+
+    if (isSubmitting) {
+        return (
+            <div className={stylesForms.loadingContainer}>
+                <p>Procesando alarma...</p>
+            </div>
+        );
+    }
+
+    return (
         <form onSubmit={handleSubmit} className={stylesForms.form}>
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>
@@ -200,8 +248,12 @@ export const AlarmCreateForm = ({ alarmData, isEditing}) => {
                 
             </div>
 
-            <button type="submit" className={stylesForms.formBtn}>
-                Guardar Alarma
+            <button 
+                type="submit" 
+                className={stylesForms.formBtn}
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? 'Guardando...' : 'Guardar Alarma'}
             </button>
         </form>
     );

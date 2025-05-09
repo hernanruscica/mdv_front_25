@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation} from 'react-router-dom';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useAlarmLogsStore } from '../../store/alarmLogsStore';
 import { useChannelsStore } from '../../store/channelsStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
+import { useUsersStore } from '../../store/usersStore';
+import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { Title1 } from '../../components/Title1/Title1';
@@ -12,15 +14,16 @@ import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardImage from '../../components/CardImage/CardImage';
 import Table from '../../components/Table/Table';
 import styles from './ViewAlarm.module.css';
-import { valueOrDefault } from 'chart.js/helpers';
+
 
 const ViewAlarm = () => {
-  const { alarmId } = useParams();
+  const { alarmId, userId, locationId } = useParams();
   const [currentAlarm, setCurrentAlarm] = useState(null);
   const [alarmLogs, setAlarmLogs] = useState([]);
   const [currentChannel, setCurrentChannel] = useState(null);
   const [currentDatalogger, setCurrentDatalogger] = useState(null);
-  
+  const location = useLocation();
+
   const { 
     fetchAlarmById,
     loadingStates: { fetchAlarm: isLoading },
@@ -47,6 +50,20 @@ const ViewAlarm = () => {
     error: errorDatalogger
   } = useDataloggersStore();
 
+  const {
+    selectedUser,
+    fetchUserById,
+    isLoading: isLoadingUser ,
+    error: errorUser
+  } = useUsersStore();
+
+  const {
+    selectedLocation,
+    fetchLocationById,
+    loadingStates: { fetchLocation: isLoadingLocation },
+    error: errorLocation
+  } = useLocationsStore();
+
   useEffect(() => {
     const loadAlarm = async () => {
       const alarm = await fetchAlarmById(alarmId);
@@ -57,6 +74,26 @@ const ViewAlarm = () => {
       loadAlarm();
     }
   }, [alarmId]);
+
+  useEffect(() => {    
+   const loadUser = async () => {
+      await fetchUserById(userId);   
+    };
+  if (userId) {  
+    loadUser();
+  }
+      
+  }, [userId] )
+
+  useEffect(() => {    
+    const loadLocation = async () => {
+       await fetchLocationById(locationId);   
+     };
+    if (locationId) {  
+      loadLocation();
+    }
+       
+   }, [locationId] )
 
   useEffect(() => {
     const loadChannelAndLogs = async () => {
@@ -103,7 +140,7 @@ const ViewAlarm = () => {
     loadDatalogger();
   }, [currentChannel, dataloggers]);
 
-  if (isLoading || isLoadingLogs || isLoadingChannel || isLoadingDatalogger) {
+  if (isLoading || isLoadingLogs || isLoadingChannel || isLoadingDatalogger || isLoadingUser || isLoadingLocation) {
     return <LoadingSpinner message="Cargando detalles de la alarma..." />;
   }
 
@@ -123,13 +160,14 @@ const ViewAlarm = () => {
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
-        url={`/panel/dataloggers/${currentAlarm?.datalogger_id}/canales/${currentAlarm?.canal_id}/alarmas/${currentAlarm?.alarma_id}/edicion`}
+        // url={`/panel/dataloggers/${currentAlarm?.datalogger_id}/canales/${currentAlarm?.canal_id}/alarmas/${currentAlarm?.alarma_id}/edicion`}
+        url={`${location.pathname}/editar`}
       />
       <BtnCallToAction
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
-        url={`/panel/dataloggers/${currentAlarm?.datalogger_id}/canales/${currentAlarm?.canal_id}/alarmas/${currentAlarm?.alarma_id}/eliminar`}
+        url={`${location.pathname}/eliminar`}
       />
     </>
   );
@@ -151,7 +189,7 @@ const ViewAlarm = () => {
     mensaje: log.mensaje
   }));
 
-  //console.log(currentDatalogger)
+  console.log(currentChannel)
 
   return (
     <>
@@ -160,8 +198,10 @@ const ViewAlarm = () => {
         text={`Alarma: ${currentAlarm.nombre}`}
       />
       <Breadcrumb 
+        usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
+        ubicacion={selectedLocation?.nombre}
         datalogger={currentDatalogger?.nombre}
-        canal={currentChannel?.nombre}
+        canal={currentChannel?.canales_nombre}
         alarma={currentAlarm.nombre}
       />
       <CardImage
@@ -184,6 +224,8 @@ const ViewAlarm = () => {
         <LoadingSpinner message="Cargando historial de alarmas..." />
       ) : errorLogs ? (
         <div className={styles.error}>{errorLogs}</div>
+      ) : alarmLogs.length === 0 ? (
+        <div className={styles.noData}>No hay registros de disparos para esta alarma</div>
       ) : (
         <div className={styles.tableContainer}>
           <Table 

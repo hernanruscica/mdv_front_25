@@ -2,7 +2,10 @@ import React,{ useState, useEffect} from 'react'
 import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
 import { useLocationUsersStore } from '../../store/locationUsersStore';
+import { useUsersStore } from '../../store/usersStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 export const UserCreateForm = ({ userId, userData, isEditing }) => {
     const { user: userStore, userRoles } = useAuthStore();
@@ -28,6 +31,7 @@ export const UserCreateForm = ({ userId, userData, isEditing }) => {
         estado:"",
         direcciones_id: ""
     });    
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (isEditing && userData) {
@@ -78,37 +82,79 @@ export const UserCreateForm = ({ userId, userData, isEditing }) => {
         });
     };
 
+    const { createUser, updateUser } = useUsersStore();
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();    
-        const formData = new FormData();
-        formData.append("nombre_1", user.nombre_1 || "");
-        formData.append("nombre_2", user.nombre_2 || "");
-        formData.append("apellido_1", user.apellido_1 || "");
-        formData.append("apellido_2", user.apellido_2 || "");
-        formData.append("email", user.email || "");
-        formData.append("telefono", user.telefono || "");
-        formData.append("foto", newImage || profileImage);
+        setIsSubmitting(true);
+        
+        if (isEditing) {
+            const updateData = {
+                nombre_1: user.nombre_1,
+                nombre_2: user.nombre_2,
+                apellido_1: user.apellido_1,
+                apellido_2: user.apellido_2,
+                email: user.email,
+                telefono: user.telefono,
+                foto: newImage || profileImage
+            };
 
+            try {
+                const response = await updateUser(userData.id, updateData);
+                console.log(response)
+                if (response.success) {
+                    toast.success(response.message);
+                    navigate(`/panel/usuarios/${userData.id}`);
+                } else {
+                    toast.error(response.message || 'Error al actualizar usuario');
+                }
+            } catch (error) {
+                toast.error('Error al actualizar el usuario');
+                console.error('Error al actualizar el usuario:', error);
+            } finally {
+                setIsSubmitting(false);
+            }
+            return;
+        }
+
+        // Código existente para creación
+        const formData = new FormData();
+        formData.append("foto", newImage || profileImage);
+        formData.append("nombre_1", user.nombre_1);
+        formData.append("nombre_2", user.nombre_2);
+        formData.append("apellido_1", user.apellido_1);
+        formData.append("apellido_2", user.apellido_2);
+        formData.append("email", user.email);
+        formData.append("telefono", user.telefono);
+        formData.append("dni", user.dni);
+        formData.append("password", user.password || "P4s5_W0rD*joD1d4+joD1d4_W0rD.P4s5");
+        formData.append("estado", user.estado || "0");
+        formData.append("ubicaciones_id", selectedLocation);
+        formData.append("roles_id", selectedLocationRol);
+    
         try {
-            if (isEditing) {
-                formData.append("id", userId || '');
-                console.log("Actualizando usuario", userId);
+            const {success, message, user} = await createUser(formData);
+            if (success) {               
+                toast.success(message);
+                navigate(`/panel/usuarios/${user.id}`);
             } else {
-                // Solo agregar estos campos si es creación
-                formData.append("dni", user.dni || "");
-                formData.append("password", user.password || "P4s5_W0rD*joD1d4+joD1d4_W0rD.P4s5");
-                formData.append("estado", user.estado || "0");
-                formData.append("direcciones_id", user.direcciones_id || "1");
-                console.log("Creando nuevo usuario");
+                toast.error(message);
             }
         } catch (error) {
+            toast.error("Error al procesar el usuario:");
             console.error("Error al procesar el usuario:", error);
         }
     };
 
 
     if (loadingLocationUsers) {
-        return <div>Cargando datos...</div>;
+        return <div>Cargando datos de ubicaciones...</div>;
+    }
+
+    if (isSubmitting) {
+        return <div>Guardando cambios...</div>;
     }
     
     if (error) {

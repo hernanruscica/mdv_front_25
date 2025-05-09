@@ -103,5 +103,56 @@ export const useAlarmsStore = create((set) => ({
       }));
       return null;
     }
+  },
+  
+  createAlarm: async (alarmData) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, createAlarm: true },
+      error: null
+    }));
+
+    try {
+      const response = await alarmsService.create(alarmData);
+      if (response.success) {
+        set(state => ({
+          alarms: [...state.alarms, response.alarm],
+          loadingStates: { ...state.loadingStates, createAlarm: false }
+        }));
+        return response;
+      }
+    } catch (error) {
+      set(state => ({
+        error: 'Error al crear la alarma',
+        loadingStates: { ...state.loadingStates, createAlarm: false }
+      }));
+      throw error;
+    }
+  },
+  
+  updateAlarm: async (alarmId, alarmData) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, updateAlarm: true },
+      error: null
+    }));
+
+    try {
+      const response = await alarmsService.update(alarmId, alarmData);
+      if (response.success) {
+        set(state => ({
+          alarms: state.alarms.map(alarm => 
+            alarm.id === alarmId ? response.alarm : alarm
+          ),
+          selectedAlarm: response.alarm,
+          loadingStates: { ...state.loadingStates, updateAlarm: false }
+        }));
+        return response;
+      }
+    } catch (error) {
+      set(state => ({
+        error: 'Error al actualizar la alarma',
+        loadingStates: { ...state.loadingStates, updateAlarm: false }
+      }));
+      throw error;
+    }
   }
 }));

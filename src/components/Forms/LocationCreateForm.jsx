@@ -1,12 +1,15 @@
 import React,{ useState, useEffect} from 'react'
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
 import { useLocationsStore } from '../../store/locationsStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
 
 export const LocationCreateForm = ({ locationData, isEditing }) => {
+    const navigate = useNavigate();   
     const { user: userStore } = useAuthStore();
-    const { createLocation, loadingStates } = useLocationsStore();
+    const { createLocation, updateLocation, loadingStates } = useLocationsStore();
     const [profileImage, setProfileImage] = useState(locationData?.foto || "default_location.png");
     const [newImage, setNewImage] = useState("");
     
@@ -39,21 +42,8 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();    
-        
-        // Depuración de la imagen antes de crear FormData
-        console.log('Estado de newImage:', {
-            type: typeof newImage,
-            isFile: newImage instanceof File,
-            value: newImage
-        });
-        console.log('Estado de profileImage:', {
-            type: typeof profileImage,
-            value: profileImage
-        });
-
-        const formData = new FormData();
-        
+        e.preventDefault();       
+        const formData = new FormData();        
         // Datos básicos
         formData.append("nombre", location.nombre || "");
         formData.append("descripcion", location.descripcion || "");
@@ -61,15 +51,9 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
         formData.append("email", location.email || "");
         
         // Manejo de la imagen con depuración
-        if (newImage instanceof File) {
-            console.log('Agregando nueva imagen al FormData:', {
-                name: newImage.name,
-                size: newImage.size,
-                type: newImage.type
-            });
+        if (newImage instanceof File) {            
             formData.append("foto", newImage);
         } else {
-            console.log('Usando imagen de perfil existente:', profileImage);
             formData.append("foto", profileImage || "default_location.png");
         }
         
@@ -87,19 +71,14 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
         try {
             if (isEditing) {
                 formData.append("id", locationData.id);
-                console.log("Enviando datos EDITADOS de ubicación");
-            } else {
-                console.log("Intentando crear ubicación...");
-                console.log('Contenido completo del FormData:');
-                for (let pair of formData.entries()) {
-                    console.log(`${pair[0]}: `, pair[1] instanceof File ? {
-                        name: pair[1].name,
-                        size: pair[1].size,
-                        type: pair[1].type
-                    } : pair[1]);
-                }
-                await createLocation(formData);
-                console.log("Ubicación creada exitosamente");
+                const response = await updateLocation(locationData.id, formData);
+                navigate(`/panel/ubicaciones/${locationData.id}`);
+                toast.success('Ubicación actualizada exitosamente');
+            } else {                
+                const response = await createLocation(formData);
+                const newLocationId = response.location.id;
+                navigate(`/panel/ubicaciones/${newLocationId}`);
+                toast.success('Ubicación creada exitosamente');
             }
         } catch (error) {
             console.error("Error detallado al procesar la ubicación:", {
@@ -108,6 +87,7 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
                 status: error.response?.status,
                 headers: error.response?.headers
             });
+            toast.error('Error al procesar la ubicación');
         }
     };    
     

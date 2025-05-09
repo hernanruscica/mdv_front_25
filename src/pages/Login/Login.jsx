@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import styles from './Login.module.css';
 import { Title1 } from '../../components/Title1/Title1.jsx';
 import { useAuthStore } from '../../store/authStore';
-import { Toast, useToastStore } from '../../components/Toast/Toast';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 
 const Login = () => {
@@ -11,7 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const login = useAuthStore(state => state.login);
-  const showToast = useToastStore(state => state.showToast);
+  
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
@@ -33,13 +33,14 @@ const Login = () => {
     try {
       const isLoggedIn = await login(username, password);    
       if (isLoggedIn) {
+        toast.success('Credenciales correctas');
         navigate('/');
       } else {
-        showToast('DNI y/o contraseña incorrectos', 'error');
+        toast.error('DNI y/o contraseña incorrectos');
         resetForm();
       }
     } catch (error) {
-      showToast('Error al intentar iniciar sesión', 'error');
+      toast.error('Error al intentar iniciar sesión');
     } finally {
       setIsLoading(false);
     }
@@ -84,8 +85,7 @@ const Login = () => {
         <p>😕 Se olvidó la contraseña?<br/><Link to='/panel/usuarios/resetear'>Haga CLICK ACÁ para restablecerla</Link></p>
         
         <button className={styles.loginFormBtn} type="submit">Ingresar</button>
-      </form>
-      <Toast />
+      </form>      
     </main>
   );
 };

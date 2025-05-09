@@ -39,5 +39,25 @@ export const alarmsService = {
       console.error('Get alarm by id error:', error);
       return null;
     }
+  },
+  
+  create: async (alarmData) => {
+    try {
+      const { data } = await axiosClient.post('/api/alarms', alarmData);
+      return data;
+    } catch (error) {
+      console.error('Create alarm error:', error);
+      throw error;
+    }
+  },
+  
+  update: async (alarmId, alarmData) => {
+    try {
+      const { data } = await axiosClient.put(`/api/alarms/${alarmId}`, alarmData);
+      return data;
+    } catch (error) {
+      console.error('Update alarm error:', error);
+      throw error;
+    }
   }
 };

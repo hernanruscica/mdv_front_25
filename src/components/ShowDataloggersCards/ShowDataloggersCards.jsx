@@ -91,7 +91,7 @@ const ShowDataloggersCards = ({
       );
     });
 
-    console.log(locations)
+    //console.log(locations)
 
   return (
     <>
@@ -146,8 +146,8 @@ const ShowDataloggersCards = ({
                 <p className={cardInfoStyles.paragraph}>                
                   Instalado en: {' '}
                   <CardBtnSmall 
-                    title={locations.find(loc => loc.ubicaciones_id === datalogger.ubicacion_id || loc.id === datalogger.ubicacion_id)?.ubicaciones_nombre || 
-                           locations.find(loc => loc.ubicaciones_id === datalogger.ubicacion_id || loc.id === datalogger.ubicacion_id)?.nombre || 
+                    title={locations.find(loc => loc?.ubicaciones_id === datalogger.ubicacion_id || loc?.id === datalogger.ubicacion_id)?.ubicaciones_nombre || 
+                           locations.find(loc => loc?.ubicaciones_id === datalogger.ubicacion_id || loc?.id === datalogger.ubicacion_id)?.nombre || 
                            'Sin ubicación'}
                     url={`/panel/ubicaciones/${datalogger.ubicacion_id}`}       
                   />       
@@ -155,7 +155,7 @@ const ShowDataloggersCards = ({
               )}
               
               <CardBtnSmall 
-                title={`Canales conectados (${channels.filter(channel => 
+                title={`Canales conectados (${channels?.filter(channel => 
                   channel.datalogger_id === datalogger.id
                 ).length})`}
                 onClick={() => openModal(

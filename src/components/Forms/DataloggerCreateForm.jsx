@@ -1,7 +1,10 @@
 import React,{ useState, useEffect} from 'react'
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
 import { useLocationUsersStore } from '../../store/locationUsersStore';
+import { useDataloggersStore } from '../../store/dataloggersStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
 
 export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
@@ -60,21 +63,36 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
         });
     };
 
+    const navigate = useNavigate();
+    const { createDatalogger, updateDatalogger } = useDataloggersStore();
+
     const handleSubmit = async (e) => {
         e.preventDefault();    
         const formData = new FormData();
         formData.append("direccion_mac", datalogger.direccion_mac || "");
         formData.append("nombre", datalogger.nombre || "");
         formData.append("descripcion", datalogger.descripcion || "");
-        formData.append("foto", newImage || "default_datalogger.webp");
+        formData.append("foto", newImage || datalogger.foto || "default_datalogger.webp");
         formData.append("nombre_tabla", datalogger.nombre_tabla || "");
         formData.append("ubicacion_id", datalogger.ubicacion_id || "");
-        if (isEditing) {
-            formData.append("id", dataloggerData.id);
-            console.log("enviando datos EDITADOS del datalogger", formData);            
-        }else{
-            console.log("enviando datos para CREAR el datalogger", formData);            
-        }        
+
+        try {
+            let response;
+            if (isEditing) {
+                response = await updateDatalogger(dataloggerData.id, formData);
+                toast.success('Datalogger actualizado con éxito');
+                navigate(`/panel/dataloggers/${dataloggerData.id}`);
+            } else {
+                response = await createDatalogger(formData);
+                toast.success(response.message);
+                if (response.success){                    
+                    navigate(`/panel/dataloggers/${response.datalogger.id}`);
+                }
+            }        
+        } catch (error) {
+            console.error("Error al procesar el datalogger:", error);
+            toast.error(isEditing ? 'Error al actualizar el datalogger' : 'Error al crear el datalogger');
+        }
     };
 
     if (loadingLocationUsers) {
@@ -84,7 +102,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
     if (error) {
         return <div>Error al cargar las ubicaciones: {error}</div>;
     }
-    console.log(dataloggerData)
+    //console.log(dataloggerData)
     return (        
         <form onSubmit={handleSubmit} className={stylesForms.form}>
             <CardImageLoadingPreview
@@ -125,6 +143,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
                         required
                     />
                 </div>
+                
                 <div className={stylesForms.formInput}>
                     <label htmlFor="ubicacion_id">Ubicación:</label>
                     <select
@@ -145,6 +164,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
                         ))}
                     </select>
                 </div>
+                
             </div>
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>

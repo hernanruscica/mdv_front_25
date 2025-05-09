@@ -33,17 +33,21 @@ export const usersService = {
 
   create: async (userData) => {
     try {
-      const { data } = await axiosClient.post('/api/users', userData);
+      const { data } = await axiosClient.uploadFile('/api/users', userData);
       return data;
     } catch (error) {
       console.error('Create user error:', error);
-      return null;
+      throw error;
     }
   },
 
   update: async (id, userData) => {
     try {
-      const { data } = await axiosClient.put(`/api/users/${id}`, userData);
+      const { data } = await axiosClient.put(`/api/users/${id}`, userData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       return data;
     } catch (error) {
       console.error('Update user error:', error);

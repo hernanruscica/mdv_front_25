@@ -29,5 +29,25 @@ export const channelsService = {
       console.error('Get channel by id error:', error);
       return null;
     }
+  },
+
+  create: async (channelData) => {
+    try {
+      const { data } = await axiosClient.uploadFile('/api/channels', channelData);
+      return data;
+    } catch (error) {
+      console.error('Create channel error:', error);
+      throw error;
+    }
+  },
+
+  update: async (channelId, channelData) => {
+    try {
+      const { data } = await axiosClient.put(`/api/channels/${channelId}`, channelData);
+      return data;
+    } catch (error) {
+      console.error('Update channel error:', error);
+      throw error;
+    }
   }
 };

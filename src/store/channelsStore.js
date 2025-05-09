@@ -59,5 +59,57 @@ export const useChannelsStore = create((set) => ({
       }));
       return null;
     }
+  },
+
+  createChannel: async (channelData) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, createChannel: true },
+      error: null
+    }));
+    
+    try {
+      const response = await channelsService.create(channelData);
+      if (response.success) {
+        set(state => ({
+          channels: [...state.channels, response.channel],
+          loadingStates: { ...state.loadingStates, createChannel: false }
+        }));
+        return response;
+      }
+      return response;
+    } catch (error) {
+      set(state => ({
+        error: 'Error al crear el canal',
+        loadingStates: { ...state.loadingStates, createChannel: false }
+      }));
+      throw error;
+    }
+  },
+
+  updateChannel: async (channelId, channelData) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, updateChannel: true },
+      error: null
+    }));
+    
+    try {
+      const response = await channelsService.update(channelId, channelData);
+      if (response.success) {
+        set(state => ({
+          channels: state.channels.map(ch => 
+            ch.id === channelId ? response.channel : ch
+          ),
+          loadingStates: { ...state.loadingStates, updateChannel: false }
+        }));
+        return response;
+      }
+      return response;
+    } catch (error) {
+      set(state => ({
+        error: 'Error al actualizar el canal',
+        loadingStates: { ...state.loadingStates, updateChannel: false }
+      }));
+      throw error;
+    }
   }
 }));

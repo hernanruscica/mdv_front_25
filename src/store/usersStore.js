@@ -37,40 +37,39 @@ export const useUsersStore = create((set, get) => ({
   createUser: async (userData) => {
     set({ isLoading: true, error: null });
     try {
-      const newUser = await usersService.create(userData);
-      if (newUser) {
+      const response = await usersService.create(userData);
+      if (response.success) {
         set(state => ({ 
-          users: [...state.users, newUser],
+          users: [...state.users, response.user],
           isLoading: false 
         }));
-        return true;
+        return response;
       }
-      return false;
+      return response;
     } catch (error) {
       set({ error: 'Error creating user', isLoading: false });
-      return false;
+      return response;
     }
   },
 
   updateUser: async (id, userData) => {
     set({ isLoading: true, error: null });
     try {
-      const updatedUser = await usersService.update(id, userData);
-      //console.log('updated User', updatedUser);
-      if (updatedUser.success) {
+      const response = await usersService.update(id, userData);
+      if (response.success) {
         set(state => ({
           users: state.users.map(user => 
-            user.id === id ? updatedUser : user
+            user.id === id ? response.user : user
           ),
-          selectedUser: updatedUser,
+          selectedUser: response.user,
           isLoading: false
         }));
-        return true;
+        return response;
       }
-      return false;
+      return response;
     } catch (error) {
       set({ error: 'Error updating user', isLoading: false });
-      return false;
+      return { success: false, message: 'Error al actualizar usuario' };
     }
   },
 

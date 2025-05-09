@@ -5,13 +5,14 @@ import { PrivateRoute } from './components/PrivateRoute/PrivateRoute';
 import { routes } from './routes/routes';
 import Modal from 'react-modal';
 import FloatingButtons from './components/FloatingButtons/FloatingButtons';
+import { Toaster } from 'react-hot-toast';
 
 Modal.setAppElement('#root');
 
 const App = () => {
   return (    
     <Router>
-      <Header />
+      <Header />      
       <main className="main-content">
         <FloatingButtons />
         <Routes>
@@ -32,7 +33,19 @@ const App = () => {
           ))}
         </Routes>
       </main>
-      <Footer />
+      <Footer />     
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000, // Duration in milliseconds (5 seconds)
+           style: {
+             background: '#eee',
+             border: 'solid #222 2px',
+            //  color: '#fff',
+             fontSize: '20px',
+           },
+        }}
+      />
     </Router>     
   );
 };

@@ -83,19 +83,19 @@ const ViewLocation = () => {
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
-        url={`/panel/ubicaciones/editar/${currentLocation?.id}`}
+        url={`/panel/ubicaciones/${currentLocation?.id}/editar`}
       />
       <BtnCallToAction
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
-        url={`/panel/ubicaciones/eliminar/${currentLocation?.id}`}
+        url={`/panel/ubicaciones/${currentLocation?.id}/archivar`}
       />
     </>
   );
 
   const locationChannels = channels.filter(channel => 
-    dataloggers.some(d => d.ubicacion_id === currentLocation.id && d.id === channel.datalogger_id)
+    dataloggers.some(d => d?.ubicacion_id === currentLocation?.id && d?.id === channel?.datalogger_id)
   );
 
   return (
@@ -118,16 +118,20 @@ const ViewLocation = () => {
           <p><strong>Estado:</strong> {currentLocation?.estado ? 'Activo' : 'Inactivo'}</p>
           <p><strong>Fecha de creación:</strong> {currentLocation?.fecha_creacion ? new Date(currentLocation?.fecha_creacion).toLocaleDateString() : 'No disponible'}</p>
           
-          <p><strong>Canales Activos:</strong>{" "}
-            {locationChannels.length === 0 ? (
-              'No hay canales activos'
-            ) : (
-              <CardBtnSmall 
-                title={`Ver ${locationChannels.length} canales`}
-                url={`/panel/ubicaciones/${currentLocation?.id}/canales`}
-              />
-            )}
-          </p>
+          <p><strong>Dataloggers Asociados:</strong></p>
+          <div className={styles.btnContainer}>
+            {dataloggers.length === 0 ? (
+              'No tiene'
+            ) : 
+            dataloggers.map(datalogger => (
+              <CardBtnSmall
+                key={datalogger.id}
+                title={datalogger.nombre}
+                url={`/panel/dataloggers/${datalogger.id}`}
+              />              
+            ))
+            }
+          </div>
 
           <p><strong>Alarmas Activas:</strong>{" "}
             {alarms.length === 0 ? (
@@ -142,15 +146,23 @@ const ViewLocation = () => {
         </div>
       </CardImage>
 
-      <Title2 text={`Dataloggers en ${currentLocation?.nombre}`} type="dataloggers"/>
-
-      <ShowDataloggersCards
-        dataloggers={dataloggers.filter(d => d.ubicacion_id === parseInt(id))}
-        channels={channels}
-        alarms={alarms}
-        locations={[currentLocation]}
-        showAddButton={user?.espropietario === 1}
-      />
+      <Title2 text={`Dataloggers en ${currentLocation?.nombre}`} type="dataloggers"/>            
+      <BtnCallToAction
+        text="Agregar datalogger"
+        icon="plus-circle-solid.svg"
+        type="normal"
+        url={`/panel/dataloggers/agregar`}
+      />    
+      {(dataloggers.length > 0) ?
+        <ShowDataloggersCards
+          dataloggers={dataloggers.filter(d => d.ubicacion_id === parseInt(id))}
+          channels={channels}
+          alarms={alarms}
+          locations={[currentLocation]}
+          showAddButton={false}
+        /> :
+        <p>No hay dataloggers en esta ubicación</p>
+      }      
     </>
   );
 };

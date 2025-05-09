@@ -73,13 +73,13 @@ const ViewUser = () => {
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
-        url={`/panel/usuarios/editar/${currentUser?.id}`}
+        url={`/panel/usuarios/${currentUser?.id}/editar`}
       />
       <BtnCallToAction
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
-        url={`/panel/usuarios/eliminar/${currentUser?.id}`}
+        url={`/panel/usuarios/${currentUser?.id}/archivar`}
       />
     </>
   );

@@ -68,13 +68,13 @@ const ViewChannel = () => {
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
-        url={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/edicion`}
+        url={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/editar`}
       />
       <BtnCallToAction
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
-        url={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/eliminar`}
+        url={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/archivar`}
       />
     </>
   );
@@ -96,7 +96,7 @@ const ViewChannel = () => {
     id: alarm.id
   }));
 
-  console.log(channelAlarms)
+  //console.log(channelAlarms)
 
   return (
     <>
@@ -132,7 +132,7 @@ const ViewChannel = () => {
             
           </div>
         </CardImage>
-
+        { (channelAlarms && channelAlarms.length > 0) &&
         <CardInfo
           iconSrc="/icons/bell-regular.svg"
           title={`${channelMainAlarm?.nombre || 'Sin alarma configurada'}`}
@@ -148,6 +148,7 @@ const ViewChannel = () => {
             </div>
           </div>
         </CardInfo>
+        }
       </div>
 
       <div className={styles.chartContainer}>
@@ -168,7 +169,7 @@ const ViewChannel = () => {
             url={`/panel/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
         />
       }
-
+    { (channelAlarms && channelAlarms.length > 0) ?
       <div className={styles.tableContainer}>
         <Table 
           columns={columns}
@@ -176,6 +177,8 @@ const ViewChannel = () => {
           onRowClick={handleAlarmClick}
         />
       </div>
+      : <p>{`El canal ${currentChannel?.nombre} todavia no tiene alarmas programadas.`}</p>
+    }
     </>
   );
 };

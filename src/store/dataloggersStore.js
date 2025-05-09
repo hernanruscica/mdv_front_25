@@ -7,8 +7,30 @@ export const useDataloggersStore = create((set) => ({
   loadingStates: {
     fetchDataloggers: false,
     fetchDatalogger: false,
+    createDatalogger: false
   },
   error: null,
+
+  createDatalogger: async (dataloggerData) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, createDatalogger: true }
+    }));
+    try {
+      const response = await dataloggersService.create(dataloggerData);
+      set(state => ({
+        dataloggers: [...state.dataloggers, response.datalogger],
+        error: null
+      }));
+      return response;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    } finally {
+      set(state => ({
+        loadingStates: { ...state.loadingStates, createDatalogger: false }
+      }));
+    }
+  },
 
   fetchDataloggers: async (currentUser) => {
     if (!currentUser) return;
@@ -81,6 +103,29 @@ export const useDataloggersStore = create((set) => ({
         loadingStates: { ...state.loadingStates, fetchDatalogger: false }
       }));
       return null;
+    }
+  },
+  
+  updateDatalogger: async (id, dataloggerData) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, updateDatalogger: true }
+    }));
+    try {
+      const response = await dataloggersService.update(id, dataloggerData);
+      set(state => ({
+        dataloggers: state.dataloggers.map(d => 
+          d.id === id ? response.datalogger : d
+        ),
+        error: null
+      }));
+      return response;
+    } catch (error) {
+      set({ error: error.message });
+      throw error;
+    } finally {
+      set(state => ({
+        loadingStates: { ...state.loadingStates, updateDatalogger: false }
+      }));
     }
   }
 }));

@@ -21,10 +21,25 @@ const Alarms = () => {
   const [currentChannel, setCurrentChannel] = useState(null);
   const { loadingStates, fetchUserById } = useUsersStore();
   const { fetchAlarmsByUser, fetchAlarmsByLocation, fetchAlarms, alarms, isLoading: isLoadingAlarms } = useAlarmsStore();
-  const { fetchDataloggerById } = useDataloggersStore();
-  const { fetchLocationById } = useLocationsStore();
-  const { fetchChannelById } = useChannelsStore();
-  const isLoadingUser = loadingStates?.fetchUserById;  
+  
+  const { 
+    fetchDataloggerById,
+    loadingStates: { fetchDatalogger: isLoadingDatalogger }
+  } = useDataloggersStore();
+  
+  const { 
+    fetchLocationById,
+    selectedLocation,
+    loadingStates: { fetchLocation: isLoadingLocation }
+  } = useLocationsStore();
+  
+  const { 
+    fetchChannelById,
+    loadingStates: { fetchChannel: isLoadingChannel }
+  } = useChannelsStore();
+
+  const isLoadingUser = loadingStates?.fetchUserById;
+  const isLoading = isLoadingUser || isLoadingAlarms || isLoadingDatalogger || isLoadingLocation || isLoadingChannel;
   const navigate = useNavigate();
 
   const columns = [
@@ -91,7 +106,7 @@ const Alarms = () => {
     };
 
     fetchInitialData();
-  }, [userId, dataloggerId, locationId, channelId, user, fetchUserById, fetchDataloggerById, fetchLocationById, fetchChannelById, fetchAlarmsByUser, fetchAlarms, fetchAlarmsByLocation]);
+  }, [userId, dataloggerId, locationId, channelId, user]);
 
   const preparedData = useMemo(() => {
     if (!alarms?.length) return [];
@@ -102,7 +117,7 @@ const Alarms = () => {
     } else if (dataloggerId && channelId) {
       baseUrl = `/panel/dataloggers/${currentDatalogger?.id}/canales/${currentChannel?.id}/alarmas`;
     } else if (locationId) {
-      baseUrl = `/panel/ubicaciones/${currentLocation?.id}/alarmas`;
+      baseUrl = `/panel/ubicaciones/${selectedLocation?.id}/alarmas`;
     } else if (channelId) {
       baseUrl = `/panel/dataloggers/${currentDatalogger?.id}/alarmas`;      
     }
@@ -125,10 +140,17 @@ const Alarms = () => {
     }));
   }, [alarms, userId, dataloggerId, locationId, channelId, currentUser, currentDatalogger, currentLocation, currentChannel]);
 
-  if (isLoadingUser || isLoadingAlarms) {
-    return <LoadingSpinner message='Cargando datos'/>;
+  if (isLoading) {
+    let loadingMessage = 'Cargando datos';
+    if (isLoadingUser) loadingMessage = 'Cargando información del usuario...';
+    if (isLoadingDatalogger) loadingMessage = 'Cargando información del datalogger...';
+    if (isLoadingLocation) loadingMessage = 'Cargando información de la ubicación...';
+    if (isLoadingChannel) loadingMessage = 'Cargando información del canal...';
+    if (isLoadingAlarms) loadingMessage = 'Cargando alarmas...';
+    
+    return <LoadingSpinner message={loadingMessage} />;
   }   
-  //console.log(alarms, currentChannel)
+  //console.log(selectedLocation)
 
   return (
     <>
@@ -139,7 +161,7 @@ const Alarms = () => {
       <Breadcrumb 
         usuario={currentUser ? `${currentUser.nombre_1} ${currentUser.apellido_1}` : ''} 
         datalogger={currentDatalogger?.nombre || ''}
-        ubicacion={currentLocation?.nombre || ''}
+        ubicacion={selectedLocation?.nombre || ''}
         canal={currentChannel?.nombre || ''}
       />
       <Table 

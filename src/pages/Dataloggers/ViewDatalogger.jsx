@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 
 const ViewDatalogger = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [dataloggerChannels, setDataloggerChannels] = useState([]);
   const { id } = useParams();
   const user = useAuthStore(state => state.user);
   const navigate = useNavigate();
@@ -56,7 +57,6 @@ const ViewDatalogger = () => {
   useEffect(() => {
     const loadDatalogger = async (id) => {
       const currentDatalogger = await fetchDataloggerById(id);   
-      //console.log('hace fetchDatalogger al endpoint')
       setCurrentDatalogger(currentDatalogger);
     };
     
@@ -78,6 +78,16 @@ const ViewDatalogger = () => {
     loadData();
   }, [currentDatalogger]); 
 
+  // Nuevo useEffect para manejar dataloggerChannels
+  useEffect(() => {
+    if (currentDatalogger && channels) {
+      const filteredChannels = channels.filter(
+        channel => channel.datalogger_id === currentDatalogger.id
+      );
+      setDataloggerChannels(filteredChannels);
+    }
+  }, [currentDatalogger, channels]);
+
   //     
   if (isLoadingChannels || isLoadingDatalogger || isLoadingAlarms) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -92,12 +102,8 @@ const ViewDatalogger = () => {
   
   // Función para contar canales analógicos y digitales
   const getChannelCounts = () => {
-    if (!channels) return { analog: 0, digital: 0 };
+    if (!dataloggerChannels) return { analog: 0, digital: 0 };
     
-    const dataloggerChannels = channels.filter(
-      channel => channel.datalogger_id === currentDatalogger.id
-    );
-
     return dataloggerChannels.reduce((acc, channel) => {
       if (channel.nombre_columna.startsWith('d')) {
         acc.digital++;
@@ -117,13 +123,13 @@ const ViewDatalogger = () => {
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
-        url={`/panel/dataloggers/editar/${currentDatalogger?.id}`}
+        url={`/panel/dataloggers/${currentDatalogger?.id}/editar`}
       />
       <BtnCallToAction
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
-        url={`/panel/dataloggers/eliminar/${currentDatalogger?.id}`}
+        url={`/panel/dataloggers/${currentDatalogger?.id}/archivar`}
       />
     </>
   );
@@ -170,7 +176,13 @@ const ViewDatalogger = () => {
         <div className={styles.dataloggerInfo}>
           <p className={styles.description}>{currentDatalogger.descripcion}</p>
           <p><strong>MAC:</strong> {currentDatalogger.direccion_mac}</p>
-          <p><strong>Ubicación:</strong> {location?.ubicaciones_nombre || 'No especificada'}</p>
+          <p><strong>Ubicación:</strong> {
+            (location) ?
+            <CardBtnSmall
+              title={location.ubicaciones_nombre}
+              url={`/panel/ubicaciones/${location.ubicaciones_id}`} />
+              : 'No especificada'
+          }</p>
           <p><strong>Creado el:</strong> {new Date(currentDatalogger.fecha_creacion).toLocaleDateString()}</p>
           <p>
             <strong>Canales conectados:</strong>{" "}
@@ -178,10 +190,13 @@ const ViewDatalogger = () => {
           </p>
           <p>
             <strong>Alarmas programadas:</strong>{" "}
+            {(dataloggerAlarms && dataloggerAlarms.length > 0)?
             <CardBtnSmall
               title={`Ver ${dataloggerAlarms.length} alarmas`}
               url={`/panel/dataloggers/${currentDatalogger.id}/alarmas`}
             />
+            : 'No hay alarmas programadas'
+            }
           </p>
         </div>
       </CardImage>
@@ -199,35 +214,39 @@ const ViewDatalogger = () => {
             type="normal"
             url={`/panel/dataloggers/${currentDatalogger.id}/canales/agregar`}
         />
+      }{
+      (dataloggerChannels && dataloggerChannels.length > 0) ?
+        <ShowChannelsCards
+          channels={dataloggerChannels}
+          alarms={alarms}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          showAddButton={false}
+        />
+        : 'No hay canales todavia'
       }
-      <ShowChannelsCards
-        channels={channels.filter(channel => channel.datalogger_id === currentDatalogger.id)}
-        alarms={alarms}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        showAddButton={false}//{user?.espropietario === 1}
-      />
-
       <Title2 
         text={`Alarmas programadas en ${currentDatalogger.nombre}`}
         type="alarmas"
-      />
+      />      
       
-      
-      <BtnCallToAction
+      {/* <BtnCallToAction
             text={`Ver ${dataloggerAlarms.length} alarmas`}
             icon="bell-regular.svg"
             type="normal"
             url={`/panel/dataloggers/${currentDatalogger.id}/alarmas`}
-        />
+        /> */}
       
-      <div className={styles.tableContainer}>
-        <Table 
-          columns={columns}
-          data={preparedAlarms}
-          onRowClick={handleAlarmClick}
-        />
-      </div>
+      { (preparedAlarms && preparedAlarms.length > 0) ? 
+        <div className={styles.tableContainer}>
+          <Table 
+            columns={columns}
+            data={preparedAlarms}
+            onRowClick={handleAlarmClick}
+          />
+        </div>
+      : (<p className={styles.description}>Este datalogger todavia no tiene alarmas, para agregar una primero tiene que elegir un canal.</p>)
+      }
     </>
   );
 };
