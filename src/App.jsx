@@ -27,7 +27,7 @@ const App = () => {
                   </PrivateRoute>
                 ) : (
                   route.element
-                )
+                )                
               }
             />
           ))}

@@ -16,10 +16,12 @@ const ButtonsBar = (props) => {
                 icon="plus-circle-solid.svg"
                 type="normal"
                 url={`/panel/${itemsName}/agregar`}
-            />
+            />      
+               
             : ''}
             {children}
             <span>Mostrando <strong>{itemsQty || "0"}</strong> {itemNameCleaned}</span>   
+            
         </div>
     )
 }

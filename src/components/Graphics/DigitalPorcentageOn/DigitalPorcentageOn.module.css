@@ -1,0 +1,20 @@
+.btn {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    background-color:#F6B510;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+.btn.active {
+    background-color: #815f09;
+    color: white;
+}
+
+.paragraph {
+    display: flex;
+    flex-direction: row;   
+    flex-wrap: wrap;     
+    padding: 0.5em;
+}

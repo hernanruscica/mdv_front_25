@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, data } from 'react-router-dom';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { Title1 } from '../../components/Title1/Title1';
@@ -11,8 +11,10 @@ import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import { useChannelsStore } from '../../store/channelsStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useAuthStore } from '../../store/authStore';
+import { useDataStore } from '../../store/dataStore';
 import styles from './ViewChannel.module.css';
 import cardInfoStyles from '../../components/CardInfo/CardInfo.module.css';
+import DigitalPorcentagesOn from '../../components/Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
 
 import Table from '../../components/Table/Table';
 
@@ -23,8 +25,10 @@ const ViewChannel = () => {
   const navigate = useNavigate();
   const user = useAuthStore(state => state.user);
   const { fetchAlarmsByUser, alarms, loadingStates: { fetchAlarmsByUser: isLoadingAlarms }, error: errorAlarms } = useAlarmsStore();
+  const { fetchDataChannel, dataChannel, loadingStates: {fetchData : isLoadingData} } = useDataStore();
   const [channelAlarms, setChannelAlarms] = useState([]);
   const [channelMainAlarm, setChannelMainAlarm] = useState(null); 
+  const hoursBackView = 120; // Define el valor por defecto o ajusta según tu lógica
 
   useEffect(() => {
     const loadChannel = async () => {
@@ -54,13 +58,39 @@ const ViewChannel = () => {
     }
   }, [alarms, currentChannel]);
 
-  if (isLoadingChannel || isLoadingAlarms) {
+  useEffect(() => {
+    const loadData = async () => {
+      if (currentChannel) {
+        // Ajusta los valores según tu lógica
+        console.log('canal:', currentChannel);
+        const nombreTabla = currentChannel.datalogger_nombre_tabla;
+        const nombreColumna = currentChannel.nombre_columna;
+        const minutosAtras = hoursBackView * 60; // Asegúrate de definir hoursBackView
+        const tiempoPromedio = currentChannel.tiempo_a_promediar;        
+        await fetchDataChannel(nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);
+      }
+    };
+    loadData();
+  }, [currentChannel]);
+
+  /*
+  useEffect(() => {
+    if (dataChannel) {
+      console.log('Datos del canal:', dataChannel);
+    }
+  }, [dataChannel]);
+  */
+
+  if (isLoadingChannel || isLoadingAlarms || isLoadingData) {
     return <LoadingSpinner message="Cargando detalles del canal..." />;
   }
 
   if (errorChannel || errorAlarms) {
     return <div className={styles.error}>{errorChannel || errorAlarms}</div>;
   }
+
+  //console.log('datos del canal:', dataChannel);
+  console.log('canal:', currentChannel);
 
   const channelButtons = (
     <>
@@ -144,7 +174,8 @@ const ViewChannel = () => {
             <p><strong>Condicion: </strong>{channelMainAlarm?.condicion}</p>
             <div className={styles.gaugePlaceholder}>
               {/* Placeholder para el gráfico gauge */}
-              <div className={styles.gaugeDemo}>Gauge Chart</div>
+              <div className={styles.gaugeDemo}>
+              </div>
             </div>
           </div>
         </CardInfo>
@@ -152,10 +183,16 @@ const ViewChannel = () => {
       </div>
 
       <div className={styles.chartContainer}>
-        {/* Placeholder para el gráfico de datos */}
+        {(dataChannel && dataChannel.length > 0) &&
+         <DigitalPorcentagesOn 
+          data={dataChannel}
+          currentChannelName={currentChannel?.nombre}
+          currentChannelTimeProm={currentChannel?.tiempo_a_promediar}                  
+        />}
+       {/* Placeholder para el gráfico de datos 
         <div className={styles.chartPlaceholder}>
           Gráfico de datos históricos
-        </div>
+        </div>*/}
       </div>
 
       <Title2 text="Alarmas Configuradas" type="alarmas"/>

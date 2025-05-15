@@ -17,6 +17,7 @@
     "crypto-js": "^4.2.0",
     "dotenv": "^16.5.0",
     "react": "^19.0.0",
+    "react-apexcharts": "^1.7.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
     "react-modal": "^3.16.3",

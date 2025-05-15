@@ -11,6 +11,7 @@ import { useDataloggersStore } from '../../store/dataloggersStore';
 import { useChannelsStore } from '../../store/channelsStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useLocationsStore } from '../../store/locationsStore';
+import { useDataStore } from '../../store/dataStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import styles from './ViewDatalogger.module.css';
 import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCards';
@@ -22,6 +23,7 @@ const ViewDatalogger = () => {
   const [dataloggerChannels, setDataloggerChannels] = useState([]);
   const { id } = useParams();
   const user = useAuthStore(state => state.user);
+  const { fetchDataChannel } = useDataStore();
   const navigate = useNavigate();
   
   const { 
@@ -54,6 +56,8 @@ const ViewDatalogger = () => {
 
   const [currentDatalogger, setCurrentDatalogger] = React.useState(null);
 
+  
+
   useEffect(() => {
     const loadDatalogger = async (id) => {
       const currentDatalogger = await fetchDataloggerById(id);   
@@ -71,22 +75,49 @@ const ViewDatalogger = () => {
   useEffect(() => {
     const loadData = async () => {      
       if (currentDatalogger) {        
-        await fetchChannels(user);        
-        await fetchAlarmsByLocation(currentDatalogger.ubicacion_id);        
+        const currentChannels = await fetchChannels(user);        
+        await fetchAlarmsByLocation(currentDatalogger.ubicacion_id);    
       }     
     };
     loadData();
   }, [currentDatalogger]); 
-
-  // Nuevo useEffect para manejar dataloggerChannels
+  
+  // Modifica el useEffect para manejar dataloggerChannels
   useEffect(() => {
-    if (currentDatalogger && channels) {
-      const filteredChannels = channels.filter(
-        channel => channel.datalogger_id === currentDatalogger.id
-      );
-      setDataloggerChannels(filteredChannels);
-    }
-  }, [currentDatalogger, channels]);
+    const loadData = async () => {
+      if (currentDatalogger && channels) {
+        // Filtra los canales para el datalogger actual
+        const filteredChannels = channels.filter(
+          channel => channel.datalogger_id === currentDatalogger.id
+        );        
+        // Busca los datos de cada canal
+        const channelsWithData = await Promise.all(
+          filteredChannels.map(async (channel) => {
+            const nombreTabla = currentDatalogger.nombre_tabla;
+            const nombreColumna = channel.nombre_columna;
+            const minutosAtras = 24 * 60; 
+            const tiempoPromedio = channel?.tiempo_a_promediar || 15; 
+            
+            const channelData = await fetchDataChannel(
+              nombreTabla,
+              nombreColumna,
+              minutosAtras,
+              tiempoPromedio
+            );
+            //console.log('nombreColumna',nombreColumna);
+            return {
+              ...channel,
+              data: channelData
+            };
+          })
+        );
+
+        setDataloggerChannels(channelsWithData);        
+      }
+    };
+    
+    loadData();
+  }, [currentDatalogger, channels.length, fetchDataChannel]);
 
   //     
   if (isLoadingChannels || isLoadingDatalogger || isLoadingAlarms) {
@@ -155,11 +186,9 @@ const ViewDatalogger = () => {
     condicion: alarm.condicion || 'Sin condición',
     canalId: alarm.canal_id,
     id: alarm.id  // Aquí está el cambio clave
-  }));
-  //console.log('dataloggersAlarms',dataloggerAlarms);
-  //console.log(currentDatalogger);
-  //console.log('dataloggerAlarms',dataloggerAlarms);
- // console.log('preparedAlarms',preparedAlarms);
+  }));  
+
+  console.log('dataloggerChannels',dataloggerChannels);
 
   return (
     <>

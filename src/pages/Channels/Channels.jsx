@@ -8,6 +8,7 @@ import { useChannelsStore } from '../../store/channelsStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCards';
+import { useDataStore } from '../../store/dataStore';
 
 const Channels = () => {
   const { dataloggerId } = useParams();
@@ -19,6 +20,7 @@ const Channels = () => {
   const { fetchDataloggerById, loadingStates: { fetchDatalogger: isLoadingDatalogger }, error: errorDatalogger } = useDataloggersStore();
   const { fetchChannels, channels, loadingStates: { fetchChannels: isLoadingChannels }, error: errorChannels } = useChannelsStore();
   const { fetchAlarmsByUser, alarms, loadingStates: { fetchAlarms: isLoadingAlarms }, error: errorAlarms } = useAlarmsStore();
+  const { fetchDataChannel } = useDataStore();
 
   useEffect(() => {
     const loadDatalogger = async () => {
@@ -61,6 +63,43 @@ const Channels = () => {
     }
   }, [alarms, currentDatalogger]);
 
+  useEffect(() => {
+    if (currentChannels.length > 0) { 
+      
+    }
+  }, [currentChannels]);
+
+  useEffect(() => {
+    const loadChannelsData = async () => {
+      if (currentChannels.length > 0 && currentDatalogger) {
+        const channelsWithData = await Promise.all(
+          currentChannels.map(async (channel) => {
+            const nombreTabla = currentDatalogger.nombre_tabla;
+            const nombreColumna = channel.nombre_columna;
+            const minutosAtras = 24 * 60; 
+            const tiempoPromedio = channel?.tiempo_a_promediar || 15; 
+            
+            const channelData = await fetchDataChannel(
+              nombreTabla,
+              nombreColumna,
+              minutosAtras,
+              tiempoPromedio
+            );
+            
+            return {
+              ...channel,
+              data: channelData
+            };
+          })
+        );
+        
+        setCurrentChannels(channelsWithData);
+      }
+    };
+    
+    loadChannelsData();
+}, [currentChannels.length, currentDatalogger, fetchDataChannel]);
+
   const isLoading = isLoadingDatalogger || isLoadingChannels || isLoadingAlarms;
   const hasError = errorDatalogger || errorChannels || errorAlarms;
 
@@ -72,7 +111,7 @@ const Channels = () => {
     return <div>Error: {errorDatalogger || errorChannels || errorAlarms}</div>
   }
 
-  //console.log(currentChannels)
+  console.log(currentChannels)
 
   return (
     <>

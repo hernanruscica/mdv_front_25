@@ -6,6 +6,8 @@ import SearchBar from '../SearchBar/SearchBar';
 import { getIconFileName } from "../../utils/iconsDictionary";
 import styles from './ShowChannelsCards.module.css';
 import cardInfoStyles from "../CardInfo/CardInfo.module.css";
+import DigitalPorcentageOn from '../Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
+import AnalogData from '../Graphics/AnalogData/AnalogData';
 
 const ShowChannelsCards = ({ 
   channels, 
@@ -30,6 +32,8 @@ const ShowChannelsCards = ({
       channel.canales_descripcion?.toLowerCase().includes(searchTermLower)      
     );
   });
+
+  //console.log(channels);
 
   return (
     <>
@@ -100,13 +104,30 @@ const ShowChannelsCards = ({
                 </p>
               </div>
             </div>
-            <div className={cardInfoStyles.cardGraphic}>
-              <div className={cardInfoStyles.graphicContainer}>
-                Graphic placeholder                
+            <div >
+              <div >               
+                {channel.data && channel.data.length > 0 ? (
+                  channel.nombre_columna.startsWith('d') ? (
+                    <DigitalPorcentageOn
+                      data={channel.data} 
+                      currentChannelName={channel?.canales_nombre}
+                      currentChannelTimeProm={channel?.tiempo_a_promediar} 
+                    />
+                  ) : channel.nombre_columna.startsWith('a') ? (
+                    <AnalogData
+                      data={channel.data}
+                      mult={channel.multiplicador} // Ajusta este valor según necesites
+                    />
+                  ) : (
+                    <p className={cardInfoStyles.noData}>Tipo de canal no soportado</p>
+                  )
+                ) : (
+                  <p className={cardInfoStyles.noData}>No hay datos disponibles</p>
+                )}
               </div>
-              <p className={cardInfoStyles.paragraph}>
+              {/* <p className={cardInfoStyles.paragraph}>
                 Este es el pie de pagina del grafico
-              </p>
+              </p> */}
             </div>
             </CardInfo>
           );
