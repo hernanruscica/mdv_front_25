@@ -25,6 +25,7 @@ const ViewDatalogger = () => {
   const user = useAuthStore(state => state.user);
   const { fetchDataChannel } = useDataStore();
   const navigate = useNavigate();
+  const hoursBackView = 120;
   
   const { 
     dataloggers, 
@@ -95,7 +96,7 @@ const ViewDatalogger = () => {
           filteredChannels.map(async (channel) => {
             const nombreTabla = currentDatalogger.nombre_tabla;
             const nombreColumna = channel.nombre_columna;
-            const minutosAtras = 24 * 60; 
+            const minutosAtras = hoursBackView * 60; 
             const tiempoPromedio = channel?.tiempo_a_promediar || 15; 
             
             const channelData = await fetchDataChannel(
@@ -188,7 +189,7 @@ const ViewDatalogger = () => {
     id: alarm.id  // Aquí está el cambio clave
   }));  
 
-  console.log('dataloggerChannels',dataloggerChannels);
+  //console.log('dataloggerChannels',dataloggerChannels);
 
   return (
     <>

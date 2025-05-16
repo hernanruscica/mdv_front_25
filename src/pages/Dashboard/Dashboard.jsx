@@ -33,6 +33,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Función para cargar datos si es necesario
+    /*
     const loadDataIfNeeded = () => {
       if (!users || users.length === 0) {
         fetchUsers(user);
@@ -43,7 +44,7 @@ const Dashboard = () => {
       if (!locations || locations.length === 0) {
         fetchLocations(user);
       }
-    };
+    };*/
 
     // Función para recargar todos los datos
     const reloadAllData = () => {
@@ -63,7 +64,8 @@ const Dashboard = () => {
     };
 
     // Carga inicial condicional
-    loadDataIfNeeded();
+    //loadDataIfNeeded();
+    //reloadAllData();
 
     // Configurar revalidación por foco
     window.addEventListener('focus', handleFocus);

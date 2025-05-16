@@ -21,6 +21,7 @@ const Channels = () => {
   const { fetchChannels, channels, loadingStates: { fetchChannels: isLoadingChannels }, error: errorChannels } = useChannelsStore();
   const { fetchAlarmsByUser, alarms, loadingStates: { fetchAlarms: isLoadingAlarms }, error: errorAlarms } = useAlarmsStore();
   const { fetchDataChannel } = useDataStore();
+  const hoursBackView = 120;
 
   useEffect(() => {
     const loadDatalogger = async () => {
@@ -76,7 +77,7 @@ const Channels = () => {
           currentChannels.map(async (channel) => {
             const nombreTabla = currentDatalogger.nombre_tabla;
             const nombreColumna = channel.nombre_columna;
-            const minutosAtras = 24 * 60; 
+            const minutosAtras = hoursBackView * 60; 
             const tiempoPromedio = channel?.tiempo_a_promediar || 15; 
             
             const channelData = await fetchDataChannel(
@@ -111,7 +112,7 @@ const Channels = () => {
     return <div>Error: {errorDatalogger || errorChannels || errorAlarms}</div>
   }
 
-  console.log(currentChannels)
+  //console.log(currentChannels)
 
   return (
     <>

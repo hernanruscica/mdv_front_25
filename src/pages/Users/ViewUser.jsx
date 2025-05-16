@@ -40,7 +40,7 @@ const ViewUser = () => {
     } else {      
       setCurrentUser(users.find(user => user.id === parseInt(userId)));
     }     
-  }, [userId]);
+  }, [users, userId]);
 
   // Nuevo efecto para cargar las alarmas cuando el usuario esté disponible
   useEffect(() => {

@@ -15,8 +15,11 @@ import { useDataStore } from '../../store/dataStore';
 import styles from './ViewChannel.module.css';
 import cardInfoStyles from '../../components/CardInfo/CardInfo.module.css';
 import DigitalPorcentagesOn from '../../components/Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
+import AnalogData from '../../components/Graphics/AnalogData/AnalogData';
+import Gauge from '../../components/Gauge/Gauge';
 
 import Table from '../../components/Table/Table';
+
 
 const ViewChannel = () => {
   const { dataloggerId, channelId } = useParams()
@@ -28,7 +31,7 @@ const ViewChannel = () => {
   const { fetchDataChannel, dataChannel, loadingStates: {fetchData : isLoadingData} } = useDataStore();
   const [channelAlarms, setChannelAlarms] = useState([]);
   const [channelMainAlarm, setChannelMainAlarm] = useState(null); 
-  const hoursBackView = 120; // Define el valor por defecto o ajusta según tu lógica
+  const hoursBackView = 120; 
 
   useEffect(() => {
     const loadChannel = async () => {
@@ -62,7 +65,7 @@ const ViewChannel = () => {
     const loadData = async () => {
       if (currentChannel) {
         // Ajusta los valores según tu lógica
-        console.log('canal:', currentChannel);
+        //console.log('canal:', currentChannel);
         const nombreTabla = currentChannel.datalogger_nombre_tabla;
         const nombreColumna = currentChannel.nombre_columna;
         const minutosAtras = hoursBackView * 60; // Asegúrate de definir hoursBackView
@@ -90,7 +93,7 @@ const ViewChannel = () => {
   }
 
   //console.log('datos del canal:', dataChannel);
-  console.log('canal:', currentChannel);
+  //console.log('canal:', currentChannel);
 
   const channelButtons = (
     <>
@@ -126,7 +129,7 @@ const ViewChannel = () => {
     id: alarm.id
   }));
 
-  //console.log(channelAlarms)
+  //console.log(dataChannel)
 
   return (
     <>
@@ -172,10 +175,24 @@ const ViewChannel = () => {
             <p><strong>Creado el:</strong> {new Date(channelMainAlarm?.fecha_creacion).toLocaleDateString()}</p>
             <p><strong>Descripcion: </strong>{channelMainAlarm?.descripcion}</p>
             <p><strong>Condicion: </strong>{channelMainAlarm?.condicion}</p>
-            <div className={styles.gaugePlaceholder}>
-              {/* Placeholder para el gráfico gauge */}
-              <div className={styles.gaugeDemo}>
-              </div>
+            <div className={styles.gaugePlaceholder}>              
+              {(channelMainAlarm.tipo_alarma == "PORCENTAJE_ENCENDIDO") ?
+                (() => {
+                  const conditionOperator = channelMainAlarm.condicion.split(" ")[1];
+                  const conditionValue = channelMainAlarm.condicion.split(" ")[2];  
+                  const max = (conditionOperator.includes(">")) ? conditionValue : 100;
+                  const min = (conditionOperator.includes("<")) ? conditionValue : 0;
+                  return (
+                    <Gauge 
+                      currentValue= {dataChannel && dataChannel.length > 0 ? dataChannel[dataChannel.length - 1][channelMainAlarm.nombre_variables] : 0}
+                      alarmMin={min}
+                      alarmMax={max}                              
+                    />
+                  )
+                })()
+                 : <strong>{`Ultimo valor medido : `}</strong>                
+              }        
+        
             </div>
           </div>
         </CardInfo>
@@ -183,16 +200,32 @@ const ViewChannel = () => {
       </div>
 
       <div className={styles.chartContainer}>
-        {(dataChannel && dataChannel.length > 0) &&
+       {/*  {(dataChannel && dataChannel.length > 0) &&
          <DigitalPorcentagesOn 
           data={dataChannel}
           currentChannelName={currentChannel?.nombre}
           currentChannelTimeProm={currentChannel?.tiempo_a_promediar}                  
-        />}
-       {/* Placeholder para el gráfico de datos 
-        <div className={styles.chartPlaceholder}>
-          Gráfico de datos históricos
-        </div>*/}
+        />}*/}
+       
+       {dataChannel && dataChannel.length > 0 ? (
+          currentChannel?.nombre_columna.startsWith('d') ? (
+            <DigitalPorcentagesOn
+              data={dataChannel} 
+              currentChannelName={currentChannel?.nombre}
+              currentChannelTimeProm={currentChannel?.tiempo_a_promediar} 
+            />
+          ) : currentChannel?.nombre_columna.startsWith('a') ? (
+            <AnalogData
+              data={dataChannel}
+              mult={currentChannel?.multiplicador} // Ajusta este valor según necesites
+            />
+          ) : (
+            <p className={cardInfoStyles.noData}>Tipo de canal no soportado</p>
+          )
+        ) : (
+          <p className={cardInfoStyles.noData}>No hay datos disponibles</p>
+        )}
+
       </div>
 
       <Title2 text="Alarmas Configuradas" type="alarmas"/>

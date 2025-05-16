@@ -14,7 +14,11 @@ export const locationsService = {
 
   update: async (locationId, locationData) => {
     try {
-      const { data } = await axiosClient.put(`/api/locations/${locationId}`, locationData);
+      const { data } = await axiosClient.put(`/api/locations/${locationId}`, locationData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       return data;
     } catch (error) {
       console.error('Update location error:', error);
