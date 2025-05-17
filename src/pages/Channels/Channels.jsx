@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import {Title1} from '../../components/Title1/Title1';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import { useDataloggersStore } from '../../store/dataloggersStore';
 import { useChannelsStore } from '../../store/channelsStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
@@ -120,14 +121,25 @@ const Channels = () => {
         type="canales"
         text={`Canales del datalogger "${currentDatalogger?.nombre || ''}""`}
       />
-      <Breadcrumb datalogger={currentDatalogger?.nombre || ''}/>
+      <Breadcrumb datalogger={currentDatalogger?.nombre || ''}/>   
+
+      {
+        (user?.espropietario === 1) && (
+          <BtnCallToAction
+            text="Agregar"
+            icon="plus-circle-solid.svg"
+            type="normal"
+            url={`/panel/dataloggers/${currentDatalogger?.id}/canales/agregar`}
+          />
+        )
+      }
 
       <ShowChannelsCards
         channels={currentChannels}
         alarms={currentAlarms}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        showAddButton={user?.espropietario === 1}
+        showAddButton={false}
       />
     </>
   );

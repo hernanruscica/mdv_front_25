@@ -10,7 +10,7 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
     const navigate = useNavigate();   
     const { user: userStore } = useAuthStore();
     const { createLocation, updateLocation, loadingStates } = useLocationsStore();
-    const [profileImage, setProfileImage] = useState(locationData?.foto || "default_location.png");
+    const [profileImage, setProfileImage] = useState("default_location.png");
     const [newImage, setNewImage] = useState("");
     
     const [location, setLocation] = useState({     

@@ -1,21 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Title1 } from "../../components/Title1/Title1";
-import  Breadcrumb  from "../../components/Breadcrumb/Breadcrumb";
+import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import { useAuthStore } from "../../store/authStore";
 import { useUsersStore } from "../../store/usersStore";
 import { useDataloggersStore } from "../../store/dataloggersStore";
 import { useLocationsStore } from "../../store/locationsStore";
 import { LoadingSpinner } from "../../components/LoadingSpinner/LoadingSpinner";
-import { filterEntitiesByStatus } from "../../utils/entityFilters";
 import styles from "./Dashboard.module.css";
 import CardInfo from '../../components/CardInfo/CardInfo';
 import cardInfoStyles from "../../components/CardInfo/CardInfo.module.css";
 import CardBtnSmall from "../../components/CardBtnSmall/CardBtnSmall";
-import {getIconFileName} from "../../utils/iconsDictionary";
-
+import { getIconFileName } from "../../utils/iconsDictionary";
 
 const Dashboard = () => {
-  const [showActiveOnly, setShowActiveOnly] = useState(true);
   const user = useAuthStore(state => state.user);
   const { users, isLoading: isLoadingUsers, error: usersError, fetchUsers } = useUsersStore();
   const { 
@@ -32,61 +29,21 @@ const Dashboard = () => {
   } = useLocationsStore();
 
   useEffect(() => {
-    // Función para cargar datos si es necesario
-    /*
-    const loadDataIfNeeded = () => {
-      if (!users || users.length === 0) {
-        fetchUsers(user);
-      }
-      if (!dataloggers || dataloggers.length === 0) {
-        fetchDataloggers(user);
-      }
-      if (!locations || locations.length === 0) {
-        fetchLocations(user);
-      }
-    };*/
-
-    // Función para recargar todos los datos
-    const reloadAllData = () => {
+    const loadData = () => {
       fetchUsers(user);
       fetchDataloggers(user);
       fetchLocations(user);
-      localStorage.setItem('dashboardLastUpdate', Date.now().toString());
     };
 
-    // Función para manejar el foco de la ventana
-    const handleFocus = () => {
-      const now = Date.now();
-      const lastUpdate = localStorage.getItem('dashboardLastUpdate');
-      if (!lastUpdate || now - parseInt(lastUpdate) > 300000) { // 5 minutos
-        reloadAllData();
-      }
-    };
-
-    // Carga inicial condicional
-    //loadDataIfNeeded();
-    //reloadAllData();
-
-    // Configurar revalidación por foco
-    window.addEventListener('focus', handleFocus);
-
-    // Configurar revalidación periódica
-    const interval = setInterval(reloadAllData, 300000); // 5 minutos
-
-    // Limpieza
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      clearInterval(interval);
-    };
-  }, [user, users, dataloggers, locations]);
+    loadData();
+    
+    // Recargar datos cada 5 minutos
+    const interval = setInterval(loadData, 300000);
+    return () => clearInterval(interval);
+  }, [user, fetchUsers, fetchDataloggers, fetchLocations]);
 
   const isLoading = isLoadingUsers || isLoadingDataloggers || isLoadingLocations;
   const error = usersError || dataloggersError || locationsError;
-
-  // Filter entities based on status
-  const activeUsers = filterEntitiesByStatus(users, showActiveOnly);
-  const activeDataloggers = filterEntitiesByStatus(dataloggers, showActiveOnly);
-  const activeLocations = filterEntitiesByStatus(locations, showActiveOnly);
 
   if (isLoading) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -98,10 +55,7 @@ const Dashboard = () => {
 
   return (
     <>      
-      <Title1 
-        type="panel"
-        text="Panel de Control" 
-      />
+      <Title1 type="panel" text="Panel de Control" />
       <Breadcrumb />      
       <div className={styles.cardsContainer}>
         <CardInfo
@@ -111,22 +65,15 @@ const Dashboard = () => {
         >
           <div className={cardInfoStyles.description}>
             <p className={cardInfoStyles.paragraph}>
-              <strong>
-              {activeUsers.length} Usuarios
-              </strong>{" "}
+              <strong>{users.length} Usuarios</strong>{" "}
               para ver o administrar, según los permisos de su usuario.
             </p>
-            {(user?.espropietario === 1) && (
+            {user?.espropietario === 1 && (
               <CardBtnSmall 
                 title='Agregar usuario'
                 url='/panel/usuarios/agregar'
               />
-            )}            
-            {user.espropietario === 1 && showActiveOnly && users?.length > activeUsers.length && (
-              <span className={styles.inactiveCount}>
-                ({users.length - activeUsers.length} inactivos)
-              </span>
-            )}  
+            )}
           </div>
         </CardInfo>
 
@@ -137,21 +84,14 @@ const Dashboard = () => {
         >
           <div className={cardInfoStyles.description}>
             <p className={cardInfoStyles.paragraph}>
-              <strong>
-                {activeLocations.length} Ubicaciones
-              </strong>{" "}
+              <strong>{locations.length} Ubicaciones</strong>{" "}
               para ver o administrar, según los permisos de su usuario.
             </p>
-            {(user?.espropietario === 1) && (
+            {user?.espropietario === 1 && (
               <CardBtnSmall 
                 title='Agregar ubicación'
                 url='/panel/ubicaciones/agregar'
               />
-            )}
-            {user.espropietario === 1 && showActiveOnly && locations?.length > activeLocations.length && (
-              <span className={styles.inactiveCount}>
-                ({locations.length - activeLocations.length} inactivas)
-              </span>
             )}
           </div>
         </CardInfo>
@@ -163,25 +103,17 @@ const Dashboard = () => {
         >
           <div className={cardInfoStyles.description}>
             <p className={cardInfoStyles.paragraph}>
-              <strong>
-                {activeDataloggers.length} Dataloggers
-              </strong>{" "}
+              <strong>{dataloggers.length} Dataloggers</strong>{" "}
               para ver o administrar, según los permisos de su usuario.
             </p>
-            {(user?.espropietario === 1) && (
+            {user?.espropietario === 1 && (
               <CardBtnSmall 
                 title='Agregar datalogger'
                 url='/panel/dataloggers/agregar'
               />
             )}
-            {user.espropietario === 1 && showActiveOnly && dataloggers?.length > activeDataloggers.length && (
-              <span className={styles.inactiveCount}>
-                ({dataloggers.length - activeDataloggers.length} inactivos)
-              </span>
-            )}
           </div>
         </CardInfo>
-
       </div>
     </>
   );

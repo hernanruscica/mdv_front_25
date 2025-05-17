@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const UserCreateForm = ({ userId, userData, isEditing }) => {
     const { user: userStore, userRoles } = useAuthStore();
-    const [profileImage, setProfileImage] = useState(userData?.foto || "default_avatar.png");
+    const [profileImage, setProfileImage] = useState("default_avatar.png");
     const [newImage, setNewImage] = useState("");
     const { 
         locationUsers, 

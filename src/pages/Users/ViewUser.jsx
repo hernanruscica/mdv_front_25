@@ -41,19 +41,25 @@ const ViewUser = () => {
       setCurrentUser(users.find(user => user.id === parseInt(userId)));
     }     
   }, [users, userId]);
-
-  // Nuevo efecto para cargar las alarmas cuando el usuario esté disponible
+  
+ // Efecto unificado para cargar y mantener actualizado el usuario
   useEffect(() => {
     const loadData = async () => {
-      if (currentUser) {
-        await fetchAlarmsByUser(currentUser); 
-        await fetchLocationUsers(currentUser);
-        await fetchDataloggers(currentUser);
+      // Siempre obtener el usuario actualizado del servidor
+      const updatedUser = await fetchUserById(userId);
+      setCurrentUser(updatedUser);
+      
+      if (updatedUser) {
+        await Promise.all([
+          fetchAlarmsByUser(updatedUser),
+          fetchLocationUsers(updatedUser),
+          fetchDataloggers(updatedUser)
+        ]);
       }
     };
 
     loadData();
-  }, [currentUser]); // Se ejecutará cuando currentUser cambie
+  }, [userId, fetchUserById]);
 
   if (isLoadingUsers ||  isLoadingLocations || isLoadingDataloggers) {
     return <LoadingSpinner message="Cargando datos..." />;

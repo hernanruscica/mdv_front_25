@@ -102,7 +102,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
     if (error) {
         return <div>Error al cargar las ubicaciones: {error}</div>;
     }
-    //console.log(dataloggerData)
+   console.log(dataloggerData)
     return (        
         <form onSubmit={handleSubmit} className={stylesForms.form}>
             <CardImageLoadingPreview
