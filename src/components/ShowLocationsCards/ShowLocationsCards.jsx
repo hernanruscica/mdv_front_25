@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CardInfo from '../CardInfo/CardInfo';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import ButtonsBar from '../ButtonsBar/ButtonsBar';
@@ -6,6 +6,7 @@ import SearchBar from '../SearchBar/SearchBar';
 import { getIconFileName } from "../../utils/iconsDictionary";
 import styles from './ShowLocationsCards.module.css';
 import cardInfoStyles from "../CardInfo/CardInfo.module.css";
+import CustomTag from '../CustomTag/CustomTag';
 
 const ShowLocationsCards = ({ 
   locations, 
@@ -14,14 +15,21 @@ const ShowLocationsCards = ({
   onSearchChange,
   showAddButton = false 
 }) => {
+  const [showArchived, setShowArchived] = useState(false);
+
   const filteredLocations = locations.filter(location => {
     const searchTermLower = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       location.ubicaciones_nombre.toLowerCase().includes(searchTermLower) ||
       location.ubicaciones_descripcion?.toLowerCase().includes(searchTermLower) ||
       location.ubicaciones_calle.toLowerCase().includes(searchTermLower) ||
       location.ubicaciones_email.toLowerCase().includes(searchTermLower)
     );
+
+    // Filtrar por estado - Corregido para usar el campo 'estado'
+    const matchesStatus = showArchived ? true : location.estado !== 0;
+
+    return matchesSearch && matchesStatus;
   });
 
   return (
@@ -32,11 +40,23 @@ const ShowLocationsCards = ({
           itemsQty={filteredLocations.length}
           showAddButton={showAddButton}
         >
-          <SearchBar
-            searchTerm={searchTerm}
-            onSearchChange={onSearchChange}
-            placeholder="Buscar ubicaciones..."
-          />
+          <div className={styles.controls}>
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchChange={onSearchChange}
+              placeholder="Buscar ubicaciones..."
+            />
+            {showAddButton && (
+            <label className={styles.checkboxContainer}>
+              <input
+                type="checkbox"
+                checked={showArchived}
+                onChange={(e) => setShowArchived(e.target.checked)}
+              />
+              <span>Mostrar tambien las archivadas</span>
+            </label>
+            )}
+          </div>
         </ButtonsBar>
       </div>
 
@@ -54,6 +74,15 @@ const ShowLocationsCards = ({
               url={`/panel/ubicaciones/${location.ubicaciones_id}`}   
             >
               <div className={cardInfoStyles.description}>
+                {
+                  (location.estado === 0) && (
+                    <CustomTag
+                      text="Archivado"
+                      type="archive"
+                      icon="/icons/archive-solid.svg"
+                    />
+                  )
+                }
                 <p className={cardInfoStyles.paragraph}>                 
                   {location.ubicaciones_descripcion}                  
                 </p>

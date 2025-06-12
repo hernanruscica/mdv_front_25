@@ -3,6 +3,7 @@
 }
 
 .cardsContainer {
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
@@ -31,4 +32,36 @@
   color: #666;
   font-style: italic;
   margin: 0.5rem 0;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.checkboxContainer input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .checkboxContainer {
+    margin-top: 0.5rem;
+  }
 }

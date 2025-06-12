@@ -14,6 +14,7 @@ import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import { filterEntitiesByStatus } from '../../utils/entityFilters';
 import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
+import CustomTag from '../../components/CustomTag/CustomTag';
 
 const ViewUser = () => {  
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,7 +75,8 @@ const ViewUser = () => {
   //console.log('dataloggers para el usuario', dataloggers?.length);
 
   const userButtons = (
-    <>
+    currentUser?.estado == '1' ? 
+    (<>
       <BtnCallToAction
         text="Editar"
         icon="edit-regular.svg"
@@ -87,7 +89,21 @@ const ViewUser = () => {
         type="danger"
         url={`/panel/usuarios/${currentUser?.id}/archivar`}
       />
-    </>
+    </>):
+    (<>
+      <BtnCallToAction
+        text="Desarchivar"
+        icon="archive-solid.svg"        
+        url={`/panel/usuarios/${currentUser?.id}/desarchivar`}
+      />
+      <BtnCallToAction
+        text="Eliminar"
+        icon="trash-alt-regular.svg"
+        type="danger"
+        url={`/panel/usuarios/${currentUser?.id}/eliminar`}
+      />
+    </>)
+
   );
 
   const activeLocations = filterEntitiesByStatus(locationUsers);
@@ -108,6 +124,10 @@ const ViewUser = () => {
             buttons={userButtons}
           >
             <div className={styles.userInfo}>
+               {
+                currentUser.estado == '0' &&
+                (<CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />)
+                }
               <p><strong>DNI:</strong> {currentUser.dni}</p>
               <p><strong>Email:</strong> {currentUser.email}</p>
               <p><strong>Teléfono:</strong> {currentUser.telefono}</p>

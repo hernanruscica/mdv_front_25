@@ -17,6 +17,7 @@ import styles from './ViewDatalogger.module.css';
 import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCards';
 import Table from '../../components/Table/Table';
 import { useNavigate } from 'react-router-dom';
+import CustomTag from '../../components/CustomTag/CustomTag';
 
 const ViewDatalogger = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,7 +77,7 @@ const ViewDatalogger = () => {
   useEffect(() => {
     const loadData = async () => {      
       if (currentDatalogger) {        
-        const currentChannels = await fetchChannels(user);        
+        //const currentChannels = await fetchChannels(user);        
         await fetchAlarmsByLocation(currentDatalogger.ubicacion_id);    
       }     
     };
@@ -149,22 +150,36 @@ const ViewDatalogger = () => {
   const channelCounts = getChannelCounts();
   const dataloggerAlarms = alarms?.filter(alarm => alarm.datalogger_id === currentDatalogger?.id) || [];
 
-  const dataloggerButtons = (
-    <>
-      <BtnCallToAction
-        text="Editar"
-        icon="edit-regular.svg"
-        type="warning"
-        url={`/panel/dataloggers/${currentDatalogger?.id}/editar`}
-      />
-      <BtnCallToAction
-        text="Archivar"
-        icon="archive-solid.svg"
-        type="danger"
-        url={`/panel/dataloggers/${currentDatalogger?.id}/archivar`}
-      />
-    </>
-  );
+  const dataloggerButtons =     
+      (currentDatalogger?.estado == '1') ?
+      (<>
+        <BtnCallToAction
+          text="Editar"
+          icon="edit-regular.svg"
+          type="warning"
+          url={`/panel/dataloggers/${currentDatalogger?.id}/editar`}
+        />
+        <BtnCallToAction
+          text="Archivar"
+          icon="archive-solid.svg"
+          type="danger"
+          url={`/panel/dataloggers/${currentDatalogger?.id}/archivar`}
+        />
+      </>) :
+      (<>
+          <BtnCallToAction
+            text="Desarchivar"
+            icon="save-regular.svg"          
+            url={`/panel/dataloggers/${currentDatalogger?.id}/desarchivar`}
+          />
+          <BtnCallToAction
+            text="Eliminar"
+            icon="trash-alt-regular.svg"
+            type="danger"
+            url={`/panel/dataloggers/${currentDatalogger?.id}/eliminar`}
+          />
+      </>) ;
+  
 
   const getChannelName = (channelId) => {
     const channel = channels?.find(ch => ch.canales_id === channelId);
@@ -204,6 +219,10 @@ const ViewDatalogger = () => {
         buttons={dataloggerButtons}
       >
         <div className={styles.dataloggerInfo}>
+          {
+            currentDatalogger.estado == '0' &&
+            (<CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />)
+            }
           <p className={styles.description}>{currentDatalogger.descripcion}</p>
           <p><strong>MAC:</strong> {currentDatalogger.direccion_mac}</p>
           <p><strong>Ubicación:</strong> {
@@ -258,14 +277,7 @@ const ViewDatalogger = () => {
       <Title2 
         text={`Alarmas programadas en ${currentDatalogger.nombre}`}
         type="alarmas"
-      />      
-      
-      {/* <BtnCallToAction
-            text={`Ver ${dataloggerAlarms.length} alarmas`}
-            icon="bell-regular.svg"
-            type="normal"
-            url={`/panel/dataloggers/${currentDatalogger.id}/alarmas`}
-        /> */}
+      />         
       
       { (preparedAlarms && preparedAlarms.length > 0) ? 
         <div className={styles.tableContainer}>

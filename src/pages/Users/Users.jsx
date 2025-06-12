@@ -40,43 +40,37 @@ const Users = () => {
 
   if (isLoading || !users || !locationUsers) {
     return <LoadingSpinner message="Cargando usuarios..." />;
-  }
+  } 
 
   if (error) {
     return <div className={styles.error}>{error}</div>;
-  }
+  }  
 
-  const activeUsers = filterEntitiesByStatus(users);
 
-  const getUserLocations = (userId) => {
-    if (!locationUsers) return 'Sin ubicación';
-    const userLocations = locationUsers.filter(lu => lu.usuarios_id === userId);
-    return userLocations.map(lu => lu.ubicaciones_nombre).join(', ') || 'Sin ubicación';
-  };
-
-  const filteredUsers = activeUsers.filter(user => {
-    const searchTermLower = searchTerm.toLowerCase();
-    return (
-      user.nombre_1?.toLowerCase().includes(searchTermLower) ||
-      user.apellido_1?.toLowerCase().includes(searchTermLower)
-    );
-  });
+//habria que poner un check para mostrar ademas los usuarios archivados
+  //const activeUsers = filterEntitiesByStatus(users);
+ 
 
   const columns = [
     { 
       label: 'NOMBRE Y APELLIDO', 
       accessor: 'nombreCompleto',
-      icon: '/icons/user-regular.svg' // Icono por defecto para usuarios
+      icon: '/icons/user-regular.svg' 
     },
     { 
       label: 'CORREO ELECTRONICO', 
       accessor: 'email',
-      icon: '/icons/envelope-regular.svg' // Icono por defecto para email
-    },
+      icon: '/icons/envelope-regular.svg' 
+    },    
     { 
       label: 'UBICACION/ES', 
       accessor: 'ubicaciones',
-      icon: '/icons/building-regular.svg' // Icono por defecto para ubicaciones
+      icon: '/icons/building-regular.svg' 
+    },   
+    { 
+      label: 'ESTADO', 
+      accessor: 'estado',
+      icon: '/icons/eye-regular.svg' 
     }
   ];
 
@@ -84,12 +78,15 @@ const Users = () => {
     navigate(`/panel/usuarios/${row.id}`);
   };
 
-  const preparedData = filteredUsers.map(user => ({
-    nombreCompleto: `${user.nombre_1} ${user.apellido_1}`,
-    email: user.email,
-    ubicaciones: getUserLocations(user.id),
-    id: user.id
+  const preparedData = users.map(user => ({
+    nombreCompleto: user.usuario_nom_apell,
+    email: user.email,    
+    ubicaciones: user.ubicaciones.map(ubi => ubi.ubicaciones_nombre).join(', '),
+    id: user.id,
+    estado: user.estado
   }));
+
+  console.log('user', users[0])
 
   return (
     <>

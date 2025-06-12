@@ -81,13 +81,20 @@ export const useLocationsStore = create((set, get) => ({
     }
   },
   // Obtener todas las ubicaciones
-  fetchLocations: async () => {
+  fetchLocations: async (user) => {
+    //console.log('Fetching locations for user:', user);
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchLocations: true }
     }));
     try {
-      const locations = await locationsService.getAll();
-      set({ locations, error: null });
+      if (user && user.espropietario == '1'){
+        //console.log('Fetching all locations for owner');
+        const locations = await locationsService.getAll();
+        set({ locations, error: null });
+      }else{
+        const locations = await locationsService.getAllById(user.id);
+        set({ locations, error: null });
+      }
     } catch (error) {
       set({ error: error.message });
     } finally {
@@ -105,6 +112,7 @@ export const useLocationsStore = create((set, get) => ({
     try {
       const location = await locationsService.getById(locationId);
       set({ selectedLocation: location, error: null });
+      return location;
     } catch (error) {
       set({ error: error.message });
     } finally {

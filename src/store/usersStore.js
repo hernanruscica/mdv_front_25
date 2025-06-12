@@ -12,10 +12,18 @@ export const useUsersStore = create((set, get) => ({
     
     set({ isLoading: true, error: null });
     try {
-      const users = currentUser.espropietario === 1 
-        ? await usersService.getAll()
-        : await usersService.getAllById(currentUser.id);
-        
+      const users = currentUser.espropietario === 1       
+      ? await usersService.getAll()
+      : await usersService.getAllById(currentUser.id);
+      
+      /* Ahora uso un solo endpoint para obtener los usuarios asignados al usuario actual, propietario o no.
+      
+      const users = await usersService.getAllById(currentUser.id);
+      if (!users) { /api/locationsusers
+      set({ error: 'No users found', isLoading: false });
+      return;
+    }  
+    */
       set({ users, isLoading: false });
     } catch (error) {
       set({ error: 'Error fetching users', isLoading: false });

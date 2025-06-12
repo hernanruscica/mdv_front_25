@@ -27,3 +27,7 @@
 .navbarBtn--danger {
     background-color: #DE6528;
 }
+
+.navbarBtn--success {
+    background-color: #28a745;
+}

@@ -27,7 +27,8 @@ const ViewChannel = () => {
   const { fetchChannelById, loadingStates: { fetchChannel: isLoadingChannel }, errorChannel } = useChannelsStore();
   const navigate = useNavigate();
   const user = useAuthStore(state => state.user);
-  const { fetchAlarmsByUser, alarms, loadingStates: { fetchAlarmsByUser: isLoadingAlarms }, error: errorAlarms } = useAlarmsStore();
+  const { fetchAlarmsByUser, fetchAlarmsByChannel, alarms, 
+        loadingStates: { fetchAlarmsByUser: isLoadingAlarmsByUser, fetchAlarmsByChannel : isLoadingAlarmsByChannel }, error: errorAlarms } = useAlarmsStore();
   const { fetchDataChannel, dataChannel, loadingStates: {fetchData : isLoadingData} } = useDataStore();
   const [channelAlarms, setChannelAlarms] = useState([]);
   const [channelMainAlarm, setChannelMainAlarm] = useState(null); 
@@ -47,7 +48,8 @@ const ViewChannel = () => {
   useEffect(() => {
     const loadAlarms = async () => {
       if (user && currentChannel) {
-        await fetchAlarmsByUser(user);
+        //await fetchAlarmsByUser(user);
+        await fetchAlarmsByChannel(currentChannel.id);
       }
     };
     loadAlarms();
@@ -84,8 +86,8 @@ const ViewChannel = () => {
   }, [dataChannel]);
   */
 
-  if (isLoadingChannel || isLoadingAlarms || isLoadingData) {
-    return <LoadingSpinner message="Cargando detalles del canal..." />;
+  if (isLoadingChannel || isLoadingAlarmsByUser || isLoadingAlarmsByChannel || isLoadingData) {
+    return <LoadingSpinner message="Cargando datos..." />;
   }
 
   if (errorChannel || errorAlarms) {
@@ -93,7 +95,7 @@ const ViewChannel = () => {
   }
 
   //console.log('datos del canal:', dataChannel);
-  //console.log('canal:', currentChannel);
+  //console.log('alarmas del canal:', alarms);
 
   const channelButtons = (
     <>
@@ -113,10 +115,32 @@ const ViewChannel = () => {
   );
 
   const columns = [
-    { label: 'NOMBRE DE LA ALARMA', accessor: 'nombreAlarma' },
-    { label: 'NOMBRE DEL CANAL', accessor: 'nombreCanal' },
-    { label: 'CONDICIÓN', accessor: 'condicion' }
-  ];
+    { 
+      label: 'NOMBRE ALARMA', 
+      accessor: 'nombreAlarma',
+      icon: '/icons/bell-regular.svg'
+    },
+    { 
+      label: 'CANAL', 
+      accessor: 'canal',
+      icon: '/icons/code-branch-solid.svg'
+    },
+    { 
+      label: 'TIPO', 
+      accessor: 'tipo',
+      icon: '/icons/flag-regular.svg'
+    },
+    { 
+      label: 'CONDICION', 
+      accessor: 'condicion',
+      icon: '/icons/building-regular.svg'
+    },   
+    { 
+      label: 'ESTADO', 
+      accessor: 'estado',
+      icon: '/icons/eye-regular.svg' 
+    }
+  ];  
 
   const handleAlarmClick = (row) => {
     navigate(`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/alarmas/${row.id}`);
@@ -124,8 +148,11 @@ const ViewChannel = () => {
 
   const preparedAlarms = channelAlarms.map(alarm => ({
     nombreAlarma: alarm.nombre,
-    nombreCanal: currentChannel?.nombre || 'Canal no encontrado',
+    canal: alarm?.canal_nombre || 'Sin canal',
+    tipo: alarm.tipo_alarma,  
     condicion: alarm.condicion || 'Sin condición',
+    estado: alarm.estado,
+    url: `/panel/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${alarm.id}`,  
     id: alarm.id
   }));
 

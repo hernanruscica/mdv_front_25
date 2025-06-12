@@ -14,6 +14,7 @@ import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardImage from '../../components/CardImage/CardImage';
 import Table from '../../components/Table/Table';
 import styles from './ViewAlarm.module.css';
+import CustomTag from '../../components/CustomTag/CustomTag';
 
 
 const ViewAlarm = () => {
@@ -155,21 +156,34 @@ const ViewAlarm = () => {
   }
 
   const alarmButtons = (
-    <>
+    (currentAlarm.estado == '1') ?
+    (<>
       <BtnCallToAction
         text="Editar"
         icon="edit-regular.svg"
-        type="warning"
-        // url={`/panel/dataloggers/${currentAlarm?.datalogger_id}/canales/${currentAlarm?.canal_id}/alarmas/${currentAlarm?.alarma_id}/edicion`}
+        type="warning"        
         url={`${location.pathname}/editar`}
       />
       <BtnCallToAction
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
-        url={`${location.pathname}/eliminar`}
+        url={`/panel/alarmas/${currentAlarm.id}/archivar`}
       />
-    </>
+    </>):
+    (<>
+      <BtnCallToAction
+        text="Desarchivar"
+        icon="save-regular.svg"
+        url={`/panel/alarmas/${currentAlarm.id}/desarchivar`}
+      />
+      <BtnCallToAction
+        text="Eliminar"
+        icon="trash-alt-regular.svg"
+        type="danger"
+        url={`/panel/alarmas/${currentAlarm.id}/eliminar`}
+      />
+      </>)
   );
 
   const columns = [
@@ -189,7 +203,7 @@ const ViewAlarm = () => {
     mensaje: log.mensaje
   }));
 
-  console.log(currentChannel)
+  //console.log(currentChannel)
 
   return (
     <>
@@ -201,7 +215,7 @@ const ViewAlarm = () => {
         usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
         ubicacion={selectedLocation?.nombre}
         datalogger={currentDatalogger?.nombre}
-        canal={currentChannel?.canales_nombre}
+        canal={(currentChannel?.nombre) ? currentChannel?.nombre : currentChannel?.canales_nombre}
         alarma={currentAlarm.nombre}
       />
       <CardImage
@@ -210,6 +224,10 @@ const ViewAlarm = () => {
         buttons={alarmButtons}
       >
         <div className={styles.alarmInfo}>
+          {
+            currentAlarm?.estado == '0' &&
+            (<CustomTag text="Archivada" type="archive" icon="/icons/archive-solid.svg" />)
+            }
           <p><strong>Nombre:</strong> {currentAlarm.nombre}</p>
           <p><strong>Condición:</strong> {currentAlarm.condicion}</p>
           <p><strong>Estado:</strong> {currentAlarm.estado ? 'Activa' : 'Inactiva'}</p>

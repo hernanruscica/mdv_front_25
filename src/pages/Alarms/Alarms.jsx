@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import {Title1} from '../../components/Title1/Title1';
@@ -54,25 +54,45 @@ const Alarms = () => {
       icon: '/icons/code-branch-solid.svg'
     },
     { 
+      label: 'TIPO', 
+      accessor: 'tipo',
+      icon: '/icons/flag-regular.svg'
+    },
+    { 
       label: 'CONDICION', 
       accessor: 'condicion',
       icon: '/icons/building-regular.svg'
+    },   
+    { 
+      label: 'ESTADO', 
+      accessor: 'estado',
+      icon: '/icons/eye-regular.svg' 
     }
   ];
 
   const handleRowClick = (row) => {    
     navigate(row.url);
   };  
-
-  // Efecto para cargar datos iniciales
+  
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchInitialData = async () => {      
       try {
-        if (userId) {
-          const userResult = await fetchUserById(userId);
+        
+        if (userId) {                    
+          const userResult = await fetchUserById(userId);          
           if (userResult) {
-            setCurrentUser(userResult);
-            await fetchAlarmsByUser(userResult);
+            setCurrentUser(userResult);            
+          }
+          await fetchAlarmsByUser(userId);          
+        }    
+        
+        if (locationId) {
+          //console.log(`Fetching alarms for location Id: ${locationId}`);
+          const locationResult = await fetchLocationById(locationId);
+          //console.log('Location result:', locationResult);
+          if (locationResult) {
+            setCurrentLocation(locationResult);
+            await fetchAlarmsByLocation(locationId);
           }
         }
         
@@ -93,52 +113,50 @@ const Alarms = () => {
           }
         }
 
-        if (locationId) {
-          const locationResult = await fetchLocationById(locationId);
-          if (locationResult) {
-            setCurrentLocation(locationResult);
-            await fetchAlarmsByLocation(locationId);
-          }
-        }
+        
       } catch (error) {
         console.error('Error al cargar datos:', error);
       }
     };
 
     fetchInitialData();
-  }, [userId, dataloggerId, locationId, channelId, user]);
+  }, [userId, dataloggerId, locationId, channelId, user, fetchUserById, fetchAlarmsByUser, fetchAlarms]);
 
-  const preparedData = useMemo(() => {
+  const getTableData = () => {
     if (!alarms?.length) return [];
 
     let baseUrl;
+    let filteredAlarms = alarms;
+
+    // Determinar la URL base según el contexto
     if (userId) {
-      baseUrl = `/panel/usuarios/${currentUser?.id}/alarmas`;
+      baseUrl = `/panel/usuarios/${userId}/alarmas`;
     } else if (dataloggerId && channelId) {
       baseUrl = `/panel/dataloggers/${currentDatalogger?.id}/canales/${currentChannel?.id}/alarmas`;
+      // Filtrar alarmas por datalogger y canal
+      filteredAlarms = alarms.filter(alarm => 
+        alarm.datalogger_id === parseInt(dataloggerId) && 
+        alarm.canal_id === parseInt(channelId)
+      );
     } else if (locationId) {
-      baseUrl = `/panel/ubicaciones/${selectedLocation?.id}/alarmas`;
-    } else if (channelId) {
-      baseUrl = `/panel/dataloggers/${currentDatalogger?.id}/alarmas`;      
-    }
-
-    let filteredAlarms = alarms;
-    
-    if (dataloggerId) {
-      filteredAlarms = alarms.filter(alarm => alarm.datalogger_id === currentDatalogger?.id);
-      
-      if (channelId && currentChannel) {        
-        filteredAlarms = filteredAlarms.filter(alarm => alarm.canal_id === currentChannel.id);
-      }
+      baseUrl = `/panel/ubicaciones/${locationId}/alarmas`;
+    } else {
+      baseUrl = `/panel/dataloggers/${dataloggerId}/alarmas`;
+      // Filtrar alarmas solo por datalogger
+      filteredAlarms = alarms.filter(alarm => 
+        alarm.datalogger_id === parseInt(dataloggerId)
+      );
     }
 
     return filteredAlarms.map(alarm => ({
       nombreAlarma: alarm.nombre,
-      canal: alarm.canal_nombre,
+      canal: alarm?.canal_nombre || 'Sin canal',
+      tipo: alarm.tipo_alarma,         
       condicion: alarm.condicion,
-      url: `${baseUrl}/${alarm.id}`
+      estado: alarm.estado,
+      url: `${baseUrl}/${alarm.id}`      
     }));
-  }, [alarms, userId, dataloggerId, locationId, channelId, currentUser, currentDatalogger, currentLocation, currentChannel]);
+  };
 
   if (isLoading) {
     let loadingMessage = 'Cargando datos';
@@ -150,7 +168,8 @@ const Alarms = () => {
     
     return <LoadingSpinner message={loadingMessage} />;
   }   
-  //console.log(selectedLocation)
+  //console.log(`userId: ${userId}`, locationId, dataloggerId, channelId);
+  console.log( alarms);
 
   return (
     <>
@@ -166,7 +185,7 @@ const Alarms = () => {
       />
       <Table 
         columns={columns}
-        data={preparedData}
+        data={getTableData()}
         onRowClick={handleRowClick}
       />
     </>

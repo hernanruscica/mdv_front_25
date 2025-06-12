@@ -5,7 +5,6 @@ import { useAuthStore } from '../../store/authStore';
 import { useLocationsStore } from '../../store/locationsStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
-import { filterEntitiesByStatus } from '../../utils/entityFilters';
 import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
 
 const Locations = () => {
@@ -14,7 +13,7 @@ const Locations = () => {
   
   const { 
     locations, 
-    loadingStates: { fetchLocations: isLoading }, 
+    loadingStates: { fetchLocations: isLoadingLocations }, 
     error,
     fetchLocations 
   } = useLocationsStore();
@@ -26,24 +25,23 @@ const Locations = () => {
   } = useDataloggersStore();
 
   useEffect(() => {
-    if (!dataloggers || dataloggers.length === 0) {
-      fetchDataloggers(user);      
+    const fetchData = async () => {
+      if (user) {
+        await fetchLocations(user);
+        await fetchDataloggers(user);
+      }
     }
-    if (!locations || locations.length === 0) {
-      fetchLocations(user);
-    }
+    fetchData();
+    
   }, [user]);
 
-  if (isLoading || isLoadingDataloggers) {
+  if (isLoadingLocations || isLoadingDataloggers) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
   if (error) {
     return <div className={styles.error}>{error}</div>;
   }
-
-  const activeLocations = filterEntitiesByStatus(locations);
-  const activeDataloggers = filterEntitiesByStatus(dataloggers);
 
   return (
     <>
@@ -53,8 +51,8 @@ const Locations = () => {
         text="Ubicaciones" 
       />
       <ShowLocationsCards
-        locations={activeLocations}
-        dataloggers={activeDataloggers}
+        locations={locations}
+        dataloggers={dataloggers}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         showAddButton={user.espropietario === 1}

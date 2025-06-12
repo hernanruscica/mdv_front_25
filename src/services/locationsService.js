@@ -48,7 +48,7 @@ export const locationsService = {
   getAllById: async (userId) => {
     try {
       const { data } = await axiosClient.get(`/api/locationsusers/locationsbyuser/${userId}`);
-      return data.locations;
+      return data.locationUserData;
     } catch (error) {
       console.error('Get assigned locations error:', error);
       return null;
@@ -57,7 +57,7 @@ export const locationsService = {
 
   getById: async (locationId) => {
     try {
-      const { data } = await axiosClient.get(`/api/locations/${locationId}`);
+      const { data } = await axiosClient.get(`/api/locations/${locationId}`);      
       return data.location;
     } catch (error) {
       console.error('Get location by id error:', error);

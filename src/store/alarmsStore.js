@@ -33,21 +33,22 @@ export const useAlarmsStore = create((set) => ({
       }));
     }
   },
-  fetchAlarmsByUser: async (currentUser) => {
-    //console.log("desde el store alarm:", currentUser)
-    if (!currentUser) return;
+  fetchAlarmsByUser: async (userId) => {
+    //console.log("desde el store alarm:", userId)
+    if (!userId) return;
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchAlarmsByUser: true },
       error: null
     }));
 
     try {
-      const alarms =  await alarmsService.getAllById(currentUser.id);
+      const alarms =  await alarmsService.getAllById(userId);
         
       set(state => ({
         alarms,
         loadingStates: { ...state.loadingStates, fetchAlarmsByUser: false }
       }));
+      return alarms;
     } catch (error) {
       set(state => ({
         error: 'Error fetching alarms by User',
@@ -57,6 +58,7 @@ export const useAlarmsStore = create((set) => ({
   },
   
   fetchAlarmsByLocation: async (locationId) => {
+    //console.log('Fetching alarms by location:', locationId);
     if (!locationId) return;
     
     set(state => ({
@@ -66,7 +68,7 @@ export const useAlarmsStore = create((set) => ({
 
     try {
       const alarms = await alarmsService.getAllByLocation(locationId);
-      
+      //console.log('Alarms by location:', alarms);
       set(state => ({
         alarms,
         loadingStates: { ...state.loadingStates, fetchAlarms: false }
@@ -154,5 +156,29 @@ export const useAlarmsStore = create((set) => ({
       }));
       throw error;
     }
-  }
+  },
+  
+  fetchAlarmsByChannel: async (channelId) => {
+    if (!channelId) return;
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchAlarmsByChannel: true },
+      error: null
+    }));
+
+    try {
+      const alarms = await alarmsService.getAllByChannel(channelId);
+      console.log('Alarms by channel:', alarms);
+      set(state => ({
+        alarms,
+        loadingStates: { ...state.loadingStates, fetchAlarmsByChannel: false }
+      }));
+      return alarms;
+    } catch (error) {
+      set(state => ({
+        error: 'Error fetching channel alarms',
+        loadingStates: { ...state.loadingStates, fetchAlarmsByChannel: false }
+      }));
+    }
+  },
 }));

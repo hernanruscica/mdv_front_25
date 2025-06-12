@@ -32,6 +32,7 @@ const Login = () => {
 
     try {
       const isLoggedIn = await login(username, password);    
+      console.log('isLoggedIn:', isLoggedIn);
       if (isLoggedIn) {
         toast.success('Credenciales correctas');
         navigate('/');

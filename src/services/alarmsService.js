@@ -14,6 +14,7 @@ export const alarmsService = {
   getAllById: async (userId) => {
     try {
       const { data } = await axiosClient.get(`/api/alarmusers/alarmsbyuser/${userId}`);
+      //console.log('Alarms by user:', data);
       return data.alarms;
     } catch (error) {
       console.error('Get assigned alarms error:', error);
@@ -24,6 +25,19 @@ export const alarmsService = {
   getAllByLocation: async (locationId) => {
     try {
       const { data } = await axiosClient.get(`/api/alarms/bylocation/${locationId}`);
+      //console.log('data.alarms', data.alarms)
+      return data.alarms;
+    } catch (error) {
+      console.error('Get location alarms error:', error);
+      return null;
+    }
+  },
+
+  ///api/alarms/bychannel
+  getAllByChannel: async (channelId) => {
+    try {
+      const { data } = await axiosClient.get(`/api/alarms/bychannel/${channelId}`);
+      //console.log('data.alarms', data.alarms)
       return data.alarms;
     } catch (error) {
       console.error('Get location alarms error:', error);

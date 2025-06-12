@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../SearchBar/SearchBar';
+import CustomTag from '../CustomTag/CustomTag';
 import styles from './Table.module.css';
 
 const Table = ({ columns, data, onRowClick }) => {
@@ -8,6 +9,8 @@ const Table = ({ columns, data, onRowClick }) => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [showArchived, setShowArchived] = useState(true);
+  const [showAddButton, setShowAddButton] = useState(true);
 
   const sortedData = useMemo(() => {
     let sortableData = [...data];
@@ -25,11 +28,21 @@ const Table = ({ columns, data, onRowClick }) => {
     return sortableData;
   }, [data, sortConfig]);
 
-  const filteredData = sortedData.filter(item =>
-    columns.some(column =>
-      item[column.accessor].toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const filteredData = useMemo(() => {
+    // Primero filtramos por término de búsqueda
+    let filtered = sortedData.filter(item =>
+      columns.some(column =>
+        item[column.accessor].toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    // Luego filtramos por estado si showArchived es false
+    if (!showArchived) {
+      filtered = filtered.filter(item => item.estado !== 0);
+    }
+
+    return filtered;
+  }, [sortedData, columns, searchTerm, showArchived]);
 
   const paginatedData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -51,6 +64,13 @@ const Table = ({ columns, data, onRowClick }) => {
       onRowClick(row);
     }
   };
+
+  const handleCheckArchived = (e) => {
+    setShowArchived(e.target.checked);
+    console.log('Mostrar archivados:', e.target.checked);
+    
+    console.log('raw Data:', data);
+  }
 
   const renderPaginationButtons = () => {
     const buttons = [];
@@ -114,10 +134,23 @@ const Table = ({ columns, data, onRowClick }) => {
       ));
   };
 
+  //console.log('data', data);
+  
+
   return (
     <div>
       <div className={styles.controls}>
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} placeholder="Buscar..." />
+        {showAddButton && (
+          <label className={styles.checkboxContainer}>
+            <input
+              type="checkbox"
+              checked={showArchived}
+              onChange={handleCheckArchived}
+            />
+            <span>Mostrar también los archivados</span>
+          </label>
+        )}
         <span>Mostrando {filteredData.length} resultados</span>
         <div className={styles.pagination}>
           <span>Páginas: </span>
@@ -161,6 +194,22 @@ export default Table;
 const renderCellContent = (row, column) => {
   const content = row[column.accessor];
   
+  // Caso especial para la columna estado
+  if (column.accessor === 'estado') {
+    const tagType = content === 0 ? 'archive' : 'success';
+    const tagText = content === 0 ? 'Archivado' : 'Activo';
+    const icon = `/icons/${content === 0 ? 'archive-solid.svg' : 'eye-regular-white.svg'}`;
+    
+    return (
+      <CustomTag 
+        text={tagText}
+        type={tagType}
+        icon={icon}
+      />
+    );
+  }
+
+  // Renderizado normal para otras columnas
   return (
     <div className={styles.cellContent}>
       {column.icon && <img 

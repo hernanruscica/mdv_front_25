@@ -28,7 +28,7 @@ export const UserCreateForm = ({ userId, userData, isEditing }) => {
         telefono: "",    
         dni:"",
         password:"",
-        estado:"",
+        estado:"0",
         direcciones_id: ""
     });    
     const navigate = useNavigate();

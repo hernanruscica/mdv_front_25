@@ -42,16 +42,17 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, [user, fetchUsers, fetchDataloggers, fetchLocations]);
 
-  const isLoading = isLoadingUsers || isLoadingDataloggers || isLoadingLocations;
+  //const isLoading = isLoadingUsers || isLoadingDataloggers || isLoadingLocations;
   const error = usersError || dataloggersError || locationsError;
 
-  if (isLoading) {
+  if (isLoadingUsers || isLoadingDataloggers || isLoadingLocations) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
   if (error) {
     return <div className={styles.error}>{error}</div>;
   }
+  console.log(locations)
 
   return (
     <>      
@@ -84,7 +85,7 @@ const Dashboard = () => {
         >
           <div className={cardInfoStyles.description}>
             <p className={cardInfoStyles.paragraph}>
-              <strong>{locations.length} Ubicaciones</strong>{" "}
+              <strong>{locations?.length} Ubicaciones</strong>{" "}
               para ver o administrar, según los permisos de su usuario.
             </p>
             {user?.espropietario === 1 && (

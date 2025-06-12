@@ -11,7 +11,7 @@ const CustomTag = ({ text, type = 'archive', icon }) => {
   return (
     <p className={styles.tag} data-type={type} title={currentTitleText[type]}>
       <img src={icon} alt={type} />
-      <strong>{text}</strong>
+      <strong >{text}</strong>
     </p>
   );
 };

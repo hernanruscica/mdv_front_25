@@ -29,6 +29,7 @@ export const useAuthStore = create(
       ],
       login: async (dni, password) => {
         const response = await authService.login(dni, password);
+        //onsole.log('Login response:', response);
         if (response?.user && response?.token) {
           set({ 
             user: response.user,

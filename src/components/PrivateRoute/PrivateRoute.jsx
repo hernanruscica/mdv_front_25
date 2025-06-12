@@ -13,7 +13,7 @@ export const PrivateRoute = ({ children }) => {
   }
 
   // Verificar permisos de propietario para rutas de agregar y editar
-  if ((path.endsWith('agregar') || path.endsWith('editar')) && user.espropietario !== 1) {
+  if ((path.endsWith('agregar') || path.endsWith('editar')) && user?.espropietario !== 1) {
     return <Navigate to="/panel" replace />;
   }
 

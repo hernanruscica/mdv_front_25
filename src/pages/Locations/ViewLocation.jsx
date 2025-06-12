@@ -14,6 +14,7 @@ import styles from './ViewLocation.module.css';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import ShowDataloggersCards from '../../components/ShowDataloggersCards/ShowDataloggersCards';
+import CustomTag from '../../components/CustomTag/CustomTag';
 
 const ViewLocation = () => {
   const { id } = useParams();
@@ -78,19 +79,37 @@ const ViewLocation = () => {
   }
 
   const locationButtons = (
-    <>
-      <BtnCallToAction
-        text="Editar"
-        icon="edit-regular.svg"
-        type="warning"
-        url={`/panel/ubicaciones/${currentLocation?.id}/editar`}
-      />
-      <BtnCallToAction
-        text="Archivar"
-        icon="archive-solid.svg"
-        type="danger"
-        url={`/panel/ubicaciones/${currentLocation?.id}/archivar`}
-      />
+    <>      
+      { currentLocation?.estado == 1 ? (
+      <>
+        <BtnCallToAction
+          text="Editar"
+          icon="edit-regular.svg"          
+          url={`/panel/ubicaciones/${currentLocation?.id}/editar`}
+        />  
+        <BtnCallToAction
+          text="Archivar"
+          icon="archive-solid.svg"
+          type="danger"
+          url={`/panel/ubicaciones/${currentLocation?.id}/archivar`}
+        />
+      </>
+      ) : 
+      (<>
+        <BtnCallToAction
+          text="Desarchivar"
+          icon="save-regular.svg"          
+          url={`/panel/ubicaciones/${currentLocation?.id}/descarchivar`}
+        />
+        <BtnCallToAction
+          text="Eliminar"
+          icon="trash-alt-regular.svg"
+          type="danger"
+          url={`/panel/ubicaciones/${currentLocation?.id}/eliminar`}
+        />
+      </>)  
+      }
+
     </>
   );
 
@@ -111,6 +130,10 @@ const ViewLocation = () => {
         buttons={locationButtons}
       >
         <div className={styles.locationInfo}>
+          {
+            currentLocation?.estado == '0' &&
+            (<CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />)
+            }
           <p><strong>Descripción:</strong> {currentLocation?.descripcion}</p>
           <p><strong>Dirección:</strong> {currentLocation?.calle} {currentLocation?.calle_numero}</p>
           <p><strong>Teléfono:</strong> {currentLocation?.tel}</p>

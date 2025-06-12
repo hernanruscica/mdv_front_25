@@ -5,7 +5,7 @@ import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
 
-export const AlarmCreateForm = ({ alarmData, isEditing }) => {
+export const AlarmCreateForm = ({ alarmData, isEditing, channelData }) => {
     const { channelId, alarmId, dataloggerId } = useParams();
     const { user } = useAuthStore();
     const { createAlarm, updateAlarm } = useAlarmsStore();
@@ -148,6 +148,8 @@ export const AlarmCreateForm = ({ alarmData, isEditing }) => {
         );
     }
 
+    console.log("channelData:", channelData);
+
     return (
         <form onSubmit={handleSubmit} className={stylesForms.form}>
             <div className={stylesForms.formInputGroup}>
@@ -232,14 +234,15 @@ export const AlarmCreateForm = ({ alarmData, isEditing }) => {
                     />
                 </div>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="periodo_tiempo">Minutos hacia atrás:</label>
+                    <label htmlFor="periodo_tiempo">Minutos a promediar, cambiar desde la edicion de canal.</label>
                     <input
                         type="number"
                         name="periodo_tiempo"
                         id="periodo_tiempo"
-                        value={alarm.periodo_tiempo}
-                        onChange={handleChange}
-                        required
+                        value={channelData?.tiempo_a_promediar || 15}
+                        disabled
+                        // onChange={handleChange}
+                        // required
                     />
                 </div>
             </div>
