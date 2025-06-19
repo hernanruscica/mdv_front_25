@@ -17,9 +17,9 @@ import cardInfoStyles from '../../components/CardInfo/CardInfo.module.css';
 import DigitalPorcentagesOn from '../../components/Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
 import AnalogData from '../../components/Graphics/AnalogData/AnalogData';
 import Gauge from '../../components/Gauge/Gauge';
-
 import Table from '../../components/Table/Table';
-
+import CustomTag from '../../components/CustomTag/CustomTag';
+import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 
 const ViewChannel = () => {
   const { dataloggerId, channelId } = useParams()
@@ -33,6 +33,8 @@ const ViewChannel = () => {
   const [channelAlarms, setChannelAlarms] = useState([]);
   const [channelMainAlarm, setChannelMainAlarm] = useState(null); 
   const hoursBackView = 120; 
+
+    const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const loadChannel = async () => {
@@ -78,13 +80,16 @@ const ViewChannel = () => {
     loadData();
   }, [currentChannel]);
 
-  /*
-  useEffect(() => {
-    if (dataChannel) {
-      console.log('Datos del canal:', dataChannel);
-    }
-  }, [dataChannel]);
-  */
+ 
+   useEffect(() => {
+      if (!modalOpen && currentChannel?.id) {        
+        const timeout = setTimeout(() => {
+          fetchChannelById(currentChannel.id).then(setCurrentChannel);
+        }, 200);
+        return () => clearTimeout(timeout);
+      }
+    }, [modalOpen, fetchChannelById, currentChannel?.id]); 
+
 
   if (isLoadingChannel || isLoadingAlarmsByUser || isLoadingAlarmsByChannel || isLoadingData) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -97,22 +102,38 @@ const ViewChannel = () => {
   //console.log('datos del canal:', dataChannel);
   //console.log('alarmas del canal:', alarms);
 
-  const channelButtons = (
-    <>
-      <BtnCallToAction
-        text="Editar"
-        icon="edit-regular.svg"
-        type="warning"
-        url={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/editar`}
-      />
-      <BtnCallToAction
-        text="Archivar"
-        icon="archive-solid.svg"
-        type="danger"
-        url={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/archivar`}
-      />
-    </>
-  );
+  const channelButtons =     
+      (currentChannel?.estado == 1) ?
+        (<>
+          <BtnCallToAction
+            text="Editar"
+            icon="edit-regular.svg"
+            type="warning"
+            url={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/editar`}
+          />
+          <BtnCallToAction
+            text="Archivar"
+            icon="archive-solid.svg"
+            type="danger"
+            onClick={() => setModalOpen(true)}            
+          />
+        </>):
+      (<>
+        <BtnCallToAction
+          text="Desarchivar"
+          icon="archive-solid.svg"
+          type="normal"
+          onClick={() => setModalOpen(true)}          
+        />
+        <BtnCallToAction
+          text="Editar"
+          icon="edit-regular.svg"
+          type="warning"
+          url={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/editar`}
+        />
+        </>
+      )    
+    ;
 
   const columns = [
     { 
@@ -160,6 +181,15 @@ const ViewChannel = () => {
 
   return (
     <>
+     <ModalSetArchive
+      isOpen={modalOpen}
+      onRequestClose={() => setModalOpen(false)}
+      entidad="canal"
+      entidadId={currentChannel?.id}
+      nuevoEstado={currentChannel?.estado == '1' ? 0 : 1}
+      redirectTo={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}`}
+      nombre={`${currentChannel?.nombre}`}
+    />
       <Title1 type="canales" text={`Canal ${currentChannel?.nombre}`}/>
       <Breadcrumb datalogger={currentChannel?.datalogger_nombre} canal={currentChannel?.nombre}/>
       
@@ -169,6 +199,10 @@ const ViewChannel = () => {
           title={currentChannel?.nombre}
           buttons={channelButtons}
         >
+          {
+            currentChannel?.estado == '0' &&
+            (<CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />)
+            }
           <div className={styles.channelInfo}>
             <p>Pertenece al datalogger : 
               <CardBtnSmall 

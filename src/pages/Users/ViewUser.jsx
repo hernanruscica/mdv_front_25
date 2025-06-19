@@ -15,6 +15,7 @@ import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import { filterEntitiesByStatus } from '../../utils/entityFilters';
 import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
 import CustomTag from '../../components/CustomTag/CustomTag';
+import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 
 const ViewUser = () => {  
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,6 +29,7 @@ const ViewUser = () => {
 
   const user = users.find(user => user.id === parseInt(userId));
   const [currentUser, setCurrentUser] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Efecto para cargar el usuario
   useEffect(() => {
@@ -41,7 +43,7 @@ const ViewUser = () => {
     } else {      
       setCurrentUser(users.find(user => user.id === parseInt(userId)));
     }     
-  }, [users, userId]);
+  }, [user, userId]);
   
  // Efecto unificado para cargar y mantener actualizado el usuario
   useEffect(() => {
@@ -61,6 +63,15 @@ const ViewUser = () => {
 
     loadData();
   }, [userId, fetchUserById]);
+
+  useEffect(() => {
+    if (!modalOpen && currentUser?.id) {        
+      const timeout = setTimeout(() => {
+        fetchUserById(currentUser.id).then(setCurrentUser);
+      }, 200);
+      return () => clearTimeout(timeout);
+    }
+  }, [modalOpen, fetchUserById, currentUser?.id]); 
 
   if (isLoadingUsers ||  isLoadingLocations || isLoadingDataloggers) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -86,15 +97,15 @@ const ViewUser = () => {
       <BtnCallToAction
         text="Archivar"
         icon="archive-solid.svg"
-        type="danger"
-        url={`/panel/usuarios/${currentUser?.id}/archivar`}
+        type="danger"        
+        onClick={() => setModalOpen(true)}
       />
     </>):
     (<>
       <BtnCallToAction
         text="Desarchivar"
-        icon="archive-solid.svg"        
-        url={`/panel/usuarios/${currentUser?.id}/desarchivar`}
+        icon="archive-solid.svg"  
+        onClick={() => setModalOpen(true)}
       />
       <BtnCallToAction
         text="Eliminar"
@@ -109,8 +120,19 @@ const ViewUser = () => {
   const activeLocations = filterEntitiesByStatus(locationUsers);
   const activeDataloggers = filterEntitiesByStatus(dataloggers);
 
+  console.log('estado de usuario:',  currentUser?.estado);
+
   return (
     <>
+    <ModalSetArchive
+      isOpen={modalOpen}
+      onRequestClose={() => setModalOpen(false)}
+      entidad="usuario"
+      entidadId={currentUser?.id}
+      nuevoEstado={currentUser?.estado == '1' ? 0 : 1}
+      redirectTo={`/panel/usuarios/${currentUser?.id}`}
+      nombre={`${currentUser?.nombre_1} ${currentUser?.apellido_1}`}
+    />
       <Title1 
         text={`Perfil de ${currentUser?.nombre_1} ${currentUser?.apellido_1}`}
         type="usuarios"

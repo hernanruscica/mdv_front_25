@@ -18,6 +18,7 @@ import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCa
 import Table from '../../components/Table/Table';
 import { useNavigate } from 'react-router-dom';
 import CustomTag from '../../components/CustomTag/CustomTag';
+import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 
 const ViewDatalogger = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,6 +59,7 @@ const ViewDatalogger = () => {
 
   const [currentDatalogger, setCurrentDatalogger] = React.useState(null);
 
+  const [modalOpen, setModalOpen] = useState(false);
   
 
   useEffect(() => {
@@ -121,6 +123,17 @@ const ViewDatalogger = () => {
     loadData();
   }, [currentDatalogger, channels.length, fetchDataChannel]);
 
+ 
+  useEffect(() => {
+    if (!modalOpen && currentDatalogger?.id) {
+      // Espera un pequeño delay para asegurar que el update terminó
+      const timeout = setTimeout(() => {
+        fetchDataloggerById(currentDatalogger.id).then(setCurrentDatalogger);
+      }, 200);
+      return () => clearTimeout(timeout);
+    }
+  }, [modalOpen, fetchDataloggerById, currentDatalogger?.id]); 
+
   //     
   if (isLoadingChannels || isLoadingDatalogger || isLoadingAlarms) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -163,14 +176,16 @@ const ViewDatalogger = () => {
           text="Archivar"
           icon="archive-solid.svg"
           type="danger"
-          url={`/panel/dataloggers/${currentDatalogger?.id}/archivar`}
+          onClick={() => setModalOpen(true)}
+          //url={`/panel/dataloggers/${currentDatalogger?.id}/archivar`}
         />
       </>) :
       (<>
           <BtnCallToAction
             text="Desarchivar"
             icon="save-regular.svg"          
-            url={`/panel/dataloggers/${currentDatalogger?.id}/desarchivar`}
+            onClick={() => setModalOpen(true)}
+            //url={`/panel/dataloggers/${currentDatalogger?.id}/desarchivar`}
           />
           <BtnCallToAction
             text="Eliminar"
@@ -208,6 +223,15 @@ const ViewDatalogger = () => {
 
   return (
     <>
+    <ModalSetArchive
+      isOpen={modalOpen}
+      onRequestClose={() => setModalOpen(false)}
+      entidad="datalogger"
+      entidadId={currentDatalogger?.id}
+      nuevoEstado={currentDatalogger?.estado == '1' ? 0 : 1}
+      redirectTo={`/panel/dataloggers/${currentDatalogger?.id}`}
+      nombre={`${currentDatalogger?.nombre}`}
+    />
       <Title1 
         type="dataloggers"
         text={currentDatalogger.nombre}
@@ -270,7 +294,7 @@ const ViewDatalogger = () => {
           alarms={alarms}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          showAddButton={false}
+          showAddButton={user.espropietario == 1}
         />
         : 'No hay canales todavia'
       }

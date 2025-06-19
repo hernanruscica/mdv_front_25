@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import CardInfo from '../CardInfo/CardInfo';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import ButtonsBar from '../ButtonsBar/ButtonsBar';
@@ -8,6 +8,7 @@ import styles from './ShowChannelsCards.module.css';
 import cardInfoStyles from "../CardInfo/CardInfo.module.css";
 import DigitalPorcentageOn from '../Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
 import AnalogData from '../Graphics/AnalogData/AnalogData';
+import CustomTag from '../CustomTag/CustomTag';
 
 const ShowChannelsCards = ({ 
   channels, 
@@ -17,21 +18,24 @@ const ShowChannelsCards = ({
   showAddButton = false 
 }) => {
   // Validación inicial para eliminar duplicados
-  const uniqueChannels = channels.filter((channel, index, self) =>
-    index === self.findIndex((c) => c.canales_id === channel.canales_id)
-  );
+  // const uniqueChannels = channels.filter((channel, index, self) =>
+  //   index === self.findIndex((c) => c.canales_id === channel.canales_id)
+  // );
+  const [showArchived, setShowArchived] = useState(false);
 
   const uniqueAlarms = alarms.filter((alarm, index, self) =>
     index === self.findIndex((a) => a.id === alarm.id)
-  );
+  ); 
 
-  const filteredChannels = uniqueChannels.filter(channel => {
+  const filteredChannels = channels
+    .filter(channel => !showArchived ? channel.estado == 1 : true)
+    .filter(channel => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
       channel.canales_nombre.toLowerCase().includes(searchTermLower) ||
       channel.canales_descripcion?.toLowerCase().includes(searchTermLower)      
     );
-  });
+  });  
 
   //console.log(channels);
 
@@ -43,12 +47,23 @@ const ShowChannelsCards = ({
           itemsQty={filteredChannels.length}
           showAddButton={showAddButton}
         >
-          
+        <div className={styles.controls}>
           <SearchBar
             searchTerm={searchTerm}
             onSearchChange={onSearchChange}
             placeholder="Buscar canales..."
           />
+          {showAddButton && (
+            <label className={styles.checkboxContainer}>
+              <input
+                type="checkbox"
+                checked={showArchived}
+                onChange={(e) => setShowArchived(e.target.checked)}
+              />
+              <span>Mostrar también los archivados</span>
+            </label>
+          )}
+        </div>
         </ButtonsBar>
       </div>
 
@@ -76,6 +91,15 @@ const ShowChannelsCards = ({
                   />
               </div>
               <div className={cardInfoStyles.description}>
+                {
+                  channel.estado === 0 && (
+                    <CustomTag 
+                      text="Archivado"
+                      type="archive"
+                      icon="/icons/archive-solid.svg"
+                    />
+                  )
+                }
                 <p className={cardInfoStyles.paragraph}>                 
                   {channel.canales_descripcion}                  
                 </p>

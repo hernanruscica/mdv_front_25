@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
@@ -15,6 +15,7 @@ import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import ShowDataloggersCards from '../../components/ShowDataloggersCards/ShowDataloggersCards';
 import CustomTag from '../../components/CustomTag/CustomTag';
+import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 
 const ViewLocation = () => {
   const { id } = useParams();
@@ -47,6 +48,19 @@ const ViewLocation = () => {
     isLoading: isLoadingAlarms,
     error: errorAlarms
   } = useAlarmsStore(); 
+
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Recarga la ubicación cuando se cierra el modal
+  useEffect(() => {
+    if (!modalOpen) {
+      // Espera un tick para asegurarse de que el update terminó
+      const timeout = setTimeout(() => {
+        fetchLocationById(id);
+      }, 200);
+      return () => clearTimeout(timeout);
+    }
+  }, [modalOpen, fetchLocationById, id]);
 
   //const [currentLocation, setCurrentLocation] = useState(null);
 
@@ -91,7 +105,8 @@ const ViewLocation = () => {
           text="Archivar"
           icon="archive-solid.svg"
           type="danger"
-          url={`/panel/ubicaciones/${currentLocation?.id}/archivar`}
+          //url={`/panel/ubicaciones/${currentLocation?.id}/archivar`}
+          onClick={() => setModalOpen(true)}
         />
       </>
       ) : 
@@ -99,7 +114,8 @@ const ViewLocation = () => {
         <BtnCallToAction
           text="Desarchivar"
           icon="save-regular.svg"          
-          url={`/panel/ubicaciones/${currentLocation?.id}/descarchivar`}
+          //url={`/panel/ubicaciones/${currentLocation?.id}/descarchivar`}
+          onClick={() => setModalOpen(true)}
         />
         <BtnCallToAction
           text="Eliminar"
@@ -113,12 +129,22 @@ const ViewLocation = () => {
     </>
   );
 
-  const locationChannels = channels.filter(channel => 
-    dataloggers.some(d => d?.ubicacion_id === currentLocation?.id && d?.id === channel?.datalogger_id)
-  );
+  // const locationChannels = channels.filter(channel => 
+  //   dataloggers.some(d => d?.ubicacion_id === currentLocation?.id && d?.id === channel?.datalogger_id)
+  // );
+  console.log('locacion', currentLocation);
 
   return (
     <>
+    <ModalSetArchive
+      isOpen={modalOpen}
+      onRequestClose={() => setModalOpen(false)}
+      entidad="ubicacion"
+      entidadId={currentLocation?.id}
+      nuevoEstado={currentLocation?.estado == '1' ? 0 : 1}
+      redirectTo={`/panel/ubicaciones/${currentLocation?.id}`}
+      nombre={`${currentLocation?.nombre}`}
+    />
       <Title1 
         text={`Ubicación: ${currentLocation?.nombre}`}
         type="ubicaciones"

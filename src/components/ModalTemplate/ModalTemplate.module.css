@@ -1,0 +1,43 @@
+.overlay {
+  background: rgba(0,0,0,0.5);
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 400px;
+  margin: 5% auto;
+  padding: 24px 16px 16px 16px;
+  position: relative;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #888;
+}
+
+.content {
+  margin: 16px 0;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}

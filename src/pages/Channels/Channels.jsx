@@ -139,7 +139,7 @@ const Channels = () => {
         alarms={currentAlarms}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        showAddButton={false}
+        showAddButton={user?.espropietario == 1}
       />
     </>
   );

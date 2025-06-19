@@ -29,13 +29,14 @@ const Users = () => {
 
   const isLoading = loadingStates?.fetchUsers || locationUsersLoadingStates?.fetchLocationUsers;
 
-  useEffect(() => {
+  useEffect(() => {   
     if (!users || users.length === 0) {
       fetchUsers(user);
     }
     if (!locationUsers || locationUsers.length === 0) {
       fetchLocationUsers(user);
     }
+   
   }, [user]);
 
   if (isLoading || !users || !locationUsers) {
@@ -78,15 +79,15 @@ const Users = () => {
     navigate(`/panel/usuarios/${row.id}`);
   };
 
-  const preparedData = users.map(user => ({
+  const preparedData = users?.map(user => ({
     nombreCompleto: user.usuario_nom_apell,
     email: user.email,    
-    ubicaciones: user.ubicaciones.map(ubi => ubi.ubicaciones_nombre).join(', '),
+    ubicaciones: user?.ubicaciones.map(ubi => ubi.ubicaciones_nombre).join(', ') || 'N/A',
     id: user.id,
     estado: user.estado
   }));
 
-  console.log('user', users[0])
+  console.log('users', users)
 
   return (
     <>
