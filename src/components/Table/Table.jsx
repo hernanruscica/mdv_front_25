@@ -67,9 +67,9 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
 
   const handleCheckArchived = (e) => {
     setShowArchived(e.target.checked);
-    console.log('Mostrar archivados:', e.target.checked);
+    //console.log('Mostrar archivados:', e.target.checked);
     
-    console.log('raw Data:', data);
+    //console.log('raw Data:', data);
   }
 
   const renderPaginationButtons = () => {

@@ -15,7 +15,7 @@ const ShowLocationsCards = ({
   onSearchChange,
   showAddButton = false 
 }) => {
-  const [showArchived, setShowArchived] = useState(false);
+  const [showArchived, setShowArchived] = useState(showAddButton);
 
   const filteredLocations = locations.filter(location => {
     const searchTermLower = searchTerm.toLowerCase();

@@ -15,6 +15,7 @@ import CardImage from '../../components/CardImage/CardImage';
 import Table from '../../components/Table/Table';
 import styles from './ViewAlarm.module.css';
 import CustomTag from '../../components/CustomTag/CustomTag';
+import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 
 
 const ViewAlarm = () => {
@@ -24,6 +25,7 @@ const ViewAlarm = () => {
   const [currentChannel, setCurrentChannel] = useState(null);
   const [currentDatalogger, setCurrentDatalogger] = useState(null);
   const location = useLocation();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const { 
     fetchAlarmById,
@@ -141,6 +143,18 @@ const ViewAlarm = () => {
     loadDatalogger();
   }, [currentChannel, dataloggers]);
 
+    useEffect(() => {
+      if (!modalOpen && currentAlarm?.id) {        
+        const timeout = setTimeout(() => {
+          fetchAlarmById(currentAlarm.id).then(setCurrentAlarm);             
+          //console.log('Actualizando los usuarios a mostrar en ViewUser.jsx');     
+        }, 400);
+        return () => clearTimeout(timeout);
+      }
+    }, [modalOpen, fetchAlarmById, currentAlarm?.id]); 
+
+   
+
   if (isLoading || isLoadingLogs || isLoadingChannel || isLoadingDatalogger || isLoadingUser || isLoadingLocation) {
     return <LoadingSpinner message="Cargando detalles de la alarma..." />;
   }
@@ -168,14 +182,14 @@ const ViewAlarm = () => {
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
-        url={`/panel/alarmas/${currentAlarm.id}/archivar`}
+        onClick={() => setModalOpen(true)}
       />
     </>):
     (<>
       <BtnCallToAction
         text="Desarchivar"
         icon="save-regular.svg"
-        url={`/panel/alarmas/${currentAlarm.id}/desarchivar`}
+        onClick={() => setModalOpen(true)}
       />
       <BtnCallToAction
         text="Eliminar"
@@ -203,10 +217,19 @@ const ViewAlarm = () => {
     mensaje: log.mensaje
   }));
 
-  //console.log(currentChannel)
+  //console.log(currentAlarm, currentAlarm?.estado == '1' ? '0' : '1');
 
   return (
     <>
+      <ModalSetArchive
+        isOpen={modalOpen}
+        onRequestClose={() => setModalOpen(false)}
+        entidad="alarma"
+        entidadId={currentAlarm?.id}
+        nuevoEstado={currentAlarm?.estado == '1' ? '0' : '1'}
+        redirectTo="#"
+        nombre={`${currentAlarm?.nombre}`}
+      />
       <Title1 
         type="alarmas"
         text={`Alarma: ${currentAlarm.nombre}`}

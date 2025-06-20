@@ -17,7 +17,7 @@ const ShowDataloggersCards = ({
   locations,
   showAddButton = false 
 }) => {
-  const [showArchived, setShowArchived] = useState(false);
+  const [showArchived, setShowArchived] = useState(showAddButton);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalContent, setModalContent] = useState({
     isOpen: false,

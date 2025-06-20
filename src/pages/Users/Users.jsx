@@ -4,15 +4,12 @@ import { Title1 } from '../../components/Title1/Title1';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useAuthStore } from '../../store/authStore';
 import { useUsersStore } from '../../store/usersStore';
-import { useLocationUsersStore } from '../../store/locationUsersStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
-import { filterEntitiesByStatus } from '../../utils/entityFilters';
 import styles from './Users.module.css';
 import Table from '../../components/Table/Table';
 
 const Users = () => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate(); 
   const user = useAuthStore(state => state.user);
   const { 
     users, 
@@ -21,25 +18,21 @@ const Users = () => {
     fetchUsers 
   } = useUsersStore();
 
-  const { 
-    locationUsers, 
-    loadingStates: locationUsersLoadingStates,
-    fetchLocationUsers 
-  } = useLocationUsersStore();
-
-  const isLoading = loadingStates?.fetchUsers || locationUsersLoadingStates?.fetchLocationUsers;
-
+  const isLoading = loadingStates?.fetchUsers;  
+  
   useEffect(() => {   
-    if (!users || users.length === 0) {
-      fetchUsers(user);
-    }
-    if (!locationUsers || locationUsers.length === 0) {
-      fetchLocationUsers(user);
-    }
-   
-  }, [user]);
+    // if (!users || users.length === 0) {
+    //   fetchUsers(user);
+    //   console.log('Actualizando los usuarios a mostrar');
+    // }
 
-  if (isLoading || !users || !locationUsers) {
+   fetchUsers(user);
+   console.log('Actualizando los usuarios a mostrar en Users.jsx');
+  }, [user, fetchUsers]);
+
+
+
+  if (isLoading || !users ) {
     return <LoadingSpinner message="Cargando usuarios..." />;
   } 
 
@@ -47,10 +40,7 @@ const Users = () => {
     return <div className={styles.error}>{error}</div>;
   }  
 
-
-//habria que poner un check para mostrar ademas los usuarios archivados
-  //const activeUsers = filterEntitiesByStatus(users);
- 
+  //console.log('users', users);  
 
   const columns = [
     { 
@@ -81,13 +71,15 @@ const Users = () => {
 
   const preparedData = users?.map(user => ({
     nombreCompleto: user.usuario_nom_apell,
-    email: user.email,    
-    ubicaciones: user?.ubicaciones.map(ubi => ubi.ubicaciones_nombre).join(', ') || 'N/A',
+    email: user.email,
+    ubicaciones: Array.isArray(user.ubicaciones) && user.ubicaciones.length > 0
+      ? user.ubicaciones.map(ubi => ubi.ubicaciones_nombre).join(', ')
+      : 'N/A',
     id: user.id,
     estado: user.estado
   }));
 
-  //console.log('users', users)
+  //console.log('preparedData', preparedData)
 
   return (
     <>

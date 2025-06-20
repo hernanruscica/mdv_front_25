@@ -7,6 +7,7 @@ import { useUsersStore } from '../../store/usersStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useLocationUsersStore } from '../../store/locationUsersStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
+import { useAuthStore } from '../../store/authStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import CardImage from '../../components/CardImage/CardImage';
 import styles from './ViewUser.module.css';
@@ -20,58 +21,42 @@ import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 const ViewUser = () => {  
   const [searchTerm, setSearchTerm] = useState('');
   const { userId } = useParams();
-  const { fetchUserById,  
-         users, isLoading: isLoadingUsers, error: errorUsers 
-   } = useUsersStore();
+  const user = useAuthStore(state => state.user);
+  const { fetchUserById, fetchUsers,  isLoading: isLoadingUsers, error: errorUsers } = useUsersStore();
   const { fetchAlarmsByUser, alarms, isLoading: isLoadingAlarms, error: errorAlarms } = useAlarmsStore();
-  const { fetchLocationUsers, locationUsers, isLoading : isLoadingLocations, error: errorLocationsUsers } = useLocationUsersStore();
-  const { dataloggers, isLoading: isLoadingDataloggers, fetchDataloggers, error: errorDataloggers } = useDataloggersStore();
-
-  const user = users.find(user => user.id === parseInt(userId));
+  const { fetchLocationUsers, locationUsers, isLoading : isLoadingLocations, error: errorLocationsUsers } = useLocationUsersStore();  
+  const { dataloggers, isLoading: isLoadingDataloggers, fetchDataloggers, error: errorDataloggers } = useDataloggersStore();  
   const [currentUser, setCurrentUser] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Efecto para cargar el usuario
-  useEffect(() => {
-    const loadUser = async () => {
-      const currentUSer = await fetchUserById(userId);   
-      setCurrentUser(currentUSer);
-    };      
-
-    if (!users || users.length === 0) {
-      loadUser();         
-    } else {      
-      setCurrentUser(users.find(user => user.id === parseInt(userId)));
-    }     
-  }, [user, userId]);
-  
- // Efecto unificado para cargar y mantener actualizado el usuario
-  useEffect(() => {
+  useEffect(() => {    
     const loadData = async () => {
       // Siempre obtener el usuario actualizado del servidor
       const updatedUser = await fetchUserById(userId);
-      setCurrentUser(updatedUser);
+      setCurrentUser(updatedUser);           
       
       if (updatedUser) {
         await Promise.all([
           fetchAlarmsByUser(updatedUser),
           fetchLocationUsers(updatedUser),
           fetchDataloggers(updatedUser)
-        ]);
-      }
-    };
-
-    loadData();
+        ]);     }   
+    }  
+   loadData();
   }, [userId, fetchUserById]);
 
   useEffect(() => {
     if (!modalOpen && currentUser?.id) {        
       const timeout = setTimeout(() => {
-        fetchUserById(currentUser.id).then(setCurrentUser);
+        fetchUserById(currentUser.id).then(setCurrentUser);   
+        fetchUsers(user);
+        console.log('Actualizando los usuarios a mostrar en ViewUser.jsx');     
       }, 400);
       return () => clearTimeout(timeout);
     }
   }, [modalOpen, fetchUserById, currentUser?.id]); 
+
+
 
   if (isLoadingUsers ||  isLoadingLocations || isLoadingDataloggers) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -81,9 +66,6 @@ const ViewUser = () => {
     return <div className={styles.error}>Error: {errorUsers || errorLocationsUsers || errorDataloggers }</div>;
   }
 
-  //console.log('Alarmas del usuario:', alarms?.length);
-  //console.log('1 ubicacion para el usuario', locationUsers[0]);
-  //console.log('dataloggers para el usuario', dataloggers?.length);
 
   const userButtons = (
     currentUser?.estado == '1' ? 
@@ -120,7 +102,7 @@ const ViewUser = () => {
   const activeLocations = filterEntitiesByStatus(locationUsers);
   const activeDataloggers = filterEntitiesByStatus(dataloggers);
 
-  console.log('estado de usuario:',  currentUser?.estado);
+  //console.log('estado de usuario:',  currentUser?.estado);
 
   return (
     <>

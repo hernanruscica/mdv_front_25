@@ -34,7 +34,7 @@ const ModalSetArchive = ({
   const handleAccept = async () => {
     if (updateFn && entidadId) {
       const responseStore = await updateFn(entidadId, { estado: nuevoEstado });
-      //console.log('Response from update:', responseStore);
+      console.log('Response from update:', responseStore);
       onRequestClose();
       navigate(redirectTo);
     }
@@ -53,8 +53,12 @@ const ModalSetArchive = ({
       ]}
     >
       <p>
-        ¿Estás seguro que deseas {nuevoEstado == 0 ? 'archivar' : 'desarchivar'} 
-        {nombre ? ` ${nombre}` : ''}?
+        {`
+        ¿Estás seguro que deseas ${nuevoEstado == 0 ? 'archivar' : 'desarchivar'} 
+        ${(entidad == 'ubicacion' || entidad == 'alarma') ? ' la ' : ' el '}
+        `}
+        <strong> {entidad} </strong><br/>
+        <strong><em>{nombre}</em> </strong>
       </p>
     </ModalTemplate>
   );

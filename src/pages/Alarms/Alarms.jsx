@@ -169,7 +169,7 @@ const Alarms = () => {
     return <LoadingSpinner message={loadingMessage} />;
   }   
   //console.log(`userId: ${userId}`, locationId, dataloggerId, channelId);
-  console.log( alarms);
+  //console.log( alarms);
 
   return (
     <>

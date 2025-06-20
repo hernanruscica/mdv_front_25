@@ -103,7 +103,7 @@ export const UserCreateForm = ({ userId, userData, isEditing }) => {
 
             try {
                 const response = await updateUser(userData.id, updateData);
-                console.log(response)
+                //console.log(response)
                 if (response.success) {
                     toast.success(response.message);
                     navigate(`/panel/usuarios/${userData.id}`);
