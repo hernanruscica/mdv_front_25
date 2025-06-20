@@ -4,13 +4,13 @@ import SearchBar from '../SearchBar/SearchBar';
 import CustomTag from '../CustomTag/CustomTag';
 import styles from './Table.module.css';
 
-const Table = ({ columns, data, onRowClick }) => {
+const Table = ({ columns, data, onRowClick, showAddButton }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [showArchived, setShowArchived] = useState(true);
-  const [showAddButton, setShowAddButton] = useState(true);
+  const [showArchived, setShowArchived] = useState(showAddButton);
+  //const [showAddButton, setShowAddButton] = useState(true);
 
   const sortedData = useMemo(() => {
     let sortableData = [...data];

@@ -87,7 +87,7 @@ const Users = () => {
     estado: user.estado
   }));
 
-  console.log('users', users)
+  //console.log('users', users)
 
   return (
     <>
@@ -102,6 +102,7 @@ const Users = () => {
           columns={columns} 
           data={preparedData} 
           onRowClick={handleRowClick}
+          showAddButton={ user?.espropietario == 1}
         />
       </div>
     </>

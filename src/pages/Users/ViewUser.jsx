@@ -68,7 +68,7 @@ const ViewUser = () => {
     if (!modalOpen && currentUser?.id) {        
       const timeout = setTimeout(() => {
         fetchUserById(currentUser.id).then(setCurrentUser);
-      }, 200);
+      }, 400);
       return () => clearTimeout(timeout);
     }
   }, [modalOpen, fetchUserById, currentUser?.id]); 

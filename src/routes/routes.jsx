@@ -15,35 +15,29 @@ export const routes = [
   { path: "/panel/usuarios/activar/:token", element: <ActivateUser /> },
   { path: "/panel/usuarios/resetear", element: <SendActivationEmail /> },
   { path: "/panel/usuarios/agregar", element: <CreatePage />, private: true },
-  { path: "/panel/usuarios/:userId/editar", element: <CreatePage />, private: true },
-  { path: "/panel/usuarios/:userId/archivar", element: <UnderConstruction />, private: true },
-  { path: "/panel/usuarios/:userId/desarchivar", element: <UnderConstruction />, private: true },
+  { path: "/panel/usuarios/:userId/editar", element: <CreatePage />, private: true },  
   { path: "/panel/usuarios/:userId/eliminar", element: <UnderConstruction />, private: true },
   
   // Locations routes
   { path: "/panel/ubicaciones", element: <Locations />, private: true },
   { path: "/panel/ubicaciones/:id", element: <ViewLocation />, private: true },
   { path: "/panel/ubicaciones/agregar", element: <CreatePage />, private: true },
-  { path: "/panel/ubicaciones/:locationId/editar", element: <CreatePage />, private: true },
-   { path: "/panel/ubicaciones/:locationId/archivar", element: <UnderConstruction />, private: true },
-  { path: "/panel/ubicaciones/:locationId/desarchivar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:locationId/editar", element: <CreatePage />, private: true },  
   { path: "/panel/ubicaciones/:locationId/eliminar", element: <UnderConstruction />, private: true },
 
   // Dataloggers routes 
   { path: "/panel/dataloggers", element: <Dataloggers />, private: true },
   { path: "/panel/dataloggers/:id", element: <ViewDatalogger />, private: true },
   { path: "/panel/dataloggers/agregar", element: <CreatePage />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/editar", element: <CreatePage />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/archivar", element: <UnderConstruction />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/desarchivar", element: <UnderConstruction />, private: true },
+  { path: "/panel/dataloggers/:dataloggerId/editar", element: <CreatePage />, private: true }, 
   { path: "/panel/dataloggers/:dataloggerId/eliminar", element: <UnderConstruction />, private: true },
-
 
   // Channels routes
   { path: "/panel/dataloggers/:dataloggerId/canales", element: <Channels />, private: true },
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId", element: <ViewChannel />, private: true },
   { path: "/panel/dataloggers/:dataloggerId/canales/agregar", element: <CreatePage />, private: true },
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/editar", element: <CreatePage />, private: true },
+  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/eliminar", element: <UnderConstruction />, private: true },
 
   /* Alarms routes */
   // Alarmas routes / dataloggers
@@ -62,8 +56,6 @@ export const routes = [
   { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm /> },
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/agregar", element: <CreatePage />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId/editar", element: <CreatePage />, private: true },
-  { path: "/panel/alarmas/:alarmId/archivar", element: <UnderConstruction />, private: true },
-  { path: "/panel/alarmas/:alarmId/desarchivar", element: <UnderConstruction />, private: true },
+  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId/editar", element: <CreatePage />, private: true },  
   { path: "/panel/alarmas/:alarmId/eliminar", element: <UnderConstruction />, private: true },
 ];

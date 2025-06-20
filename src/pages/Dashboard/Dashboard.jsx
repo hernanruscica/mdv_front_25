@@ -52,7 +52,7 @@ const Dashboard = () => {
   if (error) {
     return <div className={styles.error}>{error}</div>;
   }
-  console.log(locations)
+  //console.log(locations)
 
   return (
     <>      

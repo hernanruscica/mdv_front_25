@@ -187,6 +187,7 @@ const Alarms = () => {
         columns={columns}
         data={getTableData()}
         onRowClick={handleRowClick}
+        showAddButton={ user?.espropietario == 1 }
       />
     </>
   );

@@ -132,7 +132,7 @@ const ViewLocation = () => {
   // const locationChannels = channels.filter(channel => 
   //   dataloggers.some(d => d?.ubicacion_id === currentLocation?.id && d?.id === channel?.datalogger_id)
   // );
-  console.log('locacion', currentLocation);
+  //console.log('locacion', currentLocation);
 
   return (
     <>

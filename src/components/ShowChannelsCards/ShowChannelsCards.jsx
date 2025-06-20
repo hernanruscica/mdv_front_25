@@ -92,7 +92,7 @@ const ShowChannelsCards = ({
               </div>
               <div className={cardInfoStyles.description}>
                 {
-                  channel.estado === 0 && (
+                  channel.estado == 0 && (
                     <CustomTag 
                       text="Archivado"
                       type="archive"
