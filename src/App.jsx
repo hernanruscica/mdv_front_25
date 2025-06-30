@@ -7,7 +7,7 @@ import Modal from 'react-modal';
 import FloatingButtons from './components/FloatingButtons/FloatingButtons';
 import { Toaster } from 'react-hot-toast';
 
-Modal.setAppElement('#root');
+//Modal.setAppElement('#root');
 
 const App = () => {
   return (    

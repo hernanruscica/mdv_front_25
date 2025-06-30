@@ -140,20 +140,10 @@ const ViewChannel = () => {
       label: 'NOMBRE ALARMA', 
       accessor: 'nombreAlarma',
       icon: '/icons/bell-regular.svg'
-    },
-    { 
-      label: 'CANAL', 
-      accessor: 'canal',
-      icon: '/icons/code-branch-solid.svg'
-    },
-    { 
-      label: 'TIPO', 
-      accessor: 'tipo',
-      icon: '/icons/flag-regular.svg'
-    },
+    },    
     { 
       label: 'CONDICION', 
-      accessor: 'condicion',
+      accessor: 'condicion_mostrar',
       icon: '/icons/building-regular.svg'
     },   
     { 
@@ -171,7 +161,7 @@ const ViewChannel = () => {
     nombreAlarma: alarm.nombre,
     canal: alarm?.canal_nombre || 'Sin canal',
     tipo: alarm.tipo_alarma,  
-    condicion: alarm.condicion || 'Sin condición',
+    condicion_mostrar: alarm.condicion_mostrar || 'Sin condición',
     estado: alarm.estado,
     url: `/panel/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${alarm.id}`,  
     id: alarm.id

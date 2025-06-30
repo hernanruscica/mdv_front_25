@@ -36,7 +36,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
                 descripcion: dataloggerData.descripcion || "",
                 foto: dataloggerData.foto || "",
                 nombre_tabla: dataloggerData.nombre_tabla || "",
-                ubicacion_id: dataloggerData.ubicacion_id || ""
+                //ubicacion_id: dataloggerData.ubicacion_id || ""
             })
         }
     }, [dataloggerData, isEditing])
@@ -144,6 +144,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
                     />
                 </div>
                 
+                {!isEditing && 
                 <div className={stylesForms.formInput}>
                     <label htmlFor="ubicacion_id">Ubicación:</label>
                     <select
@@ -163,7 +164,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
                             </option>
                         ))}
                     </select>
-                </div>
+                </div>}
                 
             </div>
             <div className={stylesForms.formInputGroup}>

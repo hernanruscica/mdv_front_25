@@ -23,8 +23,8 @@ const Alarms = () => {
   const { fetchAlarmsByUser, fetchAlarmsByLocation, fetchAlarms, alarms, isLoading: isLoadingAlarms } = useAlarmsStore();
   
   const { 
-    fetchDataloggerById,
-    loadingStates: { fetchDatalogger: isLoadingDatalogger }
+    fetchDataloggerById, fetchDataloggers, dataloggers,
+    loadingStates: { fetchDatalogger: isLoadingDatalogger, fetchDataloggers: isLoadingDataloggers }
   } = useDataloggersStore();
   
   const { 
@@ -39,7 +39,7 @@ const Alarms = () => {
   } = useChannelsStore();
 
   const isLoadingUser = loadingStates?.fetchUserById;
-  const isLoading = isLoadingUser || isLoadingAlarms || isLoadingDatalogger || isLoadingLocation || isLoadingChannel;
+  const isLoading = isLoadingUser || isLoadingAlarms || isLoadingDatalogger || isLoadingDataloggers || isLoadingLocation || isLoadingChannel;
   const navigate = useNavigate();
 
   const columns = [
@@ -49,18 +49,13 @@ const Alarms = () => {
       icon: '/icons/bell-regular.svg'
     },
     { 
-      label: 'CANAL', 
-      accessor: 'canal',
-      icon: '/icons/code-branch-solid.svg'
-    },
-    { 
-      label: 'TIPO', 
-      accessor: 'tipo',
-      icon: '/icons/flag-regular.svg'
-    },
+      label: 'DATALOGGER', 
+      accessor: 'datalogger',
+      icon: '/icons/microchip-solid.svg'
+    },    
     { 
       label: 'CONDICION', 
-      accessor: 'condicion',
+      accessor: 'condicion_mostrar',
       icon: '/icons/building-regular.svg'
     },   
     { 
@@ -77,6 +72,8 @@ const Alarms = () => {
   useEffect(() => {
     const fetchInitialData = async () => {      
       try {
+
+        await fetchDataloggers(user);
         
         if (userId) {                    
           const userResult = await fetchUserById(userId);          
@@ -104,7 +101,7 @@ const Alarms = () => {
               await fetchAlarms(user);
             }
           }
-
+        
           if (channelId) {
             const channelResult = await fetchChannelById(channelId);
             if (channelResult) {
@@ -150,9 +147,8 @@ const Alarms = () => {
 
     return filteredAlarms.map(alarm => ({
       nombreAlarma: alarm.nombre,
-      canal: alarm?.canal_nombre || 'Sin canal',
-      tipo: alarm.tipo_alarma,         
-      condicion: alarm.condicion,
+      datalogger: dataloggers.find(dl => dl.id == alarm.datalogger_id).nombre || 'Sin nombre',             
+      condicion_mostrar: alarm.condicion_mostrar,
       estado: alarm.estado,
       url: `${baseUrl}/${alarm.id}`      
     }));
@@ -162,6 +158,7 @@ const Alarms = () => {
     let loadingMessage = 'Cargando datos';
     if (isLoadingUser) loadingMessage = 'Cargando información del usuario...';
     if (isLoadingDatalogger) loadingMessage = 'Cargando información del datalogger...';
+    if (isLoadingDataloggers) loadingMessage = 'Cargando informacion de los dataloggers del usuario...';
     if (isLoadingLocation) loadingMessage = 'Cargando información de la ubicación...';
     if (isLoadingChannel) loadingMessage = 'Cargando información del canal...';
     if (isLoadingAlarms) loadingMessage = 'Cargando alarmas...';
@@ -169,7 +166,7 @@ const Alarms = () => {
     return <LoadingSpinner message={loadingMessage} />;
   }   
   //console.log(`userId: ${userId}`, locationId, dataloggerId, channelId);
-  //console.log( alarms);
+  //console.log( currentDatalogger);
 
   return (
     <>

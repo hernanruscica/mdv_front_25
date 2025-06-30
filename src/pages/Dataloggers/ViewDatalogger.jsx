@@ -204,7 +204,8 @@ const ViewDatalogger = () => {
   const columns = [
     { label: 'NOMBRE DE LA ALARMA', accessor: 'nombreAlarma' },
     { label: 'NOMBRE DEL CANAL', accessor: 'nombreCanal' },
-    { label: 'CONDICIÓN', accessor: 'condicion' }
+    { label: 'CONDICIÓN', accessor: 'condicion_mostrar' },
+    { label: 'ESTADO', accessor: 'estado' },
   ];
 
   const handleAlarmClick = (row) => {
@@ -213,9 +214,10 @@ const ViewDatalogger = () => {
 
   const preparedAlarms = dataloggerAlarms.map(alarm => ({
     nombreAlarma: alarm.nombre,
-    nombreCanal: getChannelName(alarm.canal_id),
-    condicion: alarm.condicion || 'Sin condición',
+    nombreCanal: alarm.canal_nombre,//getChannelName(alarm.canal_id),
+    condicion_mostrar: alarm.condicion_mostrar || 'Sin condición',
     canalId: alarm.canal_id,
+    estado: alarm.estado,
     id: alarm.id  // Aquí está el cambio clave
   }));  
 

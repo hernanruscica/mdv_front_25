@@ -16,6 +16,7 @@ import Table from '../../components/Table/Table';
 import styles from './ViewAlarm.module.css';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
+import ModalViewAlarmLog from '../../components/ModalViewAlarmLog/ModalViewAlarmLog';
 
 
 const ViewAlarm = () => {
@@ -25,7 +26,9 @@ const ViewAlarm = () => {
   const [currentChannel, setCurrentChannel] = useState(null);
   const [currentDatalogger, setCurrentDatalogger] = useState(null);
   const location = useLocation();
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalArchiveOpen, setModalArchiveOpen] = useState(false);
+  const [modalLogOpen, setModalLogOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState(null);
 
   const { 
     fetchAlarmById,
@@ -66,6 +69,12 @@ const ViewAlarm = () => {
     loadingStates: { fetchLocation: isLoadingLocation },
     error: errorLocation
   } = useLocationsStore();
+
+  const [modalUsuariosOpen, setModalUsuariosOpen] = useState(false); 
+
+  const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
+
+
 
   useEffect(() => {
     const loadAlarm = async () => {
@@ -144,14 +153,14 @@ const ViewAlarm = () => {
   }, [currentChannel, dataloggers]);
 
     useEffect(() => {
-      if (!modalOpen && currentAlarm?.id) {        
+      if (!modalArchiveOpen && currentAlarm?.id) {        
         const timeout = setTimeout(() => {
           fetchAlarmById(currentAlarm.id).then(setCurrentAlarm);             
           //console.log('Actualizando los usuarios a mostrar en ViewUser.jsx');     
         }, 400);
         return () => clearTimeout(timeout);
       }
-    }, [modalOpen, fetchAlarmById, currentAlarm?.id]); 
+    }, [modalArchiveOpen, fetchAlarmById, currentAlarm?.id]); 
 
    
 
@@ -169,8 +178,18 @@ const ViewAlarm = () => {
     return <div className={styles.error}>Alarma no encontrada</div>;
   }
 
+  const handleOpenLogModal = (log) => {
+    setSelectedLog(log);
+    setModalLogOpen(true);
+  };
+
+  const handleCloseLogModal = () => {
+    setModalLogOpen(false);
+    setSelectedLog(null);
+  };
+
   const alarmButtons = (
-    (currentAlarm.estado == '1') ?
+    (currentAlarm?.estado == '1') ?
     (<>
       <BtnCallToAction
         text="Editar"
@@ -182,14 +201,14 @@ const ViewAlarm = () => {
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
-        onClick={() => setModalOpen(true)}
+        onClick={() => setModalArchiveOpen(true)}
       />
     </>):
     (<>
       <BtnCallToAction
         text="Desarchivar"
         icon="save-regular.svg"
-        onClick={() => setModalOpen(true)}
+        onClick={() => setModalArchiveOpen(true)}
       />
       <BtnCallToAction
         text="Eliminar"
@@ -197,42 +216,75 @@ const ViewAlarm = () => {
         type="danger"
         url={`/panel/alarmas/${currentAlarm.id}/eliminar`}
       />
-      </>)
+    </>)
   );
 
   const columns = [
     { label: 'DIA Y HORA DEL EVENTO', accessor: 'fecha', icon: '/icons/clock-regular.svg' },
-    { label: 'USUARIO', accessor: 'usuario', icon: '/icons/user-regular.svg' },
     { label: 'EVENTO', accessor: 'evento', icon: '/icons/flag-regular.svg' },
-    { label: 'VALOR', accessor: 'valor', icon: '/icons/code-branch-solid.svg' },
-    { label: 'VISTA', accessor: 'vista', icon: '/icons/eye-regular.svg' }
+    { label: 'MENSAJE', accessor: 'mensaje', icon: '/icons/envelope-regular.svg' },    
+    { label: 'USUARIOS NOTIFICADOS', accessor: 'usuarios', icon: '/icons/user-regular.svg' }
   ];
 
-  const preparedLogs = alarmLogs.map(log => ({
-    fecha: new Date(log.fecha_disparo).toLocaleString(),
-    usuario: `${log.nombre_1} ${log.apellido_1}`, 
-    vista: (log.fecha_vista === "2024-01-01T00:00:00.000Z") ? 'No vista' : 'vista',
-    evento: (log.disparada == 0) ? 'Reset' : 'Disparo',
-    valor: log.variables_valores,
-    mensaje: log.mensaje
-  }));
+  const eventosMap = new Map();
 
-  //console.log(currentAlarm, currentAlarm?.estado == '1' ? '0' : '1');
+  alarmLogs.forEach(log => {
+    if (!eventosMap.has(log.id)) {
+      eventosMap.set(log.id, {
+        fecha: new Date(log.fecha_disparo).toLocaleString(),
+        fecha_vista: new Date(log.fecha_vista).toLocaleString(),
+        evento: log.disparada == 0 ? 'Reset' : 'Disparo',
+        id: log.id,
+        mensaje: log.mensaje,
+        usuarios: 1,
+        usuarios_afectados: [{
+          nombre: log.nombre_1,
+          apellido: log.apellido_1,
+          email: log.email
+        }]
+      });
+    } else {
+      const evento = eventosMap.get(log.id);
+      evento.usuarios += 1;
+      evento.usuarios_afectados.push({
+        nombre: log.nombre_1,
+        apellido: log.apellido_1,
+        email: log.email,
+        vista: (log.fecha_vista == '2024-01-01T03:00:00.000Z') ? false : true,
+      });
+    }
+  });
+
+
+  // Convertir el Map a un array final
+  const preparedLogs = Array.from(eventosMap.values());
+
+
+
+  //console.log(preparedLogs[0]);
 
   return (
     <>
       <ModalSetArchive
-        isOpen={modalOpen}
-        onRequestClose={() => setModalOpen(false)}
+        isOpen={modalArchiveOpen}
+        onRequestClose={() => setModalArchiveOpen(false)}
         entidad="alarma"
         entidadId={currentAlarm?.id}
         nuevoEstado={currentAlarm?.estado == '1' ? '0' : '1'}
         redirectTo="#"
         nombre={`${currentAlarm?.nombre}`}
       />
+      {selectedLog && (
+        <ModalViewAlarmLog 
+          isOpen={modalLogOpen}
+          onRequestClose={handleCloseLogModal}
+          evento={selectedLog}
+        />
+      )}
+
       <Title1 
         type="alarmas"
-        text={`Alarma: ${currentAlarm.nombre}`}
+        text={`Alarma: ${currentAlarm?.nombre}`}
       />
       <Breadcrumb 
         usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
@@ -251,9 +303,9 @@ const ViewAlarm = () => {
             currentAlarm?.estado == '0' &&
             (<CustomTag text="Archivada" type="archive" icon="/icons/archive-solid.svg" />)
             }
-          <p><strong>Nombre:</strong> {currentAlarm.nombre}</p>
-          <p><strong>Condición:</strong> {currentAlarm.condicion}</p>
-          <p><strong>Estado:</strong> {currentAlarm.estado ? 'Activa' : 'Inactiva'}</p>
+          {/* <p><strong>Nombre:</strong> {currentAlarm.nombre}</p> */}
+          <p><strong>Condición:</strong> {currentAlarm.condicion_mostrar}</p>
+          {/* <p><strong>Estado:</strong> {currentAlarm.estado ? 'Activa' : 'Inactiva'}</p> */}
           <p><strong>Tipo de Alarma:</strong> {currentAlarm.tipo_alarma}</p>
           <p><strong>Descripción:</strong> {currentAlarm.descripcion}</p>
           <p><strong>Fecha de creación:</strong> {new Date(currentAlarm.fecha_creacion).toLocaleDateString()}</p>
@@ -272,9 +324,11 @@ const ViewAlarm = () => {
           <Table 
             columns={columns}
             data={preparedLogs}
+            onRowClick={(row) => handleOpenLogModal(row)}
           />
+
         </div>
-      )}
+      )}      
     </>
   );
 }; 

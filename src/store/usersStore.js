@@ -46,6 +46,7 @@ export const useUsersStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await usersService.create(userData);
+      console.log('respuesta del servicio de creación de usuario', response);
       if (response.success) {
         set(state => ({ 
           users: [...state.users, response.user],

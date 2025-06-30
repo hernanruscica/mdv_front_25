@@ -1,0 +1,66 @@
+.usersList {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.usersList li {
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.error {
+  color: #dc3545;
+  margin: 1rem 0;
+}
+
+.solutionsContainer {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.solutionsList {
+  list-style: none;
+  padding: 0;
+}
+
+.solutionsList li {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.solutionText {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.solutionMeta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.newSolutionContainer {
+  margin-top: 1.5rem;
+}
+
+.solutionTextarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+  margin-top: 0.5rem;
+}
+
+.solutionTextarea:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+} 
