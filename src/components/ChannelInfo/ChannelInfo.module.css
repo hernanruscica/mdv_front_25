@@ -1,0 +1,13 @@
+.channelInfo {
+  padding: 1rem;
+}
+
+.channelInfo p {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.noAlarms {
+  color: #666;
+  font-style: italic;
+} 

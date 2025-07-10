@@ -3,40 +3,48 @@ import { dataService } from '../services/dataService';
 
 export const useDataStore = create((set) => ({
   dataChannel: null,
+  dataChannelSecondary: null,
   loadingStates: {
     fetchData: false,   
   },
   error: null,
 
-  fetchDataChannel: async (nombreTabla, nombreColumna, minutosAtras, tiempoPromedio) => {
+  fetchDataChannel: async (nombreTabla, nombreColumna, minutosAtras, tiempoPromedio, isSecondary = false) => {
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchData: true },
       error: null
     }));
     
     try {
+      let data = null;
+      
       if (nombreColumna.startsWith('d')) {        
-        const data = await dataService.getPorcentages(nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);        
-        set(state => ({
-          dataChannel: data,
-          loadingStates: { ...state.loadingStates, fetchData: false }
-        }));
-        return data;
-    } else if (nombreColumna.startsWith('a')) {        
-        const data = await dataService.getAnalogData(nombreTabla, nombreColumna, minutosAtras);        
-        set(state => ({
-          dataChannel: data,
-          loadingStates: { ...state.loadingStates, fetchData: false }
-        }));
-        return data;
+        data = await dataService.getPorcentages(nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);        
+      } else if (nombreColumna.startsWith('a')) {        
+        data = await dataService.getAnalogData(nombreTabla, nombreColumna, minutosAtras);        
       }
+
+      set(state => ({
+        [isSecondary ? 'dataChannelSecondary' : 'dataChannel']: data,
+        loadingStates: { ...state.loadingStates, fetchData: false }
+      }));
+
+      return data;
     } catch (error) {
+      console.error('Error en fetchDataChannel:', error);
       set(state => ({
         error: 'Error al obtener los datos',
         loadingStates: { ...state.loadingStates, fetchData: false }
       }));
       return null;
     }
+  },
+
+  clearChannelData: () => {
+    set({
+      dataChannel: null,
+      dataChannelSecondary: null
+    });
   }
 }));
 

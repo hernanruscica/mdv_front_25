@@ -17,12 +17,8 @@ const ShowChannelsCards = ({
   onSearchChange,
   showAddButton = false 
 }) => {
-  // Validación inicial para eliminar duplicados
-  // const uniqueChannels = channels.filter((channel, index, self) =>
-  //   index === self.findIndex((c) => c.canales_id === channel.canales_id)
-  // );
-  const [showArchived, setShowArchived] = useState(false);
 
+  const [showArchived, setShowArchived] = useState(false);
   const uniqueAlarms = alarms.filter((alarm, index, self) =>
     index === self.findIndex((a) => a.id === alarm.id)
   ); 
@@ -37,7 +33,25 @@ const ShowChannelsCards = ({
     );
   });  
 
-  //console.log(channels);
+  const timeRangesCards = [
+    { hours: 1, label: '1 Hr' },
+    { hours: 12, label: '12 Hrs' },
+    { hours: 24, label: '24 Hrs' },
+    { hours: 48, label: '2 Días' },
+    { hours: 72, label: '3 Días' },    
+  ];
+
+  //console.log(filteredChannels[0].data);
+
+  // Preparar los datos para el gráfico digital
+  const prepareDigitalData = (data) => {
+    if (!data || !data.length) return [];
+    return data.map(point => ({
+      timestamp: point.fecha,
+      porcentaje_encendido: point.porcentaje_encendido,
+      failure: point.tiempo_total >= 900 // 15 minutos en segundos
+    }));
+  };
 
   return (
     <>
@@ -133,9 +147,10 @@ const ShowChannelsCards = ({
                 {channel.data && channel.data.length > 0 ? (
                   channel.nombre_columna.startsWith('d') ? (
                     <DigitalPorcentageOn
-                      data={channel.data} 
+                      data={prepareDigitalData(channel.data)} 
                       currentChannelName={channel?.canales_nombre}
                       currentChannelTimeProm={channel?.tiempo_a_promediar} 
+                      customTimeRanges={timeRangesCards}
                     />
                   ) : channel.nombre_columna.startsWith('a') ? (
                     <AnalogData

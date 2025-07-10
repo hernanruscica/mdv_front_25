@@ -1,9 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useLocation} from 'react-router-dom';
-import { useAlarmsStore } from '../../store/alarmsStore';
-import { useAlarmLogsStore } from '../../store/alarmLogsStore';
-import { useChannelsStore } from '../../store/channelsStore';
-import { useDataloggersStore } from '../../store/dataloggersStore';
+import React, { useState } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import { useUsersStore } from '../../store/usersStore';
 import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
@@ -17,49 +13,59 @@ import styles from './ViewAlarm.module.css';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import ModalViewAlarmLog from '../../components/ModalViewAlarmLog/ModalViewAlarmLog';
+import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
+import { useAlarmDetails } from '../../hooks/useAlarmDetails';
+import { useChannelDetails } from '../../hooks/useChannelDetails';
+import DigitalPorcentageOn from '../../components/Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
+import AnalogData from '../../components/Graphics/AnalogData/AnalogData';
+import TimeSeriesChart from '../../components/Graphics/TimeSeriesChart/TimeSeriesChart';
 
+// Definimos los rangos de tiempo personalizados para los gráficos
+const customTimeRanges = [
+  { hours: 1, label: '1 Hr' },
+  { hours: 6, label: '6 Hrs' },
+  { hours: 12, label: '12 Hrs' },
+  { hours: 24, label: '1 Día' },
+  { hours: 72, label: '3 Días' },
+  { hours: 168, label: '1 Semana' }
+];
 
 const ViewAlarm = () => {
   const { alarmId, userId, locationId } = useParams();
-  const [currentAlarm, setCurrentAlarm] = useState(null);
-  const [alarmLogs, setAlarmLogs] = useState([]);
-  const [currentChannel, setCurrentChannel] = useState(null);
-  const [currentDatalogger, setCurrentDatalogger] = useState(null);
   const location = useLocation();
   const [modalArchiveOpen, setModalArchiveOpen] = useState(false);
   const [modalLogOpen, setModalLogOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
 
-  const { 
-    fetchAlarmById,
-    loadingStates: { fetchAlarm: isLoading },
-    error 
-  } = useAlarmsStore();
+  // Hook para datos de la alarma
+  const {
+    currentAlarm,
+    alarmLogs,
+    currentChannel,
+    secondaryChannel,
+    currentDatalogger,
+    isLoadingAlarm,
+    errorAlarm,
+    refreshAlarm
+  } = useAlarmDetails(alarmId);
 
-  const { 
-    fetchAlarmLogsByAlarmId,
-    loadingStates: { fetchAlarmLogs: isLoadingLogs },
-    error: errorLogs 
-  } = useAlarmLogsStore();
+  // Hooks para datos de los canales
+  const {
+    dataChannel: primaryChannelData,
+    isLoading: isLoadingPrimaryChannel,
+    error: errorPrimaryChannel
+  } = useChannelDetails(currentChannel?.id || null);
 
   const {
-    channels, selectedChannel,
-    fetchChannelById,
-    loadingStates: { fetchChannel: isLoadingChannel },
-    error: errorChannel
-  } = useChannelsStore();
-
-  const {
-    dataloggers, selectedDatalogger,
-    fetchDataloggerById,
-    loadingStates: { fetchChannel: isLoadingDatalogger },
-    error: errorDatalogger
-  } = useDataloggersStore();
+    dataChannel: secondaryChannelData,
+    isLoading: isLoadingSecondaryChannel,
+    error: errorSecondaryChannel
+  } = useChannelDetails(secondaryChannel?.id || null, 120, true);
 
   const {
     selectedUser,
     fetchUserById,
-    isLoading: isLoadingUser ,
+    isLoading: isLoadingUser,
     error: errorUser
   } = useUsersStore();
 
@@ -70,113 +76,151 @@ const ViewAlarm = () => {
     error: errorLocation
   } = useLocationsStore();
 
-  const [modalUsuariosOpen, setModalUsuariosOpen] = useState(false); 
-
-  const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
-
-
-
-  useEffect(() => {
-    const loadAlarm = async () => {
-      const alarm = await fetchAlarmById(alarmId);
-      setCurrentAlarm(alarm);
-    };
-
-    if (alarmId) {
-      loadAlarm();
+  // Cargar usuario y ubicación
+  React.useEffect(() => {
+    if (userId) {
+      fetchUserById(userId);
     }
-  }, [alarmId]);
-
-  useEffect(() => {    
-   const loadUser = async () => {
-      await fetchUserById(userId);   
-    };
-  if (userId) {  
-    loadUser();
-  }
-      
-  }, [userId] )
-
-  useEffect(() => {    
-    const loadLocation = async () => {
-       await fetchLocationById(locationId);   
-     };
-    if (locationId) {  
-      loadLocation();
+    if (locationId) {
+      fetchLocationById(locationId);
     }
-       
-   }, [locationId] )
+  }, [userId, locationId]);
 
-  useEffect(() => {
-    const loadChannelAndLogs = async () => {
-      if (currentAlarm) {
-        // Primero cargamos los logs
-        const logs = await fetchAlarmLogsByAlarmId(currentAlarm.id);
-        setAlarmLogs(logs || []);
+  // Actualizar alarma después de archivar/desarchivar
+  React.useEffect(() => {
+    if (!modalArchiveOpen && currentAlarm?.id) {
+      const timeout = setTimeout(() => {
+        refreshAlarm();
+      }, 400);
+      return () => clearTimeout(timeout);
+    }
+  }, [modalArchiveOpen, currentAlarm?.id]);
 
-        // Luego buscamos el canal
-        const channelFromStore = channels.find(c => c.canales_id === currentAlarm.canal_id);
-        if (channelFromStore) {
-          setCurrentChannel(channelFromStore);
-        } else {
-          try {
-            const fetchedChannel = await fetchChannelById(currentAlarm.canal_id);
-            setCurrentChannel(fetchedChannel);
-          } catch (error) {
-            console.error('Error al cargar el canal:', error);
-          }
-        }
-      }
-    };
-    
-    loadChannelAndLogs();
-  }, [currentAlarm, channels]);
+  const isLoading = isLoadingAlarm || isLoadingUser || isLoadingLocation || 
+                   isLoadingPrimaryChannel || 
+                   (secondaryChannel && isLoadingSecondaryChannel);
 
-  useEffect(() => {
-    const loadDatalogger = async () => {
-      if (currentChannel?.datalogger_id) {
-        const dataloggerFromStore = dataloggers.find(d => d.id === currentChannel.datalogger_id);
-        if (dataloggerFromStore) {
-          setCurrentDatalogger(dataloggerFromStore);
-        } else {
-          try {
-            const fetchedDatalogger = await fetchDataloggerById(currentChannel.datalogger_id);
-            setCurrentDatalogger(fetchedDatalogger);
-          } catch (error) {
-            console.error('Error al cargar el datalogger:', error);
-          }
-        }
-      }
-    };
-
-    loadDatalogger();
-  }, [currentChannel, dataloggers]);
-
-    useEffect(() => {
-      if (!modalArchiveOpen && currentAlarm?.id) {        
-        const timeout = setTimeout(() => {
-          fetchAlarmById(currentAlarm.id).then(setCurrentAlarm);             
-          //console.log('Actualizando los usuarios a mostrar en ViewUser.jsx');     
-        }, 400);
-        return () => clearTimeout(timeout);
-      }
-    }, [modalArchiveOpen, fetchAlarmById, currentAlarm?.id]); 
-
-   
-
-  if (isLoading || isLoadingLogs || isLoadingChannel || isLoadingDatalogger || isLoadingUser || isLoadingLocation) {
+  if (isLoading) {
     return <LoadingSpinner message="Cargando detalles de la alarma..." />;
   }
 
-  if (error || errorLogs || errorChannel || errorDatalogger) {
-    return <div className={styles.error}>
-      {error || errorLogs || errorChannel || errorDatalogger}
-    </div>;
+  const error = errorAlarm || errorUser || errorLocation || 
+                errorPrimaryChannel || 
+                (secondaryChannel && errorSecondaryChannel);
+
+  if (error) {
+    return <div className={styles.error}>{error}</div>;
   }
 
   if (!currentAlarm) {
     return <div className={styles.error}>Alarma no encontrada</div>;
   }
+
+  // Preparar los datos para el gráfico digital
+  const prepareDigitalData = (data, channelName) => {
+    if (!data || !data.length) return [];
+    return data.map(point => ({
+      timestamp: point.fecha,
+      porcentaje_encendido: parseFloat(point.porcentaje_encendido),
+      failure: point.tiempo_total >= 900, // 15 minutos en segundos
+      channelName
+    }));
+  };
+
+  // Preparar los datos para el gráfico analógico
+  const prepareAnalogData = (data, channelName, multiplicador = 1) => {
+    if (!data || !data.length) return [];
+    return data.map(point => ({
+      timestamp: point.fecha,
+      value: parseFloat(point.valor) * multiplicador,
+      channelName
+    }));
+  };
+
+  const renderChart = () => {
+    if (!primaryChannelData || primaryChannelData.length === 0) {
+      return <p className={styles.noData}>No hay datos disponibles</p>;
+    }
+
+    const isDigital = currentChannel?.nombre_columna.startsWith('d');
+    const isAnalog = currentChannel?.nombre_columna.startsWith('a');
+
+    if (isDigital) {
+      const primaryData = prepareDigitalData(primaryChannelData, currentChannel?.nombre);
+      const secondaryData = secondaryChannel && secondaryChannelData ? 
+        prepareDigitalData(secondaryChannelData, secondaryChannel?.nombre) : [];
+
+      if (currentAlarm.tipo_alarma === 'FUNCIONAMIENTO_SIMULTANEO' && secondaryData.length > 0) {
+        return (
+          <TimeSeriesChart
+            dataSets={[primaryData, secondaryData]}
+            series={[
+              {
+                name: currentChannel?.nombre,
+                field: 'porcentaje_encendido',
+                color: '#2196F3'
+              },
+              {
+                name: secondaryChannel?.nombre,
+                field: 'porcentaje_encendido',
+                color: '#FF9800'
+              }
+            ]}
+            customTimeRanges={customTimeRanges}
+            yAxisTitle="Porcentaje de Encendido (%)"
+            showFailureMarkers={true}
+            enableZoom={true}
+          />
+        );
+      } else {
+        return (
+          <DigitalPorcentageOn
+            data={primaryData}
+            currentChannelName={currentChannel?.nombre}
+            currentChannelTimeProm={currentChannel?.tiempo_a_promediar}
+            customTimeRanges={customTimeRanges}
+          />
+        );
+      }
+    } else if (isAnalog) {
+      const primaryData = prepareAnalogData(primaryChannelData, currentChannel?.nombre, currentChannel?.multiplicador);
+      const secondaryData = secondaryChannel && secondaryChannelData ? 
+        prepareAnalogData(secondaryChannelData, secondaryChannel?.nombre, secondaryChannel?.multiplicador) : [];
+
+      if (currentAlarm.tipo_alarma === 'FUNCIONAMIENTO_SIMULTANEO' && secondaryData.length > 0) {
+        return (
+          <TimeSeriesChart
+            dataSets={[primaryData, secondaryData]}
+            series={[
+              {
+                name: currentChannel?.nombre,
+                field: 'value',
+                color: '#2196F3'
+              },
+              {
+                name: secondaryChannel?.nombre,
+                field: 'value',
+                color: '#FF9800'
+              }
+            ]}
+            customTimeRanges={customTimeRanges}
+            yAxisTitle={currentChannel?.unidad || 'Valor'}
+            showFailureMarkers={false}
+            enableZoom={true}
+          />
+        );
+      } else {
+        return (
+          <AnalogData
+            data={primaryChannelData}
+            mult={currentChannel?.multiplicador}
+          />
+        );
+      }
+    }
+
+    return <p className={styles.noData}>Tipo de canal no soportado</p>;
+  };
 
   const handleOpenLogModal = (log) => {
     setSelectedLog(log);
@@ -189,12 +233,12 @@ const ViewAlarm = () => {
   };
 
   const alarmButtons = (
-    (currentAlarm?.estado == '1') ?
+    currentAlarm?.estado == '1' ?
     (<>
       <BtnCallToAction
         text="Editar"
         icon="edit-regular.svg"
-        type="warning"        
+        type="warning"
         url={`${location.pathname}/editar`}
       />
       <BtnCallToAction
@@ -203,7 +247,7 @@ const ViewAlarm = () => {
         type="danger"
         onClick={() => setModalArchiveOpen(true)}
       />
-    </>):
+    </>) :
     (<>
       <BtnCallToAction
         text="Desarchivar"
@@ -222,7 +266,7 @@ const ViewAlarm = () => {
   const columns = [
     { label: 'DIA Y HORA DEL EVENTO', accessor: 'fecha', icon: '/icons/clock-regular.svg' },
     { label: 'EVENTO', accessor: 'evento', icon: '/icons/flag-regular.svg' },
-    { label: 'MENSAJE', accessor: 'mensaje', icon: '/icons/envelope-regular.svg' },    
+    { label: 'MENSAJE', accessor: 'mensaje', icon: '/icons/envelope-regular.svg' },
     { label: 'USUARIOS NOTIFICADOS', accessor: 'usuarios', icon: '/icons/user-regular.svg' }
   ];
 
@@ -255,13 +299,7 @@ const ViewAlarm = () => {
     }
   });
 
-
-  // Convertir el Map a un array final
   const preparedLogs = Array.from(eventosMap.values());
-
-
-
-  //console.log(preparedLogs[0]);
 
   return (
     <>
@@ -275,18 +313,18 @@ const ViewAlarm = () => {
         nombre={`${currentAlarm?.nombre}`}
       />
       {selectedLog && (
-        <ModalViewAlarmLog 
+        <ModalViewAlarmLog
           isOpen={modalLogOpen}
           onRequestClose={handleCloseLogModal}
           evento={selectedLog}
         />
       )}
 
-      <Title1 
+      <Title1
         type="alarmas"
         text={`Alarma: ${currentAlarm?.nombre}`}
       />
-      <Breadcrumb 
+      <Breadcrumb
         usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
         ubicacion={selectedLocation?.nombre}
         datalogger={currentDatalogger?.nombre}
@@ -299,38 +337,53 @@ const ViewAlarm = () => {
         buttons={alarmButtons}
       >
         <div className={styles.alarmInfo}>
-          {
-            currentAlarm?.estado == '0' &&
-            (<CustomTag text="Archivada" type="archive" icon="/icons/archive-solid.svg" />)
-            }
-          {/* <p><strong>Nombre:</strong> {currentAlarm.nombre}</p> */}
+          {currentAlarm?.estado == '0' && (
+            <CustomTag text="Archivada" type="archive" icon="/icons/archive-solid.svg" />
+          )}
           <p><strong>Condición:</strong> {currentAlarm.condicion_mostrar}</p>
-          {/* <p><strong>Estado:</strong> {currentAlarm.estado ? 'Activa' : 'Inactiva'}</p> */}
           <p><strong>Tipo de Alarma:</strong> {currentAlarm.tipo_alarma}</p>
           <p><strong>Descripción:</strong> {currentAlarm.descripcion}</p>
+
+          <p><strong>Canales monitoreados:</strong> <br/>
+            <CardBtnSmall 
+              title={currentChannel?.nombre || 'Canal principal'} 
+              url={`/panel/dataloggers/${currentDatalogger?.id}/canales/${currentChannel?.id}`} 
+            />
+            {currentAlarm.tipo_alarma === 'FUNCIONAMIENTO_SIMULTANEO' && secondaryChannel && (
+              <CardBtnSmall 
+                title={secondaryChannel.nombre || 'Canal secundario'} 
+                url={`/panel/dataloggers/${currentDatalogger?.id}/canales/${secondaryChannel.id}`} 
+              />
+            )}
+          </p>
+
           <p><strong>Fecha de creación:</strong> {new Date(currentAlarm.fecha_creacion).toLocaleDateString()}</p>
         </div>
       </CardImage>
+
+      <div className={styles.chartContainer}>
+        {renderChart()}
+      </div>
+
       <Title2 type="historial" text={`Historial de disparos para alarma ${currentAlarm.nombre}`} />
       
-      {isLoadingLogs ? (
+      {isLoading ? (
         <LoadingSpinner message="Cargando historial de alarmas..." />
-      ) : errorLogs ? (
-        <div className={styles.error}>{errorLogs}</div>
+      ) : error ? (
+        <div className={styles.error}>{error}</div>
       ) : alarmLogs.length === 0 ? (
         <div className={styles.noData}>No hay registros de disparos para esta alarma</div>
       ) : (
         <div className={styles.tableContainer}>
-          <Table 
+          <Table
             columns={columns}
             data={preparedLogs}
             onRowClick={(row) => handleOpenLogModal(row)}
           />
-
         </div>
-      )}      
+      )}
     </>
   );
-}; 
+};
 
 export default ViewAlarm;

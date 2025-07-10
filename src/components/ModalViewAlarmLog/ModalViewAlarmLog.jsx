@@ -77,7 +77,7 @@ const ModalViewAlarmLog = ({ isOpen, onRequestClose, evento }) => {
     )
   }
 
-  console.log(solutions);
+  //console.log(solutions);
 
   return (
     <ModalTemplate

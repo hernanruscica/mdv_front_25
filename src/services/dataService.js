@@ -6,6 +6,7 @@ export const dataService = {
       const response = await axiosClient.get(
         `/api/data/getporcentages/${nombreTabla}/${nombreColumna}/${minutosAtras}/${tiempoPromedio}`
       );      
+      //console.log('Response:', response.data);
       return response.data.data;
     } catch (error) {
       console.error('Error al obtener datos:', error);

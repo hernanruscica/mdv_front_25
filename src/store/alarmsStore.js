@@ -58,8 +58,7 @@ export const useAlarmsStore = create((set) => ({
   },
   
   fetchAlarmsByLocation: async (locationId) => {
-    //console.log('Fetching alarms by location:', locationId);
-    if (!locationId) return;
+    if (!locationId) return [];
     
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchAlarms: true },
@@ -68,16 +67,18 @@ export const useAlarmsStore = create((set) => ({
 
     try {
       const alarms = await alarmsService.getAllByLocation(locationId);
-      //console.log('Alarms by location:', alarms);
       set(state => ({
-        alarms,
+        alarms: Array.isArray(alarms) ? alarms : [],
         loadingStates: { ...state.loadingStates, fetchAlarms: false }
       }));
+      return Array.isArray(alarms) ? alarms : [];
     } catch (error) {
       set(state => ({
         error: 'Error fetching location alarms',
-        loadingStates: { ...state.loadingStates, fetchAlarms: false }
+        loadingStates: { ...state.loadingStates, fetchAlarms: false },
+        alarms: []
       }));
+      return [];
     }
   },
   
@@ -168,7 +169,7 @@ export const useAlarmsStore = create((set) => ({
 
     try {
       const alarms = await alarmsService.getAllByChannel(channelId);
-      console.log('Alarms by channel:', alarms);
+      //console.log('Alarms by channel:', alarms);
       set(state => ({
         alarms,
         loadingStates: { ...state.loadingStates, fetchAlarmsByChannel: false }

@@ -1,209 +1,90 @@
-import React, { useState,useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
-import {Title2} from '../../components/Title2/Title2';
+import { Title2 } from '../../components/Title2/Title2';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
-import  BtnCallToAction  from '../../components/BtnCallToAction/BtnCallToAction';
+import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardImage from '../../components/CardImage/CardImage';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import { useAuthStore } from '../../store/authStore';
-import { useDataloggersStore } from '../../store/dataloggersStore';
-import { useChannelsStore } from '../../store/channelsStore';
-import { useAlarmsStore } from '../../store/alarmsStore';
-import { useLocationsStore } from '../../store/locationsStore';
-import { useDataStore } from '../../store/dataStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import styles from './ViewDatalogger.module.css';
 import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCards';
 import Table from '../../components/Table/Table';
-import { useNavigate } from 'react-router-dom';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
+import { useDataloggerDetails } from '../../hooks/useDataloggerDetails';
 
 const ViewDatalogger = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [dataloggerChannels, setDataloggerChannels] = useState([]);
-  const { id } = useParams();
-  const user = useAuthStore(state => state.user);
-  const { fetchDataChannel } = useDataStore();
-  const navigate = useNavigate();
-  const hoursBackView = 120;
-  
-  const { 
-    dataloggers, 
-    loadingStates: { 
-      fetchDataloggers: isLoading,
-      fetchDatalogger: isLoadingDatalogger 
-    },     
-    fetchDataloggers,
-    fetchDataloggerById 
-  } = useDataloggersStore();
-
-  const {
-    channels,
-    loadingStates: { fetchChannels: isLoadingChannels },
-    fetchChannels
-  } = useChannelsStore();
-
-  const {
-    alarms,
-    loadingStates: { fetchAlarmsByLocation: isLoadingAlarms },    
-    fetchAlarmsByLocation
-  } = useAlarmsStore();
-
-  const {
-    locations,
-    loadingStates: { fetchLocations: isLoadingLocations },
-    fetchLocations
-  } = useLocationsStore();
-
-  const [currentDatalogger, setCurrentDatalogger] = React.useState(null);
-
   const [modalOpen, setModalOpen] = useState(false);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const user = useAuthStore(state => state.user);
   
+  const {
+    currentDatalogger,
+    dataloggerChannels,
+    dataloggerAlarms,
+    location,
+    isLoading,
+    error,
+    channelCounts,
+    refreshDatalogger
+  } = useDataloggerDetails(parseInt(id));
 
-  useEffect(() => {
-    const loadDatalogger = async (id) => {
-      const currentDatalogger = await fetchDataloggerById(id);   
-      setCurrentDatalogger(currentDatalogger);
-    };
-    
-    if (!dataloggers || dataloggers.length === 0){
-      loadDatalogger(id);
-    }else{
-      const currentDatalogger = dataloggers.find(d => d.id === parseInt(id));
-      setCurrentDatalogger(currentDatalogger);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    const loadData = async () => {      
-      if (currentDatalogger) {        
-        //const currentChannels = await fetchChannels(user);        
-        await fetchAlarmsByLocation(currentDatalogger.ubicacion_id);    
-      }     
-    };
-    loadData();
-  }, [currentDatalogger]); 
-  
-  // Modifica el useEffect para manejar dataloggerChannels
-  useEffect(() => {
-    const loadData = async () => {
-      if (currentDatalogger && channels) {
-        // Filtra los canales para el datalogger actual
-        const filteredChannels = channels.filter(
-          channel => channel.datalogger_id === currentDatalogger.id
-        );        
-        // Busca los datos de cada canal
-        const channelsWithData = await Promise.all(
-          filteredChannels.map(async (channel) => {
-            const nombreTabla = currentDatalogger.nombre_tabla;
-            const nombreColumna = channel.nombre_columna;
-            const minutosAtras = hoursBackView * 60; 
-            const tiempoPromedio = channel?.tiempo_a_promediar || 15; 
-            
-            const channelData = await fetchDataChannel(
-              nombreTabla,
-              nombreColumna,
-              minutosAtras,
-              tiempoPromedio
-            );
-            //console.log('nombreColumna',nombreColumna);
-            return {
-              ...channel,
-              data: channelData
-            };
-          })
-        );
-
-        setDataloggerChannels(channelsWithData);        
-      }
-    };
-    
-    loadData();
-  }, [currentDatalogger, channels.length, fetchDataChannel]);
-
- 
-  useEffect(() => {
+  // Efecto para actualizar el datalogger después de cerrar el modal
+  React.useEffect(() => {
     if (!modalOpen && currentDatalogger?.id) {
-      // Espera un pequeño delay para asegurar que el update terminó
       const timeout = setTimeout(() => {
-        fetchDataloggerById(currentDatalogger.id).then(setCurrentDatalogger);
+        refreshDatalogger();
       }, 200);
       return () => clearTimeout(timeout);
     }
-  }, [modalOpen, fetchDataloggerById, currentDatalogger?.id]); 
+  }, [modalOpen, currentDatalogger?.id]);
 
-  //     
-  if (isLoadingChannels || isLoadingDatalogger || isLoadingAlarms) {
+  if (isLoading) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-
-  if (!currentDatalogger) {
-    return <div className={styles.error}>Datalogger no encontrado</div>;
+  if (error || !currentDatalogger) {
+    return <div className={styles.error}>Error: {error || 'Datalogger no encontrado'}</div>;
   }
-  
-  const location = locations?.find(loc => loc.ubicaciones_id === currentDatalogger?.ubicacion_id);
-  
-  // Función para contar canales analógicos y digitales
-  const getChannelCounts = () => {
-    if (!dataloggerChannels) return { analog: 0, digital: 0 };
-    
-    return dataloggerChannels.reduce((acc, channel) => {
-      if (channel.nombre_columna.startsWith('d')) {
-        acc.digital++;
-      } else {
-        acc.analog++;
-      }
-      return acc;
-    }, { analog: 0, digital: 0 });
-  };
 
-  const channelCounts = getChannelCounts();
-  const dataloggerAlarms = alarms?.filter(alarm => alarm.datalogger_id === currentDatalogger?.id) || [];
-
-  const dataloggerButtons =     
-      (currentDatalogger?.estado == '1') ?
-      (<>
-        <BtnCallToAction
-          text="Editar"
-          icon="edit-regular.svg"
-          type="warning"
-          url={`/panel/dataloggers/${currentDatalogger?.id}/editar`}
-        />
-        <BtnCallToAction
-          text="Archivar"
-          icon="archive-solid.svg"
-          type="danger"
-          onClick={() => setModalOpen(true)}
-          //url={`/panel/dataloggers/${currentDatalogger?.id}/archivar`}
-        />
-      </>) :
-      (<>
-          <BtnCallToAction
-            text="Desarchivar"
-            icon="save-regular.svg"          
-            onClick={() => setModalOpen(true)}
-            //url={`/panel/dataloggers/${currentDatalogger?.id}/desarchivar`}
-          />
-          <BtnCallToAction
-            text="Eliminar"
-            icon="trash-alt-regular.svg"
-            type="danger"
-            url={`/panel/dataloggers/${currentDatalogger?.id}/eliminar`}
-          />
-      </>) ;
-  
-
-  const getChannelName = (channelId) => {
-    const channel = channels?.find(ch => ch.canales_id === channelId);
-    return channel ? channel.canales_nombre : 'Canal no encontrado';
-  };
+  const dataloggerButtons = currentDatalogger.estado == '1' ? (
+    <>
+      <BtnCallToAction
+        text="Editar"
+        icon="edit-regular.svg"
+        type="warning"
+        url={`/panel/dataloggers/${currentDatalogger.id}/editar`}
+      />
+      <BtnCallToAction
+        text="Archivar"
+        icon="archive-solid.svg"
+        type="danger"
+        onClick={() => setModalOpen(true)}
+      />
+    </>
+  ) : (
+    <>
+      <BtnCallToAction
+        text="Desarchivar"
+        icon="save-regular.svg"
+        onClick={() => setModalOpen(true)}
+      />
+      <BtnCallToAction
+        text="Eliminar"
+        icon="trash-alt-regular.svg"
+        type="danger"
+        url={`/panel/dataloggers/${currentDatalogger.id}/eliminar`}
+      />
+    </>
+  );
 
   const columns = [
     { label: 'NOMBRE DE LA ALARMA', accessor: 'nombreAlarma' },
-    { label: 'NOMBRE DEL CANAL', accessor: 'nombreCanal' },
+    //{ label: 'NOMBRE DEL CANAL', accessor: 'nombreCanal' },
     { label: 'CONDICIÓN', accessor: 'condicion_mostrar' },
     { label: 'ESTADO', accessor: 'estado' },
   ];
@@ -214,50 +95,53 @@ const ViewDatalogger = () => {
 
   const preparedAlarms = dataloggerAlarms.map(alarm => ({
     nombreAlarma: alarm.nombre,
-    nombreCanal: alarm.canal_nombre,//getChannelName(alarm.canal_id),
+    //nombreCanal: alarm.canal_nombre,
     condicion_mostrar: alarm.condicion_mostrar || 'Sin condición',
     canalId: alarm.canal_id,
     estado: alarm.estado,
-    id: alarm.id  // Aquí está el cambio clave
-  }));  
-
-  //console.log('dataloggerChannels',dataloggerChannels);
+    id: alarm.id
+  }));
 
   return (
     <>
-    <ModalSetArchive
-      isOpen={modalOpen}
-      onRequestClose={() => setModalOpen(false)}
-      entidad="datalogger"
-      entidadId={currentDatalogger?.id}
-      nuevoEstado={currentDatalogger?.estado == '1' ? 0 : 1}
-      redirectTo={`/panel/dataloggers/${currentDatalogger?.id}`}
-      nombre={`${currentDatalogger?.nombre}`}
-    />
+      <ModalSetArchive
+        isOpen={modalOpen}
+        onRequestClose={() => setModalOpen(false)}
+        entidad="datalogger"
+        entidadId={currentDatalogger.id}
+        nuevoEstado={currentDatalogger.estado == '1' ? 0 : 1}
+        redirectTo={`/panel/dataloggers/${currentDatalogger.id}`}
+        nombre={currentDatalogger.nombre}
+      />
+      
       <Title1 
         type="dataloggers"
         text={currentDatalogger.nombre}
       />
+      
       <Breadcrumb datalogger={currentDatalogger.nombre}/>
+      
       <CardImage
         image={currentDatalogger.foto ? `${import.meta.env.VITE_IMAGE_URL}/${currentDatalogger.foto}` : '/images/default-datalogger.webp'}
         title={currentDatalogger.nombre}
         buttons={dataloggerButtons}
       >
         <div className={styles.dataloggerInfo}>
-          {
-            currentDatalogger.estado == '0' &&
-            (<CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />)
-            }
+          {currentDatalogger.estado == '0' && (
+            <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
+          )}
           <p className={styles.description}>{currentDatalogger.descripcion}</p>
           <p><strong>MAC:</strong> {currentDatalogger.direccion_mac}</p>
-          <p><strong>Ubicación:</strong> {
-            (location) ?
-            <CardBtnSmall
-              title={location.ubicaciones_nombre}
-              url={`/panel/ubicaciones/${location.ubicaciones_id}`} />
-              : 'No especificada'
-          }</p>
+          <p>
+            <strong>Ubicación:</strong> {
+              location ? (
+                <CardBtnSmall
+                  title={location.ubicaciones_nombre}
+                  url={`/panel/ubicaciones/${location.ubicaciones_id}`}
+                />
+              ) : 'No especificada'
+            }
+          </p>
           <p><strong>Creado el:</strong> {new Date(currentDatalogger.fecha_creacion).toLocaleDateString()}</p>
           <p>
             <strong>Canales conectados:</strong>{" "}
@@ -265,12 +149,12 @@ const ViewDatalogger = () => {
           </p>
           <p>
             <strong>Alarmas programadas:</strong>{" "}
-            {(dataloggerAlarms && dataloggerAlarms.length > 0)?
-            <CardBtnSmall
-              title={`Ver ${dataloggerAlarms.length} alarmas`}
-              url={`/panel/dataloggers/${currentDatalogger.id}/alarmas`}
-            />
-            : 'No hay alarmas programadas'
+            {dataloggerAlarms.length > 0 ? (
+              <CardBtnSmall
+                title={`Ver ${dataloggerAlarms.filter(alarm => alarm.estado == '1').length} alarmas activas`}
+                url={`/panel/dataloggers/${currentDatalogger.id}/alarmas`}
+              />
+            ) : 'No hay alarmas programadas'
             }
           </p>
         </div>
@@ -281,40 +165,44 @@ const ViewDatalogger = () => {
         type="canales"
       />
       
-      {/*Si es propietario puede agregar canales al datalogger */
-      (user.espropietario == 1) &&      
-       <BtnCallToAction
-            text="Agregar canal"
-            icon="plus-circle-solid.svg"
-            type="normal"
-            url={`/panel/dataloggers/${currentDatalogger.id}/canales/agregar`}
+      {user.espropietario == '1' && (
+        <BtnCallToAction
+          text="Agregar canal"
+          icon="plus-circle-solid.svg"
+          type="normal"
+          url={`/panel/dataloggers/${currentDatalogger.id}/canales/agregar`}
         />
-      }{
-      (dataloggerChannels && dataloggerChannels.length > 0) ?
+      )}
+
+      {dataloggerChannels.length > 0 ? (
         <ShowChannelsCards
           channels={dataloggerChannels}
-          alarms={alarms}
+          alarms={dataloggerAlarms}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          showAddButton={user.espropietario == 1}
+          showAddButton={user.espropietario == '1'}
         />
-        : 'No hay canales todavia'
-      }
+      ) : 'No hay canales todavía'}
+
       <Title2 
         text={`Alarmas programadas en ${currentDatalogger.nombre}`}
         type="alarmas"
-      />         
-      
-      { (preparedAlarms && preparedAlarms.length > 0) ? 
+      />
+
+      {preparedAlarms.length > 0 ? (
         <div className={styles.tableContainer}>
           <Table 
             columns={columns}
             data={preparedAlarms}
             onRowClick={handleAlarmClick}
+            showAddButton={user.espropietario == '1'}
           />
         </div>
-      : (<p className={styles.description}>Este datalogger todavia no tiene alarmas, para agregar una primero tiene que elegir un canal.</p>)
-      }
+      ) : (
+        <p className={styles.description}>
+          Este datalogger todavía no tiene alarmas, para agregar una primero tiene que elegir un canal.
+        </p>
+      )}
     </>
   );
 };
