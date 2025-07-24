@@ -153,7 +153,7 @@ const ViewLocation = () => {
       <CardImage
         image={currentLocation?.foto ? `${import.meta.env.VITE_IMAGE_URL}/${currentLocation?.foto}` : '/images/default-location.png'}
         title={currentLocation?.nombre}
-        buttons={locationButtons}
+        buttons={user.espropietario == 1 ? locationButtons : null}
       >
         <div className={styles.locationInfo}>
           {
@@ -196,19 +196,19 @@ const ViewLocation = () => {
       </CardImage>
 
       <Title2 text={`Dataloggers en ${currentLocation?.nombre}`} type="dataloggers"/>            
-      <BtnCallToAction
+      {/* <BtnCallToAction
         text="Agregar datalogger"
         icon="plus-circle-solid.svg"
         type="normal"
         url={`/panel/dataloggers/agregar`}
-      />    
+      />     */}
       {(dataloggers.length > 0) ?
         <ShowDataloggersCards
           dataloggers={dataloggers.filter(d => d.ubicacion_id === parseInt(id))}
           channels={channels}
           alarms={alarms}
           locations={[currentLocation]}
-          showAddButton={false}
+          showAddButton={user.espropietario == 1}
         /> :
         <p>No hay dataloggers en esta ubicación</p>
       }      

@@ -79,7 +79,7 @@ const Users = () => {
     estado: user.estado
   }));
 
-  //console.log('preparedData', preparedData)
+  console.log('es admin de alguna ubicacion', user.esadministrador);
 
   return (
     <>
@@ -94,7 +94,7 @@ const Users = () => {
           columns={columns} 
           data={preparedData} 
           onRowClick={handleRowClick}
-          showAddButton={ user?.espropietario == 1}
+          showAddButton={ user?.espropietario == 1 || user.esadministrador}
         />
       </div>
     </>

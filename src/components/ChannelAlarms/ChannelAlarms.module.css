@@ -1,9 +1,12 @@
 .alarmsContainer {
-  margin-top: 2rem;
+  
+  width: 100%;
+  padding: 1em;
 }
 
 .tableContainer {
-  margin-top: 1rem;
+  
+  padding: 1em;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

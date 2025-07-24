@@ -56,6 +56,7 @@ export const routes = [
   { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm /> },
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/agregar", element: <UnderConstruction />, private: true },
+  { path: "/panel/dataloggers/:dataloggerId/alarmas/agregar", element: <UnderConstruction />, private: true },
   { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId/editar", element: <UnderConstruction />, private: true },  
   { path: "/panel/alarmas/:alarmId/eliminar", element: <UnderConstruction />, private: true },
 ];

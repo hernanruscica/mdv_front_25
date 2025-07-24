@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 
 export const PrivateRoute = ({ children }) => {
   const user = useAuthStore(state => state.user);
+  const logout = useAuthStore(state => state.logout);
   const token = useAuthStore(state => state.token);
   const location = useLocation();
   const path = location.pathname;
@@ -13,13 +14,13 @@ export const PrivateRoute = ({ children }) => {
     try {
       const { exp } = jwtDecode(token);
       if (Date.now() >= exp * 1000) {
-        // Token expirado
-        useAuthStore.getState().logout(); // O la función que limpias el store
+        // Token expirado, llamamos a la acción de logout
+        logout();
         return <Navigate to="/ingresar" replace />;
       }
     } catch (e) {
-      // Token corrupto
-      useAuthStore.getState().logout();
+      // Token corrupto, llamamos a la acción de logout
+      logout();
       return <Navigate to="/ingresar" replace />;
     }
   }
@@ -29,10 +30,19 @@ export const PrivateRoute = ({ children }) => {
     return <Navigate to="/ingresar" replace />;
   }
 
-  // Verificar permisos de propietario para rutas de agregar y editar
-  if ((path.endsWith('agregar') || path.endsWith('editar')) && user?.espropietario !== 1) {
+  // Verificar permisos de propietario para rutas de agregar
+  if (path.endsWith('agregar') && (user?.espropietario !== 1 && user?.esadministrador !== true)) {
     return <Navigate to="/panel" replace />;
   }
+
+  
+
+  // Verifica permisos de administrador para rutas de edición
+  if (path.endsWith('editar') && (user?.espropietario !== 1 && user?.esadministrador !== true)) {
+    return <Navigate to="/panel" replace />;
+  }
+
+  //console.log('location.pathname', path.includes('ubicaciones'));
 
   return children;
 };

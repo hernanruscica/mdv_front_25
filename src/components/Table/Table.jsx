@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SearchBar from '../SearchBar/SearchBar';
 import CustomTag from '../CustomTag/CustomTag';
 import styles from './Table.module.css';
+import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
 
 const Table = ({ columns, data, onRowClick, showAddButton }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -141,7 +142,7 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
     <div>
       <div className={styles.controls}>
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} placeholder="Buscar..." />
-        {showAddButton && (
+        {showAddButton && (          
           <label className={styles.checkboxContainer}>
             <input
               type="checkbox"
@@ -149,7 +150,7 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
               onChange={handleCheckArchived}
             />
             <span>Mostrar también los archivados</span>
-          </label>
+          </label>          
         )}
         <span>Mostrando {filteredData.length} resultados</span>
         <div className={styles.pagination}>

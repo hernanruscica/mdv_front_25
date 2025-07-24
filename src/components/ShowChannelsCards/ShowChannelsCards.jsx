@@ -41,7 +41,7 @@ const ShowChannelsCards = ({
     { hours: 72, label: '3 Días' },    
   ];
 
-  //console.log(filteredChannels[0].data);
+  //console.log(channels[0]['datalogger_id']);
 
   // Preparar los datos para el gráfico digital
   const prepareDigitalData = (data) => {
@@ -52,12 +52,15 @@ const ShowChannelsCards = ({
       failure: point.tiempo_total >= 900 // 15 minutos en segundos
     }));
   };
+  const oneChannel = channels[0];
+  const dataloggerId = oneChannel ? oneChannel.datalogger_id : null;
+  //console.log(dataloggerId.datalogger_id);
 
   return (
     <>
       <div className={styles.controlsContainer}>
         <ButtonsBar 
-          itemsName='canales' 
+          itemsName={`dataloggers/${dataloggerId}/canales` }
           itemsQty={filteredChannels.length}
           showAddButton={showAddButton}
         >

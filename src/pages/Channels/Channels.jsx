@@ -123,7 +123,7 @@ const Channels = () => {
       />
       <Breadcrumb datalogger={currentDatalogger?.nombre || ''}/>   
 
-      {
+      {/*
         (user?.espropietario === 1) && (
           <BtnCallToAction
             text="Agregar"
@@ -132,7 +132,7 @@ const Channels = () => {
             url={`/panel/dataloggers/${currentDatalogger?.id}/canales/agregar`}
           />
         )
-      }
+      */}
 
       <ShowChannelsCards
         channels={currentChannels}

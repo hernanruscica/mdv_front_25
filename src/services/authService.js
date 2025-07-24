@@ -11,6 +11,8 @@ export const authService = {
       if (data.token) {
         localStorage.setItem('token', data.token);
       }
+      data.user.esadministrador =  data.user.ubicaciones.some((ubi) => ubi.usuarios_nombre_rol == "administrador");
+      //console.log('es admin en alguna ubicacion? - authservice', data.user.ubicaciones.some((ubi) => ubi.usuarios_nombre_rol == "administrador")) ;
       return data;
     } catch (error) {
       console.error('Login error:', error);

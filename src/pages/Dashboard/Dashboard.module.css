@@ -23,3 +23,24 @@
   padding: 1rem;
 }
 
+.cardGauge {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-width: 320px;
+  padding-top: 16px;
+  background-color: #EEE;
+  text-decoration: none;
+  color: #333;
+  h3 {
+    text-align: center;
+    margin: 0;
+    font-weight: 300;
+    font-size: 0.9em;
+    
+  }
+}
+.cardGauge:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  cursor: pointer;
+}

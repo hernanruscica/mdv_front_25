@@ -1,14 +1,17 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { Title1 } from "../../components/Title1/Title1";
 import styles from "./Contact.module.css";
 import { useAuthStore } from "../../store/authStore";
 import  BreadCrumb  from "../../components/Breadcrumb/Breadcrumb";
+import toast from "react-hot-toast";
 
 const Contact = () => {
   const { user } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const form = e.target;
 
     // Usar la API de Formspree
@@ -22,11 +25,13 @@ const Contact = () => {
     });
 
     if (response.ok) {
-      alert("¡Mensaje enviado exitosamente!");
+      toast.success("¡Mensaje enviado exitosamente!");
       form.reset();
     } else {
-      alert("Hubo un error al enviar el mensaje. Inténtelo de nuevo.");
+      toast.error("Hubo un error al enviar el mensaje. Inténtelo de nuevo.");
     }
+
+    setIsSubmitting(false);
   };
 
   return (
@@ -78,8 +83,8 @@ const Contact = () => {
             ></textarea>
           </div>
 
-          <button className={styles.loginFormBtn} type="submit">
-            Enviar
+          <button className={styles.loginFormBtn} type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Enviando..." : "Enviar"}
           </button>
         </form>
         </main>

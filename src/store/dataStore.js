@@ -20,6 +20,10 @@ export const useDataStore = create((set) => ({
       
       if (nombreColumna.startsWith('d')) {        
         data = await dataService.getPorcentages(nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);        
+        
+        // console.log('parametros de fetchDataChannel en datastore:', nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);        
+        // console.log('Datos obtenidos en datastore', `${nombreTabla}_${nombreColumna}`, data);
+
       } else if (nombreColumna.startsWith('a')) {        
         data = await dataService.getAnalogData(nombreTabla, nombreColumna, minutosAtras);        
       }

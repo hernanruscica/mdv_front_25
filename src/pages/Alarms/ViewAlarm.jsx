@@ -14,6 +14,7 @@ import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import ModalViewAlarmLog from '../../components/ModalViewAlarmLog/ModalViewAlarmLog';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
+import Gauge from '../../components/Gauge/Gauge';
 import { useAlarmDetails } from '../../hooks/useAlarmDetails';
 import { useChannelDetails } from '../../hooks/useChannelDetails';
 import DigitalPorcentageOn from '../../components/Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
@@ -301,6 +302,8 @@ const ViewAlarm = () => {
 
   const preparedLogs = Array.from(eventosMap.values());
 
+  console.log(currentChannel)
+
   return (
     <>
       <ModalSetArchive
@@ -343,6 +346,24 @@ const ViewAlarm = () => {
           <p><strong>Condición:</strong> {currentAlarm.condicion_mostrar}</p>
           <p><strong>Tipo de Alarma:</strong> {currentAlarm.tipo_alarma}</p>
           <p><strong>Descripción:</strong> {currentAlarm.descripcion}</p>
+          <div className={styles.gaugePlaceholder}>              
+                {currentAlarm?.tipo_alarma == "PORCENTAJE_ENCENDIDO" && (() => {
+                  const conditionOperator = currentAlarm.condicion.split(" ")[1];
+                  const conditionValue = currentAlarm.variable01;  
+                  const max = (conditionOperator.includes(">")) ? conditionValue : 100;
+                  const min = (conditionOperator.includes("<")) ? conditionValue : 0;
+                  const preparedData = prepareDigitalData(primaryChannelData);
+                  const lastData = parseFloat(preparedData[preparedData.length - 1]?.porcentaje_encendido, 2);
+                  //console.log(lastData)
+                  return (
+                    <Gauge 
+                      currentValue={lastData}
+                      alarmMin={min}
+                      alarmMax={max}                              
+                    />
+                  );
+                })()}
+              </div>
 
           <p><strong>Canales monitoreados:</strong> <br/>
             <CardBtnSmall 

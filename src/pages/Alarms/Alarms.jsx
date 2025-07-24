@@ -11,6 +11,7 @@ import { useLocationsStore } from '../../store/locationsStore';
 import { useChannelsStore } from '../../store/channelsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import Table from '../../components/Table/Table';
+import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 
 const Alarms = () => {  
   const { userId, locationId, dataloggerId, channelId } = useParams();
@@ -180,11 +181,21 @@ const Alarms = () => {
         ubicacion={selectedLocation?.nombre || ''}
         canal={currentChannel?.nombre || ''}
       />
+      {
+        (user?.espropietario == 1 || user?.esadministrador == true) && (          
+          <BtnCallToAction
+            text="Agregar alarma"
+            icon="plus-circle-solid.svg"
+            type="normal"
+            url={`/panel/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
+          />                           
+        )
+      }
       <Table 
         columns={columns}
         data={getTableData()}
         onRowClick={handleRowClick}
-        showAddButton={ user?.espropietario == 1 }
+        showAddButton={ user?.espropietario == 1 || user?.esadministrador == true }
       />
     </>
   );

@@ -124,7 +124,7 @@ const ViewDatalogger = () => {
       <CardImage
         image={currentDatalogger.foto ? `${import.meta.env.VITE_IMAGE_URL}/${currentDatalogger.foto}` : '/images/default-datalogger.webp'}
         title={currentDatalogger.nombre}
-        buttons={dataloggerButtons}
+        buttons={user.espropietario == 1 ? dataloggerButtons : null}
       >
         <div className={styles.dataloggerInfo}>
           {currentDatalogger.estado == '0' && (
@@ -163,17 +163,8 @@ const ViewDatalogger = () => {
       <Title2 
         text={`Canales del datalogger ${currentDatalogger.nombre}`}
         type="canales"
-      />
+      />      
       
-      {user.espropietario == '1' && (
-        <BtnCallToAction
-          text="Agregar canal"
-          icon="plus-circle-solid.svg"
-          type="normal"
-          url={`/panel/dataloggers/${currentDatalogger.id}/canales/agregar`}
-        />
-      )}
-
       {dataloggerChannels.length > 0 ? (
         <ShowChannelsCards
           channels={dataloggerChannels}
@@ -188,14 +179,22 @@ const ViewDatalogger = () => {
         text={`Alarmas programadas en ${currentDatalogger.nombre}`}
         type="alarmas"
       />
-
+      {(user.espropietario == 1 || user.esadministrador) && (
+        <BtnCallToAction
+          text="Agregar alarma"
+          icon="plus-circle-solid.svg"
+          type="normal"
+          url={`/panel/dataloggers/${currentDatalogger.id}/alarmas/agregar`}
+        />
+      )}
       {preparedAlarms.length > 0 ? (
+        
         <div className={styles.tableContainer}>
           <Table 
             columns={columns}
             data={preparedAlarms}
             onRowClick={handleAlarmClick}
-            showAddButton={user.espropietario == '1'}
+            showAddButton={user.espropietario == 1 || user.esadministrador == true}
           />
         </div>
       ) : (

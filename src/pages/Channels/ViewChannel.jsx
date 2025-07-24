@@ -138,7 +138,7 @@ const ViewChannel = () => {
         <CardImage
           image={`${import.meta.env.VITE_IMAGE_URL}/${currentChannel?.foto}`}
           title={currentChannel?.nombre}
-          buttons={channelButtons}
+          buttons={user.espropietario == 1 ? channelButtons : null}
         >
           {currentChannel?.estado == '0' && (
             <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
@@ -208,7 +208,7 @@ const ViewChannel = () => {
         channelId={channelId}
         dataloggerId={dataloggerId}
         onAlarmClick={handleAlarmClick}
-        showAddButton={user.espropietario == 1}
+        showAddButton={user.espropietario == 1 || user.esadministrador == true}
       />
     </>
   );
