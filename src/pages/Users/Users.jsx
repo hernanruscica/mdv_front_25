@@ -27,7 +27,7 @@ const Users = () => {
     // }
 
    fetchUsers(user);
-   console.log('Actualizando los usuarios a mostrar en Users.jsx');
+   //console.log('Actualizando los usuarios a mostrar en Users.jsx');
   }, [user, fetchUsers]);
 
 
@@ -94,7 +94,7 @@ const Users = () => {
           columns={columns} 
           data={preparedData} 
           onRowClick={handleRowClick}
-          showAddButton={ user?.espropietario == 1 || user.esadministrador}
+          showAddButton={ user?.espropietario == 1 || user?.esadministrador == true}
         />
       </div>
     </>

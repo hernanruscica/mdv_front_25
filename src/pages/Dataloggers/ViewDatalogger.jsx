@@ -15,6 +15,7 @@ import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import { useDataloggerDetails } from '../../hooks/useDataloggerDetails';
 
+
 const ViewDatalogger = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -173,13 +174,26 @@ const ViewDatalogger = () => {
           onSearchChange={setSearchTerm}
           showAddButton={user.espropietario == '1'}
         />
-      ) : 'No hay canales todavía'}
+      ) : 
+      (<>
+        <BtnCallToAction 
+          text="Agregar canal"
+          icon="plus-circle-solid.svg"
+          type="normal"
+          url={`/panel/dataloggers/${currentDatalogger.id}/canales/agregar`}  
+        />
+        <p>No hay canales todavía</p>
+        </>)}
 
-      <Title2 
-        text={`Alarmas programadas en ${currentDatalogger.nombre}`}
-        type="alarmas"
-      />
-      {(user.espropietario == 1 || user.esadministrador) && (
+      
+      
+      {preparedAlarms.length > 0 ? (
+        <>
+        <Title2 
+          text={`Alarmas programadas en ${currentDatalogger.nombre}`}
+          type="alarmas"
+        />
+        {(user.espropietario == 1 || user.esadministrador) && (
         <BtnCallToAction
           text="Agregar alarma"
           icon="plus-circle-solid.svg"
@@ -187,8 +201,6 @@ const ViewDatalogger = () => {
           url={`/panel/dataloggers/${currentDatalogger.id}/alarmas/agregar`}
         />
       )}
-      {preparedAlarms.length > 0 ? (
-        
         <div className={styles.tableContainer}>
           <Table 
             columns={columns}
@@ -197,6 +209,7 @@ const ViewDatalogger = () => {
             showAddButton={user.espropietario == 1 || user.esadministrador == true}
           />
         </div>
+        </>
       ) : (
         <p className={styles.description}>
           Este datalogger todavía no tiene alarmas, para agregar una primero tiene que elegir un canal.

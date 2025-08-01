@@ -149,7 +149,7 @@ const Alarms = () => {
     return filteredAlarms.map(alarm => ({
       nombreAlarma: alarm.nombre,
       datalogger: dataloggers.find(dl => dl.id == alarm.datalogger_id)?.nombre || 'Sin nombre',             
-      condicion_mostrar: alarm.condicion_mostrar,
+      condicion_mostrar: `${alarm.condicion_mostrar} ${alarm.variable01}` || 'Sin condición',
       estado: alarm.estado,
       url: `${baseUrl}/${alarm.id}`      
     }));

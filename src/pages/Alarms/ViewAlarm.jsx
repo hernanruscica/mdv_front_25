@@ -302,7 +302,7 @@ const ViewAlarm = () => {
 
   const preparedLogs = Array.from(eventosMap.values());
 
-  console.log(currentChannel)
+  //console.log(currentChannel)
 
   return (
     <>

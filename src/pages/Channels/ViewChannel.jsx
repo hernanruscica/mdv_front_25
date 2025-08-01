@@ -155,7 +155,7 @@ const ViewChannel = () => {
             <div className={cardInfoStyles.description}>            
               <p><strong>Creado el:</strong> {new Date(channelMainAlarm?.fecha_creacion).toLocaleDateString()}</p>
               <p><strong>Descripcion: </strong>{channelMainAlarm?.descripcion}</p>
-              <p><strong>Condicion: </strong>{channelMainAlarm?.condicion_mostrar}</p>
+              <p><strong>Condicion: </strong>{`${channelMainAlarm?.condicion_mostrar} ${channelMainAlarm?.variable01}`}</p>
               <div className={styles.gaugePlaceholder}>              
                 {channelMainAlarm?.tipo_alarma == "PORCENTAJE_ENCENDIDO" && (() => {
                   const conditionOperator = channelMainAlarm.condicion.split(" ")[1];

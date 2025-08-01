@@ -27,7 +27,7 @@ const ChannelAlarms = ({ alarms, channelId, dataloggerId, onAlarmClick, showAddB
       nombreAlarma: alarm.nombre,
       canal: alarm?.canal_nombre || 'Sin canal',
       tipo: alarm.tipo_alarma,  
-      condicion_mostrar: alarm.condicion_mostrar || 'Sin condición',
+      condicion_mostrar: `${alarm.condicion_mostrar} ${alarm.variable01}` || 'Sin condición',
       estado: alarm.estado,
       url: `/panel/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${alarm.id}`,  
       id: alarm.id

@@ -100,7 +100,7 @@ const Dashboard = () => {
               <strong>{users.length} Usuarios</strong>{" "}
               para ver o administrar, según los permisos de su usuario.
             </p>
-            {user?.espropietario === 1 && (
+            {(user?.espropietario == 1 || user?.esadministrador == true) && (
               <CardBtnSmall 
                 title='Agregar usuario'
                 url='/panel/usuarios/agregar'

@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { jwtDecode } from 'jwt-decode';
 
@@ -8,6 +8,9 @@ export const PrivateRoute = ({ children }) => {
   const token = useAuthStore(state => state.token);
   const location = useLocation();
   const path = location.pathname;
+  // const { token: tokenParams } = useLocation().params || {};
+  const { token: tokenParams } = useParams();
+  
 
   // Chequeo proactivo de expiración (solo si es JWT)
   if (token) {
@@ -33,13 +36,25 @@ export const PrivateRoute = ({ children }) => {
   // Verificar permisos de propietario para rutas de agregar
   if (path.endsWith('agregar') && (user?.espropietario !== 1 && user?.esadministrador !== true)) {
     return <Navigate to="/panel" replace />;
-  }
-
-  
+  }  
 
   // Verifica permisos de administrador para rutas de edición
   if (path.endsWith('editar') && (user?.espropietario !== 1 && user?.esadministrador !== true)) {
     return <Navigate to="/panel" replace />;
+  }
+
+  //Verifica permisos para la ruta '/panel/verestadoalarma/:token' si dentro del token hay un atributo 'userId' que sea igual al user.id avanza, sino vuelve al panel
+  if (path.includes('verestadoalarma') && tokenParams) {
+    try {
+      const decodedToken = jwtDecode(tokenParams);
+      console.log(decodedToken.userId, typeof decodedToken.userId, user.id, typeof user.id);
+      if (decodedToken.userId !== user.id) {
+        return <Navigate to="/panel" replace />;
+      }
+    } catch (e) {
+      console.error('Error decoding token:', e);
+      return <Navigate to="/panel" replace />;
+    }
   }
 
   //console.log('location.pathname', path.includes('ubicaciones'));

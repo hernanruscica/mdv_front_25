@@ -4,6 +4,7 @@ import SearchBar from '../SearchBar/SearchBar';
 import CustomTag from '../CustomTag/CustomTag';
 import styles from './Table.module.css';
 import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
+import { useAuthStore } from '../../store/authStore';
 
 const Table = ({ columns, data, onRowClick, showAddButton }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -12,6 +13,7 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
   const itemsPerPage = 10;
   const [showArchived, setShowArchived] = useState(showAddButton);
   //const [showAddButton, setShowAddButton] = useState(true);
+  const { user } = useAuthStore();
 
   const sortedData = useMemo(() => {
     let sortableData = [...data];
@@ -135,14 +137,24 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
       ));
   };
 
-  //console.log('data', data);
+  //console.log('user', user);
   
 
   return (
     <div>
       <div className={styles.controls}>
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} placeholder="Buscar..." />
-        {showAddButton && (          
+        {showAddButton && (
+          <>
+
+          
+            <BtnCallToAction 
+              text="Agregar" 
+              icon="plus-circle-solid.svg" 
+              url='/panel/usuarios/agregar'
+            />
+          
+
           <label className={styles.checkboxContainer}>
             <input
               type="checkbox"
@@ -150,7 +162,8 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
               onChange={handleCheckArchived}
             />
             <span>Mostrar también los archivados</span>
-          </label>          
+          </label>        
+          </>        
         )}
         <span>Mostrando {filteredData.length} resultados</span>
         <div className={styles.pagination}>

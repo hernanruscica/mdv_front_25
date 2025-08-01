@@ -50,7 +50,7 @@ const ViewUser = () => {
       const timeout = setTimeout(() => {
         fetchUserById(currentUser.id).then(setCurrentUser);   
         fetchUsers(user);
-        console.log('Actualizando los usuarios a mostrar en ViewUser.jsx');     
+        //console.log('Actualizando los usuarios a mostrar en ViewUser.jsx');     
       }, 400);
       return () => clearTimeout(timeout);
     }

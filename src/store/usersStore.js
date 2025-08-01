@@ -12,7 +12,7 @@ export const useUsersStore = create((set, get) => ({
     
     set({ isLoading: true, error: null });
     try {
-      const users = currentUser.espropietario === 1       
+      const users = currentUser.espropietario == 1       
       ? await usersService.getAll()
       : await usersService.getAllById(currentUser.id);
       
