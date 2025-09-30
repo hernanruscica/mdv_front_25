@@ -55,6 +55,7 @@ export const useDataloggersStore = create((set) => ({
         dataloggers,
         loadingStates: { ...state.loadingStates, fetchDataloggers: false }
       }));
+      return dataloggers;
     } catch (error) {
       set(state => ({
         error: 'Error fetching dataloggers',

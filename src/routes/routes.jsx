@@ -41,10 +41,10 @@ export const routes = [
 
   /* Alarms routes */
   // Alarmas routes / dataloggers
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true },
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true }, 
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true },//done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true }, //on progress
   // Alarmas routes / locations
-  { path: "/panel/ubicaciones/:businessUuid/alarmas", element: <Alarms />, private: true }, //on progress
+  { path: "/panel/ubicaciones/:businessUuid/alarmas", element: <Alarms />, private: true }, //done
   { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId/editar", element: <UnderConstruction />, private: true },
   // Alarmas routes / users
@@ -52,7 +52,7 @@ export const routes = [
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId/editar", element: <UnderConstruction />, private: true },
   // Alarmas routes / channels
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },//done
   { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/agregar", element: <UnderConstruction />, private: true },

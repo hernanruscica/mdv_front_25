@@ -38,6 +38,7 @@ const ViewChannel = () => {
   const navigate = useNavigate();
   const user = useAuthStore(state => state.user);
   const [modalOpen, setModalOpen] = useState(false);
+  const [currentAlarms, setCurrentAlarms] = useState([]);
   const hoursBackView = 8760; // un año
 
   const { datalogger, isLoadingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
@@ -66,6 +67,7 @@ const ViewChannel = () => {
     }
     if (!isLoadingDatalogger){
       loadData();
+      setCurrentAlarms(datalogger?.alarms.filter(al => al.channel_uuid === channelId));
     }
    }, [isLoadingDatalogger]);
 
@@ -78,7 +80,7 @@ const ViewChannel = () => {
     }
 
 
-console.log(datalogger?.table_name);
+//console.log(datalogger?.table_name);
 
 const handleAlarmClick = (row) => {
   navigate(`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.uuid}/alarmas/${row.id}`);
@@ -184,7 +186,7 @@ const handleAlarmClick = (row) => {
             )}
             <ChannelInfo 
               channel={currentChannel} 
-              alarms={datalogger?.alarms.filter(alarm => alarm.is_active == '1')} 
+              alarms={currentAlarms.filter(alarm => alarm.is_active == '1')} 
               datalogger={datalogger}
             />
           </CardImage>
@@ -193,7 +195,7 @@ const handleAlarmClick = (row) => {
 
       {datalogger &&
         <ChannelAlarms 
-        alarms={datalogger?.alarms}
+        alarms={currentAlarms}
         channelId={channelId}
         channelName={currentChannel.name}
         dataloggerId={dataloggerId}

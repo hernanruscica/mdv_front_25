@@ -19,7 +19,7 @@ const Alarms = () => {
   const {user} = useAuthStore();
   const [currentUser, setCurrentUser] = useState(null);
   const [currentDatalogger, setCurrentDatalogger] = useState(null);
-  const [currentLocation, setCurrentLocation] = useState(null);
+  const [currentAlarms, setCurrentAlarms] = useState(null);
   const [currentChannel, setCurrentChannel] = useState(null);
   const { loadingStates, fetchUserById } = useUsersStore();
   const { fetchAlarmsByUser, fetchAlarmsByLocation, alarms, isLoading: isLoadingAlarms, error : errorAlarms } = useAlarmsStore(); 
@@ -28,18 +28,34 @@ const {
     dataloggers, 
     loadingStates: { fetchDataloggers: isLoadingDataloggers }, 
     error : errorDataloggers,
-    fetchDataloggers 
+    fetchDataloggers    
   } = useDataloggersStore();  
 
   useEffect(() => {
     const loadDataByLocation = async () => {
       await fetchDataloggers(user, businessUuid);
-      await fetchAlarmsByLocation(businessUuid);
+      const currentLocationAlarms = await fetchAlarmsByLocation(businessUuid);
+      setCurrentAlarms(currentLocationAlarms)
     }
     const loadDataByUser = async () => {
       await fetchDataloggers(user, businessUuid);
-      await fetchAlarmsByUser(userId, businessUuid);          
+      const currentUserAlarms = await fetchAlarmsByUser(userId, businessUuid);          
+      setCurrentAlarms(currentUserAlarms)
     }
+    const loadDataByDatalogger = async () => {
+      const dataloggersResponse = await fetchDataloggers(user, businessUuid);      
+      const currentDataloggerResponse = dataloggersResponse.find(dl => dl.uuid === dataloggerId);
+      setCurrentDatalogger(currentDataloggerResponse);
+      setCurrentAlarms(currentDataloggerResponse?.alarms);
+      if (channelId){
+        setCurrentChannel(currentDataloggerResponse?.channels.find(ch => ch.uuid === channelId));
+        setCurrentAlarms(currentDataloggerResponse?.alarms.filter(al => al.channel_uuid === channelId));
+        //console.log(currentDataloggerResponse?.alarms.find(al => al.channel_uuid === channelId));
+        
+      }
+
+    }
+    //fetchAlarmsByUser
 
     if (businessUuid && !userId && !dataloggerId && !channelId){
       loadDataByLocation();
@@ -47,6 +63,14 @@ const {
     if (businessUuid && userId && !dataloggerId && !channelId) {                              
       loadDataByUser();
     }   
+    if (businessUuid && dataloggerId && !userId && !channelId) {    
+      console.log('business y datalogger');
+      loadDataByDatalogger();
+    }
+    if (businessUuid && dataloggerId && channelId && !userId) {  
+      console.log('business y datalogger y channel');
+      loadDataByDatalogger();
+    }
   }, [userId, businessUuid, dataloggerId, channelId])
   
   if (isLoadingAlarms || isLoadingDataloggers){
@@ -84,29 +108,23 @@ const {
   
 
   const getTableData = () => {
-    if (!alarms?.length) return [];
-
     let baseUrl;
-    let filteredAlarms = alarms;
+    //let currentAlarms = (businessUuid && dataloggerId && !userId && !channelId) ? currentDatalogger?.alarms : alarms;
 
+    if (!currentAlarms?.length) return [];
+    
+    let filteredAlarms = currentAlarms;
+    
+    //console.log('filtradas', filteredAlarms);
     // Determinar la URL base según el contexto
     if (userId) {
       baseUrl = `/panel/usuarios/${userId}/alarmas`;
     } else if (dataloggerId && channelId) {
-      baseUrl = `/panel/dataloggers/${currentDatalogger?.id}/canales/${currentChannel?.id}/alarmas`;
-      // Filtrar alarmas por datalogger y canal
-      filteredAlarms = alarms.filter(alarm => 
-        alarm.datalogger_id === parseInt(dataloggerId) && 
-        alarm.canal_id === parseInt(channelId)
-      );
+      baseUrl = `/panel/ubicaciones/${businessUuid}/dataloggers/${currentDatalogger?.uuid}/canales/${currentChannel?.uuid}/alarmas`;      
     } else if (businessUuid) {
       baseUrl = `/panel/ubicaciones/${businessUuid}/alarmas`;
     } else {
-      baseUrl = `/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/alarmas`;
-      // Filtrar alarmas solo por datalogger
-      filteredAlarms = alarms.filter(alarm => 
-        alarm.datalogger_id === parseInt(dataloggerId)
-      );
+      baseUrl = `/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/alarmas`;      
     }
 
     return filteredAlarms.map(alarm => ({
@@ -123,7 +141,10 @@ const {
     
    
   //console.log(`userId: ${userId}`, locationId, dataloggerId, channelId);
-  //console.log('dataloggers', dataloggers);
+//  console.log('current channel', currentChannel);
+  //console.log('current datalogger alarms',currentDatalogger?.alarms);
+  console.log(currentAlarms);
+  
 
   return (
     <>
@@ -132,10 +153,10 @@ const {
         text="Alarmas" 
       />
       <Breadcrumb 
-        usuario={currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : ''} 
-        datalogger={currentDatalogger?.nombre || ''}
+        usuario={(currentAlarms?.length > 0) ? `${currentAlarms[0].username}` : ''} 
+        datalogger={currentDatalogger?.name || ''}
         ubicacion={user?.businesses_roles.find(br=>br.uuid===businessUuid).name}
-        canal={currentChannel?.nombre || ''}
+        canal={currentChannel?.name || ''}
       />
       {
         (user?.espropietario == 1 || user?.esadministrador == true) && (          

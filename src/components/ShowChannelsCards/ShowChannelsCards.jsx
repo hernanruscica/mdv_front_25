@@ -123,11 +123,12 @@ const ShowChannelsCards = ({
                 </p>
                 <div className={styles.alarmsList}>
                   <p className={cardInfoStyles.paragraph}>
-                    <strong>Alarmas configuradas ({alarms.length}):</strong>
+                    <strong>Alarmas configuradas ({alarms.filter(al => al.channel_uuid === channel.uuid).length}):</strong>
                   </p>
                   {alarms.length > 0 ? (
                     <ul className={styles.alarmItems}>
-                      {alarms.map(alarm => (
+                      {alarms.filter(al => al.channel_uuid === channel.uuid)
+                        .map(alarm => (
                         <li key={alarm.uuid} className={styles.alarmItem}>
                           <CardBtnSmall
                             title={alarm.name}
