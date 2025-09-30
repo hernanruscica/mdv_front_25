@@ -10,6 +10,8 @@ export const useDataStore = create((set) => ({
   error: null,
 
   fetchDataChannel: async (nombreTabla, nombreColumna, minutosAtras, tiempoPromedio, isSecondary = false) => {
+    console.log('parametros de fetchDataChannel en datastore:', nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);        
+    
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchData: true },
       error: null
@@ -21,7 +23,7 @@ export const useDataStore = create((set) => ({
       if (nombreColumna.startsWith('d')) {        
         data = await dataService.getPorcentages(nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);        
         
-        // console.log('parametros de fetchDataChannel en datastore:', nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);        
+        
         // console.log('Datos obtenidos en datastore', `${nombreTabla}_${nombreColumna}`, data);
 
       } else if (nombreColumna.startsWith('a')) {        

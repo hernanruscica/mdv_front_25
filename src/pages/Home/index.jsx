@@ -1,5 +1,3 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import {Title1} from '../../components/Title1/Title1';
@@ -8,12 +6,11 @@ import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 
 const Home = () => {
   const { user } = useAuthStore();
-  const navigate = useNavigate();     
-  if (user) {
-    //navigate('/panel');
+     
+  if (user) {   
     return (
       <>
-      <Title1 text={`Bienvenido ${user.nombre_1} ${user.apellido_1}`}
+      <Title1 text={`Bienvenido ${user.first_name} ${user.last_name}`}
           type="usuarios"/>
         <Breadcrumb />
       <main className={styles.pageMaincontent}>
@@ -28,7 +25,7 @@ const Home = () => {
             text="Ver tus alarmas"
             icon="clock-regular.svg"
             type="normal"
-            url={`panel/usuarios/${user.id}/alarmas`} />
+            url={`panel/usuarios/${user.uuid}/alarmas`} />
           <BtnCallToAction
             text="Ver tus dataloggers"
             icon="microchip-solid.svg"
@@ -38,7 +35,7 @@ const Home = () => {
             text="Ver tu perfil"
             icon="user-regular.svg"
             type="normal"
-            url={`panel/usuarios/${user.id}`} />
+            url={`panel/usuarios/${user.uuid}`} />
           <BtnCallToAction
             text="Enviarnos un mensaje"
             icon="envelope-regular.svg"

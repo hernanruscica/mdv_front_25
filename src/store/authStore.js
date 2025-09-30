@@ -6,41 +6,19 @@ export const useAuthStore = create(
   persist(
     (set) => ({
       user: null,
-      token: null,
-      userRoles: [
-        {
-          id: 7,
-          nombre: "operario",
-          descripcion: "Operario de una ubicación, puede ver los dataloggers y canales de dicha ubicación.",
-          accion_id: 1
-        },
-        {
-          id: 8,
-          nombre: "administrador",
-          descripcion: "Administrador de una ubicación, puede crear, eliminar usuarios, asignar y desasignar alarmas.",
-          accion_id: 3
-        },
-        {
-          id: 9,
-          nombre: "propietario",
-          descripcion: "Usuario con todos los permisos sobre todas las ubicaciones y usuarios.",
-          accion_id: 3
-        }
-      ],
+      token: null,      
       login: async (dni, password) => {
-        const response = await authService.login(dni, password);
-        //onsole.log('Login response:', response);
+        const response = await authService.login(dni, password);        
         if (response?.user && response?.token) {
           set({ 
             user: response.user,
             token: response.token 
           });
-          return true;
+          return response.success;
         }
         return false;
       },
-      logout: () => {
-        localStorage.removeItem('token');
+      logout: () => {        
         set({ user: null, token: null });
       },
       

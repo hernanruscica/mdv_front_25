@@ -10,19 +10,21 @@ export const dataloggersService = {
       throw error;
     }
   },
-  getAll: async () => {
+  ///businesses/{{own_business_uuid}}/dataloggers
+  getAll: async (businessUuid) => {
     try {
-      const { data } = await axiosClient.get('/api/dataloggers');
-      return data.dataloggers;
+      const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/dataloggers`);
+      //console.log(data.items);
+      return data.items;
     } catch (error) {
       console.error('Get dataloggers error:', error);
       return null;
     }
   },
-
-  getAllById: async (userId) => {
+  // to check
+  getAllById: async (userId, businessUuid) => {
     try {
-      const { data } = await axiosClient.get(`/api/dataloggers/byuser/${userId}`);
+      const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/dataloggers/${userId}`);
       return data.dataloggers;
     } catch (error) {
       console.error('Get assigned dataloggers error:', error);
@@ -40,10 +42,11 @@ export const dataloggersService = {
     }
   },
 
-  getById: async (id) => {
+  getById: async (id, businessUuid) => {
     try {
-      const { data } = await axiosClient.get(`/api/dataloggers/${id}`);
-      return data.datalogger;
+      const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/dataloggers/${id}`);
+      //console.log('Datalogger by id data:', data);
+      return data.item;
     } catch (error) {
       console.error('Get datalogger by id error:', error);
       return null;

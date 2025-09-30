@@ -33,16 +33,18 @@ export const useAlarmsStore = create((set) => ({
       }));
     }
   },
-  fetchAlarmsByUser: async (userId) => {
-    //console.log("desde el store alarm:", userId)
-    if (!userId) return;
+  fetchAlarmsByUser: async (userUuid, businessUuid) => {
+    console.log("desde el store alarm, userUuid:", userUuid);
+    console.log('businessUuid', businessUuid);
+    
+    if (!userUuid) return;
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchAlarmsByUser: true },
       error: null
     }));
 
     try {
-      const alarms =  await alarmsService.getAllById(userId);
+      const alarms =  await alarmsService.getAll(userUuid, businessUuid);
         
       set(state => ({
         alarms,

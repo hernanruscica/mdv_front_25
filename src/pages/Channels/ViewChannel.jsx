@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
@@ -18,6 +18,8 @@ import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import ChannelInfo from '../../components/ChannelInfo/ChannelInfo';
 import ChannelAlarms from '../../components/ChannelAlarms/ChannelAlarms';
 import { useChannelDetails } from '../../hooks/useChannelDetails';
+import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
+import { useDataStore } from '../../store/dataStore';
 
 // Definimos los rangos de tiempo personalizados para los gráficos
 const customTimeRanges = [
@@ -31,14 +33,59 @@ const customTimeRanges = [
   { hours: 4368, label: '6 meses' },
   { hours: 8760, label: '1 Anio' },
 ];
-
 const ViewChannel = () => {
-  const { dataloggerId, channelId } = useParams();
+  const { dataloggerId, channelId, businessUuid } = useParams();
   const navigate = useNavigate();
   const user = useAuthStore(state => state.user);
   const [modalOpen, setModalOpen] = useState(false);
   const hoursBackView = 8760; // un año
 
+  const { datalogger, isLoadingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
+
+
+   const { 
+      fetchDataChannel,
+      dataChannel,
+      dataChannelSecondary,
+      loadingStates: { fetchData: isLoadingData }
+    } = useDataStore();
+  /*
+   console.log('businessUuid', businessUuid);
+   console.log('dataloggerId', dataloggerId);
+   console.log('channelId', channelId);  
+  */
+ 
+ const currentChannel = datalogger?.channels?.find(ch=>ch.uuid === channelId);
+ const userCurrentRole = user.businesses_roles.find(br => br.uuid === businessUuid).role;
+
+   useEffect(() => {
+    const loadData = async () => {
+      //fetchDataChannel: async (nombreTabla, nombreColumna, minutosAtras, tiempoPromedio, isSecondary = false)
+      const responseData = await fetchDataChannel(datalogger?.table_name, currentChannel?.column_name, hoursBackView, currentChannel?.averaging_period);
+      //console.log(responseData)
+    }
+    if (!isLoadingDatalogger){
+      loadData();
+    }
+   }, [isLoadingDatalogger]);
+
+  if (isLoadingDatalogger && isLoadingData) {
+    return <LoadingSpinner message="Cargando datos..." />;
+    }
+    
+  if (errorDatalogger) {
+    return <div className={styles.error}>{errorDatalogger}</div>;
+    }
+
+
+console.log(datalogger?.table_name);
+
+const handleAlarmClick = (row) => {
+  navigate(`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.uuid}/alarmas/${row.id}`);
+};
+      /*
+
+  /*
   const {
     currentChannel,
     channelAlarms,
@@ -47,30 +94,25 @@ const ViewChannel = () => {
     isLoading,
     error,
     refreshChannel
-  } = useChannelDetails(channelId, hoursBackView);
+  } = useChannelDetails(channelId, hoursBackView);*/
 
-  // Actualizar canal después de archivar/desarchivar
-  React.useEffect(() => {
-    if (!modalOpen && currentChannel?.id) {
-      const timeout = setTimeout(() => {
-        refreshChannel();
-      }, 200);
-      return () => clearTimeout(timeout);
-    }
-  }, [modalOpen, currentChannel?.id]);
+  // // Actualizar canal después de archivar/desarchivar
+  // useEffect(() => {
+  //   if (!modalOpen && currentChannel?.id) {
+  //     const timeout = setTimeout(() => {
+  //       refreshChannel();
+  //     }, 200);
+  //     return () => clearTimeout(timeout);
+  //   }
+  // }, [modalOpen, currentChannel?.id]);
+  
 
-  if (isLoading) {
-    return <LoadingSpinner message="Cargando datos..." />;
-  }
-
-  if (error) {
-    return <div className={styles.error}>{error}</div>;
-  }
 
   //console.log(channelAlarms);
   //console.log(channelMainAlarm);  
-
-  const channelButtons = (currentChannel?.estado == 1) ? (
+  /*
+  */
+  const channelButtons = (currentChannel?.is_active == 1) ? (
     <>
       <BtnCallToAction
         text="Editar"
@@ -101,10 +143,7 @@ const ViewChannel = () => {
       />
     </>
   );
-
-  const handleAlarmClick = (row) => {
-    navigate(`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/alarmas/${row.id}`);
-  };
+  
 
   // Preparar los datos para el gráfico digital
   const prepareDigitalData = (data) => {
@@ -115,36 +154,87 @@ const ViewChannel = () => {
       failure: point.tiempo_total >= 900 // 15 minutos en segundos
     }));
   };
-
+  
+  
   return (
     <>
-      <ModalSetArchive
+    <ModalSetArchive
         isOpen={modalOpen}
         onRequestClose={() => setModalOpen(false)}
         entidad="canal"
-        entidadId={currentChannel?.id}
-        nuevoEstado={currentChannel?.estado == '1' ? 0 : 1}
-        redirectTo={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}`}
-        nombre={`${currentChannel?.nombre}`}
-      />
-
-      <Title1 type="canales" text={`Canal ${currentChannel?.nombre}`}/>
+        entidadId={currentChannel?.uuid}
+        nuevoEstado={currentChannel?.is_active == '1' ? 0 : 1}
+        redirectTo={`/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.uuid}`}
+        nombre={`${currentChannel?.name}`}
+      />     
+      <Title1 type="canales" text={`Canal ${currentChannel?.name}`}/>
       <Breadcrumb 
-        datalogger={currentChannel?.datalogger_nombre} 
-        canal={currentChannel?.nombre}
+        ubicacion={datalogger?.business.name}
+        datalogger={datalogger?.name}
+        canal={currentChannel?.name}
       />
-      
       <div className={styles.cardsContainer}>
-        <CardImage
-          image={`${import.meta.env.VITE_IMAGE_URL}/${currentChannel?.foto}`}
-          title={currentChannel?.nombre}
-          buttons={user.espropietario == 1 ? channelButtons : null}
-        >
-          {currentChannel?.estado == '0' && (
-            <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
-          )}
-          <ChannelInfo channel={currentChannel} alarms={channelAlarms.filter(alarm => alarm.estado == '1')} />
-        </CardImage>
+          <CardImage
+            image={`${import.meta.env.VITE_IMAGE_URL}/${currentChannel?.img}`}
+            title={currentChannel?.name}
+            buttons={user.isOwner === 1 ? channelButtons : null}
+          >
+            {currentChannel?.is_active == '0' && (
+              <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
+            )}
+            <ChannelInfo 
+              channel={currentChannel} 
+              alarms={datalogger?.alarms.filter(alarm => alarm.is_active == '1')} 
+              datalogger={datalogger}
+            />
+          </CardImage>
+      </div>
+      <Title2 text="Alarmas Configuradas" type="alarmas"/>
+
+      {datalogger &&
+        <ChannelAlarms 
+        alarms={datalogger?.alarms}
+        channelId={channelId}
+        channelName={currentChannel.name}
+        dataloggerId={dataloggerId}
+        onAlarmClick={handleAlarmClick}
+        showAddButton={user.isOwner == 1 || userCurrentRole === 'Administrator'}
+      />}
+
+       <div className={styles.chartContainer}>
+        {dataChannel && dataChannel?.length > 0 ? (
+          currentChannel?.column_name.startsWith('d') ? (
+            <DigitalPorcentageOn
+              data={prepareDigitalData(dataChannel)}
+              currentChannelName={currentChannel?.name}
+              currentChannelTimeProm={currentChannel?.averaging_period}
+              customTimeRanges={customTimeRanges}
+            />
+          ) : currentChannel?.nombre_columna.startsWith('a') ? (
+            <AnalogData
+              data={dataChannel}
+              mult={currentChannel?.factor}
+            />
+          ) : (
+            <p className={cardInfoStyles.noData}>Tipo de canal no soportado</p>
+          )
+        ) : (
+          <p className={cardInfoStyles.noData}>No hay datos disponibles</p>
+        )}
+      </div>
+      
+    </>
+    );
+   
+  
+};
+
+export default ViewChannel;
+
+
+{/*}
+   <>
+       
 
         {channelMainAlarm != null && (
           <CardInfo
@@ -177,41 +267,6 @@ const ViewChannel = () => {
             </div>
           </CardInfo>
         )}
-      </div>
-
-      <div className={styles.chartContainer}>
-        {dataChannel && dataChannel.length > 0 ? (
-          currentChannel?.nombre_columna.startsWith('d') ? (
-            <DigitalPorcentageOn
-              data={prepareDigitalData(dataChannel)}
-              currentChannelName={currentChannel?.nombre}
-              currentChannelTimeProm={currentChannel?.tiempo_a_promediar}
-              customTimeRanges={customTimeRanges}
-            />
-          ) : currentChannel?.nombre_columna.startsWith('a') ? (
-            <AnalogData
-              data={dataChannel}
-              mult={currentChannel?.multiplicador}
-            />
-          ) : (
-            <p className={cardInfoStyles.noData}>Tipo de canal no soportado</p>
-          )
-        ) : (
-          <p className={cardInfoStyles.noData}>No hay datos disponibles</p>
-        )}
-      </div>
-
-      <Title2 text="Alarmas Configuradas" type="alarmas"/>
-
-      <ChannelAlarms 
-        alarms={channelAlarms}
-        channelId={channelId}
-        dataloggerId={dataloggerId}
-        onAlarmClick={handleAlarmClick}
-        showAddButton={user.espropietario == 1 || user.esadministrador == true}
-      />
-    </>
-  );
-};
-
-export default ViewChannel;
+      </div>    
+    
+    */}

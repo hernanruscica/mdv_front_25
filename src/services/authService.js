@@ -3,16 +3,10 @@ import axiosClient from '../utils/axiosClient';
 export const authService = {
   login: async (dni, password) => {
     try {
-      const { data } = await axiosClient.post('/api/users/login', { 
+      const { data } = await axiosClient.post('/api/auth/login', { 
         dni, 
         password 
-      });
-      
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
-      data.user.esadministrador =  data.user.ubicaciones.some((ubi) => ubi.usuarios_nombre_rol == "administrador");
-      //console.log('es admin en alguna ubicacion? - authservice', data.user.ubicaciones.some((ubi) => ubi.usuarios_nombre_rol == "administrador")) ;
+      });      
       return data;
     } catch (error) {
       console.error('Login error:', error);

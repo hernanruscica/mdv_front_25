@@ -1,10 +1,12 @@
 import axios from 'axios';
+import { useAuthStore } from '../store/authStore';
 
 const PUBLIC_ENDPOINTS = [
   '/api/users/login',
   '/api/users/register',
   '/api/users/reset-password'
 ];
+
 
 class ApiClient {
   constructor() {
@@ -17,12 +19,12 @@ class ApiClient {
       }
     });
   }
-
+  
   async request(config) {
-    try {
-      // Manejar autenticación
+    
+    try {      
       if (!PUBLIC_ENDPOINTS.some(endpoint => config.url?.includes(endpoint))) {
-        const token = localStorage.getItem('token');
+        const token = useAuthStore.getState()?.token;        
         if (token) {
           config.headers = {
             ...config.headers,

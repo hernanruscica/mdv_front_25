@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
@@ -18,91 +18,69 @@ import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocation
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 
-const ViewUser = () => {  
+const ViewUser = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { userId } = useParams();
-  const user = useAuthStore(state => state.user);
-  const { fetchUserById, fetchUsers,  isLoading: isLoadingUsers, error: errorUsers } = useUsersStore();
-  const { fetchAlarmsByUser, alarms, isLoading: isLoadingAlarms, error: errorAlarms } = useAlarmsStore();
-  const { fetchLocationUsers, locationUsers, isLoading : isLoadingLocations, error: errorLocationsUsers } = useLocationUsersStore();  
-  const { dataloggers, isLoading: isLoadingDataloggers, fetchDataloggers, error: errorDataloggers } = useDataloggersStore();  
-  const [currentUser, setCurrentUser] = useState(null);
+  const { businessUuid, userId } = useParams();  
   const [modalOpen, setModalOpen] = useState(false);
 
-  useEffect(() => {    
-    const loadData = async () => {
-      // Siempre obtener el usuario actualizado del servidor
-      const updatedUser = await fetchUserById(userId);
-      setCurrentUser(updatedUser);           
-      
-      if (updatedUser) {
-        await Promise.all([
-          fetchAlarmsByUser(updatedUser),
-          fetchLocationUsers(updatedUser),
-          fetchDataloggers(updatedUser)
-        ]);     }   
-    }  
-   loadData();
-  }, [userId, fetchUserById]);
+  const { selectedUser, fetchUserById, loadingStates, error: errorUsers } = useUsersStore();  
 
   useEffect(() => {
-    if (!modalOpen && currentUser?.id) {        
-      const timeout = setTimeout(() => {
-        fetchUserById(currentUser.id).then(setCurrentUser);   
-        fetchUsers(user);
-        //console.log('Actualizando los usuarios a mostrar en ViewUser.jsx');     
-      }, 400);
-      return () => clearTimeout(timeout);
-    }
-  }, [modalOpen, fetchUserById, currentUser?.id]); 
+    const loadUser = async () => {
+      if (userId) {
+        await fetchUserById(userId, businessUuid);
+      }
+    };
+    loadUser();
+  }, [userId, fetchUserById]);
 
-
-
-  if (isLoadingUsers ||  isLoadingLocations || isLoadingDataloggers) {
+  
+  if (loadingStates.fetchUser ) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-  if (errorUsers ||  errorLocationsUsers || errorDataloggers) {
-    return <div className={styles.error}>Error: {errorUsers || errorLocationsUsers || errorDataloggers }</div>;
+  if (errorUsers ) {
+    return <div className={styles.error}>Error: {errorUsers }</div>;
   }
 
+  if (!selectedUser) {
+    return <div className={styles.error}>Usuario no encontrado.</div>;
+  }
+
+  
 
   const userButtons = (
-    currentUser?.estado == '1' ? 
+    selectedUser?.is_active === 1 ?
     (<>
       <BtnCallToAction
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
-        url={`/panel/usuarios/${currentUser?.id}/editar`}
+        url={`/panel/usuarios/${selectedUser?.uuid}/editar`}
       />
       <BtnCallToAction
         text="Archivar"
         icon="archive-solid.svg"
-        type="danger"        
+        type="danger"
         onClick={() => setModalOpen(true)}
       />
     </>):
     (<>
       <BtnCallToAction
         text="Desarchivar"
-        icon="archive-solid.svg"  
+        icon="archive-solid.svg"
         onClick={() => setModalOpen(true)}
       />
       <BtnCallToAction
         text="Eliminar"
         icon="trash-alt-regular.svg"
         type="danger"
-        url={`/panel/usuarios/${currentUser?.id}/eliminar`}
+        url={`/panel/usuarios/${selectedUser?.uuid}/eliminar`}
       />
     </>)
-
   );
 
-  const activeLocations = filterEntitiesByStatus(locationUsers);
-  const activeDataloggers = filterEntitiesByStatus(dataloggers);
-
-  //console.log('estado de usuario:',  currentUser?.estado);
+  //console.log(selectedUser);
 
   return (
     <>
@@ -110,67 +88,74 @@ const ViewUser = () => {
       isOpen={modalOpen}
       onRequestClose={() => setModalOpen(false)}
       entidad="usuario"
-      entidadId={currentUser?.id}
-      nuevoEstado={currentUser?.estado == '1' ? 0 : 1}
-      redirectTo={`/panel/usuarios/${currentUser?.id}`}
-      nombre={`${currentUser?.nombre_1} ${currentUser?.apellido_1}`}
+      entidadId={selectedUser?.uuid}
+      nuevoEstado={selectedUser?.is_active == '1' ? 0 : 1}
+      redirectTo={`/panel/usuarios/${selectedUser?.uuid}`}
+      nombre={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
     />
-      <Title1 
-        text={`Perfil de ${currentUser?.nombre_1} ${currentUser?.apellido_1}`}
-        type="usuarios"
-      />
-      <Breadcrumb usuario={`${currentUser?.nombre_1} ${currentUser?.apellido_1}`}/>
-      {currentUser && (
+{/*}    */}
+      {selectedUser && (
         <>
+          <Title1
+            text={selectedUser ? `Perfil de ${selectedUser.first_name} ${selectedUser.last_name}` : 'Cargando perfil...'}
+            type="usuarios"
+          />
+          <Breadcrumb 
+            usuario={selectedUser ? `${selectedUser.first_name} ${selectedUser.last_name}` : '' }
+            ubicacion={selectedUser?.businesses_roles.find(br => br.uuid === businessUuid).name}
+          />
+      
           <CardImage
-            image={currentUser.foto ? `${import.meta.env.VITE_IMAGE_URL}/${currentUser.foto}` : '/images/default-user.png'}
-            title={`${currentUser.nombre_1} ${currentUser.apellido_1}`}
+            image={selectedUser?.avatar_url ? `${import.meta.env.VITE_IMAGE_URL}/${selectedUser?.avatar_url}` : '/images/default-user.png'}
+            title={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
             buttons={userButtons}
           >
             <div className={styles.userInfo}>
                {
-                currentUser.estado == '0' &&
+                selectedUser.estado == '0' &&
                 (<CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />)
                 }
-              <p><strong>DNI:</strong> {currentUser.dni}</p>
-              <p><strong>Email:</strong> {currentUser.email}</p>
-              <p><strong>Teléfono:</strong> {currentUser.telefono}</p>
-              <p><strong>Estado:</strong> {currentUser.estado ? 'Activo' : 'Inactivo'}</p>
-              <p><strong>Rol:</strong> {currentUser.espropietario ? 'Propietario' : 'Usuario'}</p>
-              <p><strong>Fecha de creación:</strong> {currentUser.fecha_creacion ? new Date(currentUser.fecha_creacion).toLocaleDateString() : 'No disponible'}</p>
+              <p><strong>DNI:</strong> {selectedUser?.dni}</p>
+              <p><strong>Email:</strong> {selectedUser?.email}</p>
+              <p><strong>Teléfono:</strong> {selectedUser?.phone}</p>
+              <p><strong>Estado:</strong> {selectedUser.estado ? 'Activo' : 'Inactivo'}</p>
+              <p><strong>Rol:</strong> {selectedUser?.isOwner ? 'Propietario' : 'Usuario'}</p>
+              <p><strong>Fecha de creación:</strong> {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : 'No disponible'}</p>
+              {/*
               <p><strong>Alarmas Asignadas:</strong>{" "}
                 {isLoadingAlarms ? (
                   <LoadingSpinner message="Cargando alarmas..." />
                 ) : alarms?.length === 0 ? (
                   'No hay alarmas asignadas'
                 ) : (
-                  <CardBtnSmall 
+                  <CardBtnSmall
                     title={`Ver ${alarms?.length} alarmas`}
-                    url={`/panel/usuarios/${currentUser.id}/alarmas`}
+                    url={`/panel/usuarios/${selectedUser.id}/alarmas`}
                   />
                 )}
                 { errorAlarms && <p className={styles.error}>{errorAlarms}</p> }
               </p>
+                */}
             </div>
-          </CardImage>
+        </CardImage>
 
-          <Title2 text={`Ubicaciones para el usuario ${currentUser.nombre_1} ${currentUser.apellido_1}`} type="ubicaciones"/>
+          <Title2 text={`Ubicaciones para el usuario ${selectedUser.first_name} ${selectedUser.last_name}`} type="ubicaciones"/>
 
-          {isLoadingLocations ? (
-            <LoadingSpinner message="Cargando ubicaciones..." />
-          ) : locationUsers?.length > 0 ? (
+          {(selectedUser.businesses_roles.length > 0) ? (          
             <ShowLocationsCards
-              locations={activeLocations}
-              dataloggers={activeDataloggers}
+              locations={selectedUser.businesses_roles}              
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
+              user={selectedUser}
               showAddButton={false}
             />
           ) : (
             <p className={styles.noLocations}>Este usuario no tiene ubicaciones asignadas</p>
           )}
+            
         </>
       )}
+        
     </>
   );
 };

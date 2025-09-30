@@ -21,6 +21,9 @@ const Header = () => {
     navigate('/');
   }
 
+  //console.log('User in Header:', user);
+  
+
   return (
     <header className={styles.header}>
       <img src={`/images/mdvsrl-logo.jpg`} className={styles.headerImg} />
@@ -39,11 +42,14 @@ const Header = () => {
             <Link to="/panel" className={`${styles.headerLink} ${location.pathname === '/panel' ? styles.headerLinkSelected : ''}`} id='panel' onClick={menuBtnHandler}>
               PANEL DE CONTROL
             </Link>
-            <Link to={`/panel/usuarios/${user.id}/alarmas`} className={`${styles.headerLink} ${location.pathname.split('/').pop() === 'alarmas' ? styles.headerLinkSelected : ''}`} id='alarmas' onClick={menuBtnHandler}>
+            <Link to={`/panel/usuarios/${user.uuid}/alarmas`} className={`${styles.headerLink} ${location.pathname.split('/').pop() === 'alarmas' ? styles.headerLinkSelected : ''}`} id='alarmas' onClick={menuBtnHandler}>
               ALARMAS
             </Link>
-            <Link to={`/panel/usuarios/${user.id}`} className={`${styles.headerLink} ${location.pathname.split('/')[location.pathname.split('/').length-2] === 'usuarios' ? styles.headerLinkSelected : ''}`} id='usuarios' onClick={menuBtnHandler}>
-              {`${user.nombre_1} ${user.apellido_1}`}
+            {/* panel/ubicaciones/:businessUuid/usuarios/:userId */}
+            <Link to={`/panel/ubicaciones/${user.businesses_roles[0].uuid}/usuarios/${user.uuid}`} 
+              className={`${styles.headerLink} ${location.pathname.split('/')[location.pathname.split('/').length-2] === 'usuarios' ? styles.headerLinkSelected : ''}`} 
+              id='usuarios' onClick={menuBtnHandler}>
+              {`${user.first_name} ${user.last_name}`}
             </Link>
             <BtnCallToAction
               text="Salir"

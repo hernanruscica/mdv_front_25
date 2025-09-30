@@ -7,7 +7,10 @@ export const useDataloggersStore = create((set) => ({
   loadingStates: {
     fetchDataloggers: false,
     fetchDatalogger: false,
-    createDatalogger: false
+    createDatalogger: false,
+    fetchDataloggersByLocation: false, 
+    fetchDataloggerById: false, 
+    updateDatalogger: false
   },
   error: null,
 
@@ -32,7 +35,8 @@ export const useDataloggersStore = create((set) => ({
     }
   },
 
-  fetchDataloggers: async (currentUser) => {
+  fetchDataloggers: async (currentUser, businessUuid) => {
+    console.log('fetchDataloggers')
     if (!currentUser) return;
     
     set(state => ({
@@ -41,10 +45,12 @@ export const useDataloggersStore = create((set) => ({
     }));
 
     try {
-      const dataloggers = currentUser.espropietario === 1 
-        ? await dataloggersService.getAll()
-        : await dataloggersService.getAllById(currentUser.id);
-        
+      /*
+      const dataloggers = currentUser.isOwner == 1 
+        ? await dataloggersService.getAll(businessUuid)
+        : await dataloggersService.getAllById(currentUser.id, businessUuid);
+        */
+      const dataloggers = await dataloggersService.getAll(businessUuid);
       set(state => ({
         dataloggers,
         loadingStates: { ...state.loadingStates, fetchDataloggers: false }
@@ -80,7 +86,7 @@ export const useDataloggersStore = create((set) => ({
     }
   },
 
-  fetchDataloggerById: async (id) => {
+  fetchDataloggerById: async (id, businessUuid) => {
     if (!id) return;
     
     set(state => ({
@@ -89,8 +95,8 @@ export const useDataloggersStore = create((set) => ({
     }));
 
     try {
-      const datalogger = await dataloggersService.getById(id);
-        
+      const datalogger = await dataloggersService.getById(id, businessUuid);
+     
       set(state => ({
         selectedDatalogger: datalogger,
         loadingStates: { ...state.loadingStates, fetchDatalogger: false }

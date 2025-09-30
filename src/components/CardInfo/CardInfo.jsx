@@ -1,7 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import CardTitle from '../CardTitle/CardTitle';
-import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import styles from './CardInfo.module.css';
 
 const CardInfo = ({ iconSrc, title, url, children, size = 'normal' }) => {

@@ -19,17 +19,15 @@ const ShowChannelsCards = ({
 }) => {
 
   const [showArchived, setShowArchived] = useState(false);
-  const uniqueAlarms = alarms.filter((alarm, index, self) =>
-    index === self.findIndex((a) => a.id === alarm.id)
-  ); 
+  
 
   const filteredChannels = channels
-    .filter(channel => !showArchived ? channel.estado == 1 : true)
+    .filter(channel => !showArchived ? channel?.is_active == 1 : true)
     .filter(channel => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
-      channel.canales_nombre.toLowerCase().includes(searchTermLower) ||
-      channel.canales_descripcion?.toLowerCase().includes(searchTermLower)      
+      channel?.name.toLowerCase().includes(searchTermLower) ||
+      channel?.description.toLowerCase().includes(searchTermLower)      
     );
   });  
 
@@ -41,7 +39,7 @@ const ShowChannelsCards = ({
     { hours: 72, label: '3 Días' },    
   ];
 
-  //console.log(channels[0]['datalogger_id']);
+  //console.log('Channels desde showchannelscards', channels);
 
   // Preparar los datos para el gráfico digital
   const prepareDigitalData = (data) => {
@@ -53,23 +51,26 @@ const ShowChannelsCards = ({
     }));
   };
   const oneChannel = channels[0];
-  const dataloggerId = oneChannel ? oneChannel.datalogger_id : null;
+  const dataloggerId = oneChannel ? oneChannel.uuid : null;
+  const businessUuid = oneChannel ? oneChannel.business.uuid : null;
   //console.log(dataloggerId.datalogger_id);
 
   return (
     <>
       <div className={styles.controlsContainer}>
         <ButtonsBar 
-          itemsName={`dataloggers/${dataloggerId}/canales` }
+          itemsName={`ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales` }
           itemsQty={filteredChannels.length}
           showAddButton={showAddButton}
         >
         <div className={styles.controls}>
-          <SearchBar
-            searchTerm={searchTerm}
-            onSearchChange={onSearchChange}
-            placeholder="Buscar canales..."
-          />
+          { channels.length > 0 && (
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchChange={onSearchChange}
+              placeholder="Buscar canales..."
+            />
+          )}
           {showAddButton && (
             <label className={styles.checkboxContainer}>
               <input
@@ -86,30 +87,30 @@ const ShowChannelsCards = ({
 
       <div className={styles.cardsContainer}>
         {filteredChannels.map(channel => {
-          const channelAlarms = uniqueAlarms.filter(
-            alarm => alarm.canal_id == channel.canales_id
+          const channelAlarms = alarms.filter(
+            alarm => alarm.channel_id == channel.uuid
           );
 
           return (
             <CardInfo
-              key={channel.canales_id}
+              key={channel.uuid}
               iconSrc={`/icons/${getIconFileName('canales')}`}
-              title={channel.canales_nombre}     
-              url={`/panel/dataloggers/${channel.datalogger_id}/canales/${channel.canales_id}`}   
+              title={channel.name}     
+              url={`/panel/ubicaciones/${businessUuid}/dataloggers/${channel.datalogger_id}/canales/${channel.uuid}`}   
               size='large'
             >
             <div className={cardInfoStyles.cardContent}>
               <div className={cardInfoStyles.cardImage}>
                 <img
-                  src={channel?.foto ? `${import.meta.env.VITE_IMAGE_URL}/${channel.foto}` : '/images/default-channel.webp'}
-                  alt={`Foto del canal ${channel?.canales_nombre}`}
-                  title={`Este es el canal ${channel?.canales_nombre}`}
+                  src={channel?.img ? `${import.meta.env.VITE_IMAGE_URL}/${channel.img}` : '/images/default-channel.webp'}
+                  alt={`Foto del canal ${channel?.name}`}
+                  title={`Este es el canal ${channel?.name}`}
                   className={cardInfoStyles.image}
                   />
               </div>
               <div className={cardInfoStyles.description}>
                 {
-                  channel.estado == 0 && (
+                  channel.is_active == 0 && (
                     <CustomTag 
                       text="Archivado"
                       type="archive"
@@ -118,19 +119,19 @@ const ShowChannelsCards = ({
                   )
                 }
                 <p className={cardInfoStyles.paragraph}>                 
-                  {channel.canales_descripcion}                  
+                  {channel.description}                  
                 </p>
                 <div className={styles.alarmsList}>
                   <p className={cardInfoStyles.paragraph}>
-                    <strong>Alarmas configuradas ({channelAlarms.length}):</strong>
+                    <strong>Alarmas configuradas ({alarms.length}):</strong>
                   </p>
-                  {channelAlarms.length > 0 ? (
+                  {alarms.length > 0 ? (
                     <ul className={styles.alarmItems}>
-                      {channelAlarms.map(alarm => (
-                        <li key={alarm.id} className={styles.alarmItem}>
+                      {alarms.map(alarm => (
+                        <li key={alarm.uuid} className={styles.alarmItem}>
                           <CardBtnSmall
-                            title={alarm.nombre}
-                            url={`/panel/dataloggers/${channel.datalogger_id}/canales/${channel.canales_id}/alarmas/${alarm.id}`}
+                            title={alarm.name}
+                            url={`/panel/ubicaciones/${businessUuid}/dataloggers/${channel.datalogger_id}/canales/${channel.uuid}/alarmas/${alarm.uuid}`}
                           />
                         </li>
                       ))}
@@ -146,6 +147,7 @@ const ShowChannelsCards = ({
               </div>
             </div>
             <div >
+              {/*
               <div >               
                 {channel.data && channel.data.length > 0 ? (
                   channel.nombre_columna.startsWith('d') ? (
@@ -167,7 +169,7 @@ const ShowChannelsCards = ({
                   <p className={cardInfoStyles.noData}>No hay datos disponibles</p>
                 )}
               </div>
-              {/* <p className={cardInfoStyles.paragraph}>
+               <p className={cardInfoStyles.paragraph}>
                 Este es el pie de pagina del grafico
               </p> */}
             </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import styles from './Login.module.css';
@@ -31,9 +31,9 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const isLoggedIn = await login(username, password);    
-      //console.log('isLoggedIn:', isLoggedIn);
-      if (isLoggedIn) {
+      const success = await login(username, password);    
+      
+      if (success) {
         toast.success('Credenciales correctas');
         navigate('/');
       } else {

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useAuthStore } from '../../store/authStore';
@@ -19,16 +19,14 @@ const Users = () => {
   } = useUsersStore();
 
   const isLoading = loadingStates?.fetchUsers;  
+  const { businessUuid } = useParams();
   
   useEffect(() => {   
-    // if (!users || users.length === 0) {
-    //   fetchUsers(user);
-    //   console.log('Actualizando los usuarios a mostrar');
-    // }
+    
 
-   fetchUsers(user);
-   //console.log('Actualizando los usuarios a mostrar en Users.jsx');
-  }, [user, fetchUsers]);
+   fetchUsers(user, businessUuid);
+   
+  }, [user, businessUuid]);
 
 
 
@@ -66,20 +64,19 @@ const Users = () => {
   ];
 
   const handleRowClick = (row) => {
-    navigate(`/panel/usuarios/${row.id}`);
+    navigate(`/panel/ubicaciones/${row.businessUuid}/usuarios/${row.id}`);
   };
 
   const preparedData = users?.map(user => ({
-    nombreCompleto: user.usuario_nom_apell,
+    nombreCompleto: user.first_name + ' ' + user.last_name,
     email: user.email,
-    ubicaciones: Array.isArray(user.ubicaciones) && user.ubicaciones.length > 0
-      ? user.ubicaciones.map(ubi => ubi.ubicaciones_nombre).join(', ')
+    ubicaciones: Array.isArray(user.businesses_roles) && user.businesses_roles.length > 0
+      ? user.businesses_roles.map(ubi => ubi.name).join(', ')
       : 'N/A',
-    id: user.id,
-    estado: user.estado
-  }));
-
-  console.log('es admin de alguna ubicacion', user.esadministrador);
+    id: user.uuid,
+    businessUuid: businessUuid,
+    estado: user.is_active
+  }));  
 
   return (
     <>
@@ -87,7 +84,10 @@ const Users = () => {
         type="usuarios"
         text="Usuarios" 
       />
-      <Breadcrumb />
+      <Breadcrumb 
+      ///posible issue when user is owner, because he hasnt all the business_roles, but one.
+        ubicacion={user.businesses_roles.find(br => br.uuid === businessUuid).name}
+      />
       
       <div className={styles.tableContainer}>
         <Table 

@@ -1,58 +1,31 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Title1 } from '../../components/Title1/Title1';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useAuthStore } from '../../store/authStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
-import { useChannelsStore } from '../../store/channelsStore';
-import { useAlarmsStore } from '../../store/alarmsStore';
-import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import ShowDataloggersCards from '../../components/ShowDataloggersCards/ShowDataloggersCards';
 import styles from './Dataloggers.module.css';
+import { data, useParams} from 'react-router-dom';
 
 const Dataloggers = () => {
   const user = useAuthStore(state => state.user);
+  const { businessUuid } = useParams();
   const { 
     dataloggers, 
     loadingStates: { fetchDataloggers: isLoading }, 
     error,
     fetchDataloggers 
-  } = useDataloggersStore();
-
-  const {
-    channels,
-    loadingStates: { fetchChannels: isLoadingChannels },
-    fetchChannels
-  } = useChannelsStore();
-
-  const {
-    alarms,
-    loadingStates: { fetchAlarms: isLoadingAlarms },
-    fetchAlarms
-  } = useAlarmsStore();
-
-  const {
-    locations,
-    loadingStates: { fetchLocations: isLoadingLocations },
-    fetchLocations
-  } = useLocationsStore();
+  } = useDataloggersStore();  
 
   useEffect(() => {
     if (!dataloggers || dataloggers.length === 0) {
-      fetchDataloggers(user);
+      fetchDataloggers(user, businessUuid);
     }
-    if (!channels || channels.length === 0) {
-      fetchChannels(user);
-    }
-    if (!alarms || alarms.length === 0) {
-      fetchAlarms(user);
-    }
-    if (!locations || locations.length === 0) {
-      fetchLocations(user);
-    }
+    
   }, [user]);
 
-  if (isLoading || isLoadingChannels || isLoadingAlarms || isLoadingLocations) {
+  if (isLoading ) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
@@ -60,7 +33,8 @@ const Dataloggers = () => {
     return <div className={styles.error}>{error}</div>;
   }
 
-  //console.log(dataloggers);
+  const userCurrentRole = user.businesses_roles.find(br => br.uuid === businessUuid).role;
+  //console.log(dataloggers[0].business.name);
 
   return (
     <>
@@ -68,14 +42,13 @@ const Dataloggers = () => {
         type="dataloggers"
         text="Dataloggers" 
       />
-      <Breadcrumb />
+      <Breadcrumb ubicacion={dataloggers[0]?.business.name}/>
+      
       <ShowDataloggersCards
-        dataloggers={dataloggers}
-        channels={channels}
-        alarms={alarms}
-        locations={locations}
-        showAddButton={user.espropietario === 1}
+        dataloggers={dataloggers}              
+        showAddButton={user.isOwner === 1 || userCurrentRole == 'Administrator'}
       />
+      {/**/}
     </>
   );
 };

@@ -87,12 +87,12 @@ export const useLocationsStore = create((set, get) => ({
       loadingStates: { ...state.loadingStates, fetchLocations: true }
     }));
     try {
-      if (user && user.espropietario == '1'){
-        //console.log('Fetching all locations for owner');
+      if (user && user.isOwner == 1){
+        
         const locations = await locationsService.getAll();
         set({ locations, error: null });
       }else{
-        const locations = await locationsService.getAllById(user.id);
+        const locations = await locationsService.getAllById();
         set({ locations, error: null });
       }
     } catch (error) {

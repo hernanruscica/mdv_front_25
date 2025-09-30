@@ -9,54 +9,54 @@ export const routes = [
   { path: "/contacto", element: <Contact /> },
   { path: "/panel", element: <Dashboard />, private: true },
   
-  // Users routes
-  { path: "/panel/usuarios", element: <Users />, private: true },
-  { path: "/panel/usuarios/:userId", element: <ViewUser />, private: true },
-  { path: "/panel/usuarios/activar/:token", element: <ActivateUser /> },
-  { path: "/panel/usuarios/resetear", element: <SendActivationEmail /> },
-  { path: "/panel/usuarios/agregar", element: <CreatePage />, private: true },
-  { path: "/panel/usuarios/:userId/editar", element: <CreatePage />, private: true },  
-  { path: "/panel/usuarios/:userId/eliminar", element: <UnderConstruction />, private: true },
-  
   // Locations routes
-  { path: "/panel/ubicaciones", element: <Locations />, private: true },
-  { path: "/panel/ubicaciones/:id", element: <ViewLocation />, private: true },
+  { path: "/panel/ubicaciones", element: <Locations />, private: true },//Done
+  { path: "/panel/ubicaciones/:businessUuid", element: <ViewLocation />, private: true },//Done
   { path: "/panel/ubicaciones/agregar", element: <CreatePage />, private: true },
-  { path: "/panel/ubicaciones/:locationId/editar", element: <CreatePage />, private: true },  
-  { path: "/panel/ubicaciones/:locationId/eliminar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/editar", element: <CreatePage />, private: true },  
+  { path: "/panel/ubicaciones/:businessUuid/eliminar", element: <UnderConstruction />, private: true },
+  
+  // Users routes
+  { path: "/panel/ubicaciones/:businessUuid/usuarios", element: <Users />, private: true },//Done
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId", element: <ViewUser />, private: true },//Done
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/activar/:token", element: <ActivateUser /> },
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/resetear", element: <SendActivationEmail /> },
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/agregar", element: <CreatePage />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/editar", element: <CreatePage />, private: true },  
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/eliminar", element: <UnderConstruction />, private: true },
 
   // Dataloggers routes 
-  { path: "/panel/dataloggers", element: <Dataloggers />, private: true },
-  { path: "/panel/dataloggers/:id", element: <ViewDatalogger />, private: true },
-  { path: "/panel/dataloggers/agregar", element: <CreatePage />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/editar", element: <CreatePage />, private: true }, 
-  { path: "/panel/dataloggers/:dataloggerId/eliminar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers", element: <Dataloggers />, private: true },//Done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:uuid", element: <ViewDatalogger />, private: true },//Done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/agregar", element: <CreatePage />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/editar", element: <CreatePage />, private: true }, 
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/eliminar", element: <UnderConstruction />, private: true },
 
   // Channels routes
-  { path: "/panel/dataloggers/:dataloggerId/canales", element: <Channels />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId", element: <ViewChannel />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/canales/agregar", element: <CreatePage />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/editar", element: <CreatePage />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/eliminar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales", element: <Channels />, private: true },//done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId", element: <ViewChannel />, private: true },//done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/agregar", element: <CreatePage />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/editar", element: <CreatePage />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/eliminar", element: <UnderConstruction />, private: true },
 
   /* Alarms routes */
   // Alarmas routes / dataloggers
-  { path: "/panel/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true }, 
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true }, 
   // Alarmas routes / locations
-  { path: "/panel/ubicaciones/:locationId/alarmas", element: <Alarms />, private: true },
-  { path: "/panel/ubicaciones/:locationId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
-  { path: "/panel/ubicaciones/:locationId/alarmas/:alarmId/editar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/alarmas", element: <Alarms />, private: true }, //on progress
+  { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId", element: <ViewAlarm />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId/editar", element: <UnderConstruction />, private: true },
   // Alarmas routes / users
-  { path: "/panel/usuarios/:userId/alarmas", element: <Alarms />, private: true },
-  { path: "/panel/usuarios/:userId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
-  { path: "/panel/usuarios/:userId/alarmas/:alarmId/editar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId/editar", element: <UnderConstruction />, private: true },
   // Alarmas routes / channels
-  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },
   { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/agregar", element: <UnderConstruction />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/alarmas/agregar", element: <UnderConstruction />, private: true },
-  { path: "/panel/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId/editar", element: <UnderConstruction />, private: true },  
-  { path: "/panel/alarmas/:alarmId/eliminar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/agregar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/agregar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId/editar", element: <UnderConstruction />, private: true },  
+  { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId/eliminar", element: <UnderConstruction />, private: true },
 ];

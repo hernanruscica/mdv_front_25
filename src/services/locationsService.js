@@ -37,18 +37,18 @@ export const locationsService = {
   },
   getAll: async () => {
     try {
-      const { data } = await axiosClient.get('/api/locations');
-      return data.locations;
+      const { data } = await axiosClient.get('/api/businesses');
+      return data.businesses;
     } catch (error) {
       console.error('Get locations error:', error);
       return null;
     }
   },
 
-  getAllById: async (userId) => {
+  getAllById: async () => {
     try {
-      const { data } = await axiosClient.get(`/api/locationsusers/locationsbyuser/${userId}`);
-      return data.locationUserData;
+      const { data } = await axiosClient.get(`/api/businesses`);
+      return data.businesses;
     } catch (error) {
       console.error('Get assigned locations error:', error);
       return null;
@@ -57,8 +57,8 @@ export const locationsService = {
 
   getById: async (locationId) => {
     try {
-      const { data } = await axiosClient.get(`/api/locations/${locationId}`);      
-      return data.location;
+      const { data } = await axiosClient.get(`/api/businesses/${locationId}`);        
+      return data.business;
     } catch (error) {
       console.error('Get location by id error:', error);
       return null;

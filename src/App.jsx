@@ -1,9 +1,7 @@
-import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Header, Footer } from './components';
 import { PrivateRoute } from './components/PrivateRoute/PrivateRoute';
 import { routes } from './routes/routes';
-import Modal from 'react-modal';
 import FloatingButtons from './components/FloatingButtons/FloatingButtons';
 import { Toaster } from 'react-hot-toast';
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CardInfo from '../CardInfo/CardInfo';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import ButtonsBar from '../ButtonsBar/ButtonsBar';
@@ -9,21 +9,21 @@ import cardInfoStyles from "../CardInfo/CardInfo.module.css";
 import CustomTag from '../CustomTag/CustomTag';
 
 const ShowLocationsCards = ({ 
-  locations, 
-  dataloggers, 
+  locations,   
   searchTerm,
   onSearchChange,
+  user,  
   showAddButton = false 
 }) => {
-  const [showArchived, setShowArchived] = useState(showAddButton);
+  const [showArchived, setShowArchived] = useState(showAddButton);  
 
   const filteredLocations = locations.filter(location => {
     const searchTermLower = searchTerm.toLowerCase();
     const matchesSearch = (
-      location.ubicaciones_nombre.toLowerCase().includes(searchTermLower) ||
-      location.ubicaciones_descripcion?.toLowerCase().includes(searchTermLower) ||
-      location.ubicaciones_calle.toLowerCase().includes(searchTermLower) ||
-      location.ubicaciones_email.toLowerCase().includes(searchTermLower)
+      location.name.toLowerCase().includes(searchTermLower) ||
+      location.description.toLowerCase().includes(searchTermLower) ||
+      location.address.street.toLowerCase().includes(searchTermLower) ||
+      location.email.toLowerCase().includes(searchTermLower)
     );
 
     // Filtrar por estado - Corregido para usar el campo 'estado'
@@ -31,6 +31,9 @@ const ShowLocationsCards = ({
 
     return matchesSearch && matchesStatus;
   });
+
+  
+  
 
   return (
     <>
@@ -61,21 +64,18 @@ const ShowLocationsCards = ({
       </div>
 
       <div className={styles.cardsContainer}>
-        {filteredLocations.map(location => {
-          const connectedDataloggers = dataloggers.filter(
-            datalogger => datalogger.ubicacion_id === location.ubicaciones_id
-          );
-
-          return (
+        {
+        filteredLocations.map(location => 
+          
             <CardInfo
-              key={location.ubicaciones_id}
+              key={`location_${location.uuid}`}
               iconSrc={`/icons/${getIconFileName('ubicaciones')}`}
-              title={location.ubicaciones_nombre}     
-              url={`/panel/ubicaciones/${location.ubicaciones_id}`}   
+              title={location.name}     
+              url={`/panel/ubicaciones/${location.uuid}`}   
             >
               <div className={cardInfoStyles.description}>
                 {
-                  (location.estado === 0) && (
+                  (location.is_active === 0) && (
                     <CustomTag
                       text="Archivado"
                       type="archive"
@@ -84,31 +84,31 @@ const ShowLocationsCards = ({
                   )
                 }
                 <p className={cardInfoStyles.paragraph}>                 
-                  {location.ubicaciones_descripcion}                  
+                  {location.description}                  
                 </p>
                 <p className={cardInfoStyles.paragraph}>
                   <strong>Dirección:</strong>{" "}
-                  {location.ubicaciones_calle} {location.ubicaciones_calle_numero}
+                  {location.address.street} 
                 </p>
                 <p className={cardInfoStyles.paragraph}>
                   <strong>Teléfono:</strong>{" "}
-                  {location.ubicaciones_tel}
+                  {location.phone}
                 </p>
                 <p className={cardInfoStyles.paragraph}>
                   <strong>Email:</strong>{" "}
-                  {location.ubicaciones_email}
+                  {location.email}
                 </p>
                 <div className={styles.dataloggersList}>
                   <p className={cardInfoStyles.paragraph}>
-                    <strong>Dataloggers conectados ({connectedDataloggers.length}):</strong>
+                    <strong>Dataloggers conectados ({location?.dataloggers?.length}):</strong>
                   </p>
-                  {connectedDataloggers.length > 0 ? (
+                  {location?.dataloggers && location?.dataloggers.length > 0 ? (
                     <ul className={styles.dataloggerItems}>
-                      {connectedDataloggers.map(datalogger => (
-                        <li key={datalogger.id} className={styles.dataloggerItem}>
+                      {location.dataloggers.map(datalogger => (
+                        <li key={datalogger.uuid} className={styles.dataloggerItem}>
                           <CardBtnSmall
-                            title={datalogger.nombre}
-                            url={`/panel/dataloggers/${datalogger.id}`}
+                            title={datalogger.name}
+                            url={`/panel/ubicaciones/${location.uuid}/dataloggers/${datalogger.uuid}`}
                           />
                         </li>
                       ))}
@@ -117,11 +117,20 @@ const ShowLocationsCards = ({
                     <p className={styles.noDataloggers}>No hay dataloggers conectados</p>
                   )}
                 </div>
+                <p className={cardInfoStyles.paragraph}>
+                  {`Rol de ${user.first_name} ${user.last_name} : `}
+                  <strong>
+                    {                      
+                      user.businesses_roles.find(ur => ur.uuid === location.uuid)?.role || 'Owner'
+                    }
+                  </strong>
+                </p>
               </div>
             </CardInfo>
-          );
-        })}
+          
+        )}
       </div>
+      {/**/}
     </>
   );
 };

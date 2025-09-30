@@ -1,10 +1,11 @@
 import axiosClient from '../utils/axiosClient';
 
 export const alarmsService = {
-  getAll: async () => {
+  getAll: async (userUuid, businessUuid) => {
+    console.log('desde alarmService, userUuid: ', userUuid);
     try {
-      const { data } = await axiosClient.get('/api/alarms');
-      return data.alarms;
+      const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/alarms`);
+      return data.items;
     } catch (error) {
       console.error('Get alarms error:', error);
       return null;
@@ -21,12 +22,12 @@ export const alarmsService = {
       return null;
     }
   },
-  
+  //GET {{api}}/businesses/{{own_business_uuid}}/alarms
   getAllByLocation: async (locationId) => {
     try {
-      const { data } = await axiosClient.get(`/api/alarms/bylocation/${locationId}`);
+      const { data } = await axiosClient.get(`/api/businesses/${locationId}/alarms`);
       //console.log('data.alarms', data.alarms)
-      return data.alarms;
+      return data.items;
     } catch (error) {
       console.error('Get location alarms error:', error);
       return null;

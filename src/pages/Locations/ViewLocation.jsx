@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useAuthStore } from '../../store/authStore';
 import { useLocationsStore } from '../../store/locationsStore';
-import { useDataloggersStore } from '../../store/dataloggersStore';
-import { useChannelsStore } from '../../store/channelsStore';
-import { useAlarmsStore } from '../../store/alarmsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import CardImage from '../../components/CardImage/CardImage';
 import styles from './ViewLocation.module.css';
@@ -18,94 +15,54 @@ import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 
 const ViewLocation = () => {
-  const { id } = useParams();
+  const { businessUuid } = useParams();
   const user = useAuthStore(state => state.user);
   
   const { 
+    selectedLocation,
     fetchLocationById,
-    selectedLocation: currentLocation,
     loadingStates: { fetchLocation: isLoadingLocation },    
     error: errorLocations 
   } = useLocationsStore();
 
-  const { 
-    dataloggers, 
-    fetchDataloggersByLocation,
-    isLoading: isLoadingDataloggers, 
-    error: errorDataloggers 
-  } = useDataloggersStore();
-
-  const {
-    channels,
-    fetchChannels,
-    isLoading: isLoadingChannels,
-    error: errorChannels,
-  } = useChannelsStore();
-
-  const {
-    alarms,
-    fetchAlarmsByLocation,
-    isLoading: isLoadingAlarms,
-    error: errorAlarms
-  } = useAlarmsStore(); 
-
   const [modalOpen, setModalOpen] = useState(false);
-
-  // Recarga la ubicación cuando se cierra el modal
-  useEffect(() => {
-    if (!modalOpen) {
-      // Espera un tick para asegurarse de que el update terminó
-      const timeout = setTimeout(() => {
-        fetchLocationById(id);
-      }, 200);
-      return () => clearTimeout(timeout);
-    }
-  }, [modalOpen, fetchLocationById, id]);
-
-  //const [currentLocation, setCurrentLocation] = useState(null);
+  const [alarmsQuantity, setAlarmsQuantity ] = useState(0);
+  const [allAlarms, setAllAlarms] = useState([]);
 
   useEffect(() => {
     const loadLocation = async () => {
-      await fetchLocationById(id);
+      const currentLocation = await fetchLocationById(businessUuid);
+      setAlarmsQuantity(currentLocation?.dataloggers.reduce((sum, dl) => sum + dl.alarms.length, 0));
+      const allAlarms = currentLocation?.dataloggers.flatMap(dl => dl.alarms) || [];      
+      setAllAlarms(allAlarms);
     };
     loadLocation();
-  }, [id]);
+  }, [businessUuid]);  
 
-  useEffect(() => {
-    const loadData = async () => {      
-      if (currentLocation) {
-        await fetchChannels(user);        
-        await fetchAlarmsByLocation(currentLocation.id);
-        await fetchDataloggersByLocation(currentLocation.id);
-      }     
-    };
-    loadData();
-  }, [currentLocation]); 
-
-  if (isLoadingLocation || isLoadingDataloggers || isLoadingChannels || isLoadingAlarms) {
+  if (isLoadingLocation && selectedLocation !== null) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-  if (errorLocations || errorDataloggers || errorChannels || errorAlarms) {
+  if (errorLocations ) {
     return <div className={styles.error}>
-      Error: {errorLocations || errorDataloggers || errorChannels || errorAlarms}
+      Error: {errorLocations }
     </div>;
   }
 
   const locationButtons = (
     <>      
-      { currentLocation?.estado == 1 ? (
+      { selectedLocation?.is_active == 1 ? (
       <>
         <BtnCallToAction
           text="Editar"
           icon="edit-regular.svg"          
-          url={`/panel/ubicaciones/${currentLocation?.id}/editar`}
+          url={`/panel/ubicaciones/${selectedLocation?.id}/editar`}
         />  
         <BtnCallToAction
           text="Archivar"
           icon="archive-solid.svg"
           type="danger"
-          //url={`/panel/ubicaciones/${currentLocation?.id}/archivar`}
+          //url={`/panel/ubicaciones/${selectedLocation?.id}/archivar`}
           onClick={() => setModalOpen(true)}
         />
       </>
@@ -114,105 +71,105 @@ const ViewLocation = () => {
         <BtnCallToAction
           text="Desarchivar"
           icon="save-regular.svg"          
-          //url={`/panel/ubicaciones/${currentLocation?.id}/descarchivar`}
+          //url={`/panel/ubicaciones/${selectedLocation?.id}/descarchivar`}
           onClick={() => setModalOpen(true)}
         />
         <BtnCallToAction
           text="Eliminar"
           icon="trash-alt-regular.svg"
           type="danger"
-          url={`/panel/ubicaciones/${currentLocation?.id}/eliminar`}
+          url={`/panel/ubicaciones/${selectedLocation?.id}/eliminar`}
         />
       </>)  
       }
 
     </>
-  );
-
-  // const locationChannels = channels.filter(channel => 
-  //   dataloggers.some(d => d?.ubicacion_id === currentLocation?.id && d?.id === channel?.datalogger_id)
-  // );
-  //console.log('locacion', currentLocation);
+  ); 
 
   return (
     <>
+    
     <ModalSetArchive
       isOpen={modalOpen}
       onRequestClose={() => setModalOpen(false)}
       entidad="ubicacion"
-      entidadId={currentLocation?.id}
-      nuevoEstado={currentLocation?.estado == '1' ? 0 : 1}
-      redirectTo={`/panel/ubicaciones/${currentLocation?.id}`}
-      nombre={`${currentLocation?.nombre}`}
+      entidadId={selectedLocation?.uuid}
+      nuevoEstado={selectedLocation?.is_active == '1' ? 0 : 1}
+      redirectTo={`/panel/ubicaciones/${selectedLocation?.uuid}`}
+      nombre={`${selectedLocation?.name}`}
     />
       <Title1 
-        text={`Ubicación: ${currentLocation?.nombre}`}
+        text={`Ubicación: ${selectedLocation?.name}`}
         type="ubicaciones"
       />
-      <Breadcrumb ubicacion={currentLocation?.nombre}/>
+      <Breadcrumb ubicacion={selectedLocation?.name}/>
       <CardImage
-        image={currentLocation?.foto ? `${import.meta.env.VITE_IMAGE_URL}/${currentLocation?.foto}` : '/images/default-location.png'}
-        title={currentLocation?.nombre}
-        buttons={user.espropietario == 1 ? locationButtons : null}
+        image={selectedLocation?.logo_url ? `${import.meta.env.VITE_IMAGE_URL}/${selectedLocation?.logo_url}` : '/images/default-location.png'}
+        title={selectedLocation?.name}
+        buttons={user.isOwner == 1 ? locationButtons : null}
       >
         <div className={styles.locationInfo}>
           {
-            currentLocation?.estado == '0' &&
+            selectedLocation?.is_active == '0' &&
             (<CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />)
             }
-          <p><strong>Descripción:</strong> {currentLocation?.descripcion}</p>
-          <p><strong>Dirección:</strong> {currentLocation?.calle} {currentLocation?.calle_numero}</p>
-          <p><strong>Teléfono:</strong> {currentLocation?.tel}</p>
-          <p><strong>Email:</strong> {currentLocation?.email}</p>
-          <p><strong>Estado:</strong> {currentLocation?.estado ? 'Activo' : 'Inactivo'}</p>
-          <p><strong>Fecha de creación:</strong> {currentLocation?.fecha_creacion ? new Date(currentLocation?.fecha_creacion).toLocaleDateString() : 'No disponible'}</p>
-          
-          <p><strong>Dataloggers Asociados:</strong></p>
+          <p><strong>Descripción:</strong> {selectedLocation?.description}</p>
+          <p><strong>Dirección:</strong> {selectedLocation?.address.street}</p>
+          <p><strong>Teléfono:</strong> {selectedLocation?.phone}</p>
+          <p><strong>Email:</strong> {selectedLocation?.email}</p>
+          <p><strong>Estado:</strong> {selectedLocation?.is_active ? 'Activo' : 'Inactivo'}</p>
+          <p><strong>Fecha de creación:</strong> {selectedLocation?.created_at ? new Date(selectedLocation?.created_at).toLocaleDateString() : 'No disponible'}</p>
+
+         
+          <p><strong>Dataloggers Asociados: {`${selectedLocation?.dataloggers.length}`}</strong></p>
+    
           <div className={styles.btnContainer}>
-            {dataloggers.length === 0 ? (
+            {selectedLocation?.dataloggers.length === 0 ? (
               'No tiene'
             ) : 
-            dataloggers.map(datalogger => (
+            selectedLocation?.dataloggers.map(datalogger => (
               <CardBtnSmall
-                key={datalogger.id}
-                title={datalogger.nombre}
-                url={`/panel/dataloggers/${datalogger.id}`}
+                key={datalogger.uuid}
+                title={datalogger.name}
+                url={`/panel/ubicaciones/${selectedLocation?.uuid}/dataloggers/${datalogger.uuid}`}
               />              
             ))
             }
           </div>
 
           <p><strong>Alarmas Activas:</strong>{" "}
-            {alarms.length === 0 ? (
+            {
+            alarmsQuantity === 0 ? (
               'No hay alarmas activas'
             ) : (
               <CardBtnSmall 
-                title={`Ver ${alarms.length} alarmas`}
-                url={`/panel/ubicaciones/${currentLocation?.id}/alarmas`}
+                title={`Ver ${alarmsQuantity} alarmas`}
+                url={`/panel/ubicaciones/${selectedLocation?.uuid}/alarmas`}
               />
-            )}
-          </p>
+            )          
+            }
+          </p>           
         </div>
       </CardImage>
 
-      <Title2 text={`Dataloggers en ${currentLocation?.nombre}`} type="dataloggers"/>            
-      {/* <BtnCallToAction
+      <Title2 text={`Dataloggers en ${selectedLocation?.name}`} type="dataloggers"/>            
+       <BtnCallToAction
         text="Agregar datalogger"
         icon="plus-circle-solid.svg"
         type="normal"
         url={`/panel/dataloggers/agregar`}
-      />     */}
-      {(dataloggers.length > 0) ?
+      />    
+      {(selectedLocation?.dataloggers.length > 0) ?
         <ShowDataloggersCards
-          dataloggers={dataloggers.filter(d => d.ubicacion_id === parseInt(id))}
-          channels={channels}
-          alarms={alarms}
-          locations={[currentLocation]}
-          showAddButton={user.espropietario == 1}
+          dataloggers={selectedLocation?.dataloggers}
+          channels={selectedLocation?.dataloggers.flatMap(d => d.channels)}
+          alarms={allAlarms}
+          locations={[selectedLocation]}
+          showAddButton={user.isOwner == 1}
         /> :
         <p>No hay dataloggers en esta ubicación</p>
-      }      
-    </>
+      }    
+    </>    
   );
 };
 

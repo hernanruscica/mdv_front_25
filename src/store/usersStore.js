@@ -3,100 +3,104 @@ import { usersService } from '../services/usersService';
 
 export const useUsersStore = create((set, get) => ({
   users: [],
-  selectedUser: null,
-  isLoading: false,
+  selectedUser: null,  
   error: null,
+  loadingStates: {
+    fetchUsers: false,
+    fetchUser: false,
+    createUser: false,
+    updateUser: false,
+    deleteUser: false
+  },  
 
-  fetchUsers: async (currentUser) => {
-    if (!currentUser) return;
-    
-    set({ isLoading: true, error: null });
+  fetchUserById: async (id, uuidOrigin) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchUser: true }
+    }));
     try {
-      const users = currentUser.espropietario == 1       
-      ? await usersService.getAll()
-      : await usersService.getAllById(currentUser.id);
-      
-      /* Ahora uso un solo endpoint para obtener los usuarios asignados al usuario actual, propietario o no.
-      
-      const users = await usersService.getAllById(currentUser.id);
-      if (!users) { /api/locationsusers
-      set({ error: 'No users found', isLoading: false });
-      return;
-    }  
-    */
-      set({ users, isLoading: false });
+      const user = await usersService.getById(id, uuidOrigin);        
+        set({ selectedUser: user, error: null });
+        return user;
     } catch (error) {
-      set({ error: 'Error fetching users', isLoading: false });
+        set({ error: error.message});        
+        return null;
+    } finally {
+        set(state => ({
+        loadingStates: { ...state.loadingStates, fetchUser: false }
+    }));
     }
   },
-
-  fetchUserById: async (id) => {
-    set({ isLoading: true, error: null });
+  
+  fetchUsers: async (currentUser, businessUuid) => {
+    if (!currentUser) return;
+    set(state => ({ loadingStates: { ...state.loadingStates, fetchUsers: true }, error: null }));
     try {
-      const user = await usersService.getById(id);
-      set({ selectedUser: user, isLoading: false });
-      return user;
+      const users = currentUser.isOwner == 1
+        ? await usersService.getAll(businessUuid)
+        : await usersService.getAllById(businessUuid);
+      set({ users, error: null });
     } catch (error) {
-      set({ error: 'Error fetching user', isLoading: false });
-      return null;
+      set({ error: 'Error fetching users' });
+    } finally {
+      set(state => ({ loadingStates: { ...state.loadingStates, fetchUsers: false } }));
     }
   },
 
   createUser: async (userData) => {
-    set({ isLoading: true, error: null });
+    set(state => ({ loadingStates: { ...state.loadingStates, createUser: true }, error: null }));
     try {
       const response = await usersService.create(userData);
-      console.log('respuesta del servicio de creación de usuario', response);
       if (response.success) {
-        set(state => ({ 
-          users: [...state.users, response.user],
-          isLoading: false 
+        set(state => ({
+          users: [...state.users, response.user]
         }));
-        return response;
       }
       return response;
     } catch (error) {
-      set({ error: 'Error creating user', isLoading: false });
-      return response;
+      set({ error: 'Error creating user' });
+      return { success: false, message: 'Error al crear usuario' };
+    } finally {
+      set(state => ({ loadingStates: { ...state.loadingStates, createUser: false } }));
     }
   },
 
   updateUser: async (id, userData) => {
-    set({ isLoading: true, error: null });
+    set(state => ({ loadingStates: { ...state.loadingStates, updateUser: true }, error: null }));
     try {
       const response = await usersService.update(id, userData);
       if (response.success) {
         set(state => ({
-          users: state.users.map(user => 
+          users: state.users.map(user =>
             user.id === id ? response.user : user
           ),
-          selectedUser: response.user,
-          isLoading: false
+          selectedUser: state.selectedUser?.id === id ? response.user : state.selectedUser
         }));
-        return response;
       }
       return response;
     } catch (error) {
-      set({ error: 'Error updating user', isLoading: false });
+      set({ error: 'Error updating user' });
       return { success: false, message: 'Error al actualizar usuario' };
+    } finally {
+      set(state => ({ loadingStates: { ...state.loadingStates, updateUser: false } }));
     }
   },
 
   deleteUser: async (id) => {
-    set({ isLoading: true, error: null });
+    set(state => ({ loadingStates: { ...state.loadingStates, deleteUser: true }, error: null }));
     try {
       const success = await usersService.delete(id);
       if (success) {
         set(state => ({
-          users: state.users.filter(user => user.id !== id),
-          isLoading: false
+          users: state.users.filter(user => user.id !== id)
         }));
         return true;
       }
       return false;
     } catch (error) {
-      set({ error: 'Error deleting user', isLoading: false });
+      set({ error: 'Error deleting user' });
       return false;
+    } finally {
+      set(state => ({ loadingStates: { ...state.loadingStates, deleteUser: false } }));
     }
   },
 

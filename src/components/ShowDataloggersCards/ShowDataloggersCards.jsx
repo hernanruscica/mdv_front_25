@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ReactModal from 'react-modal';
 import CardInfo from '../CardInfo/CardInfo';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
@@ -10,11 +10,9 @@ import styles from './ShowDataloggersCards.module.css';
 import cardInfoStyles from '../CardInfo/CardInfo.module.css';
 import CustomTag from '../CustomTag/CustomTag';
 
+
 const ShowDataloggersCards = ({ 
-  dataloggers, 
-  channels, 
-  alarms, 
-  locations,
+  dataloggers,   
   showAddButton = false 
 }) => {
   const [showArchived, setShowArchived] = useState(showAddButton);
@@ -26,6 +24,7 @@ const ShowDataloggersCards = ({
     itemsCount: 0,
     dataloggerName: ''
   });
+  
 
   const openModal = (type, dataloggerId, itemsCount, dataloggerName) => {
     setModalContent({
@@ -48,27 +47,26 @@ const ShowDataloggersCards = ({
   };
 
   const getModalContent = () => {
+    const channels = dataloggers.flatMap(d => d.channels); 
+    const alarms = dataloggers.flatMap(d => d.alarms); 
     if (!modalContent.type || !modalContent.dataloggerId) return null;
-
+    const currentChannels = channels.filter(channel => channel.datalogger_id === modalContent.dataloggerId);
     const items = modalContent.type === 'channels' 
-      ? channels.filter(channel => channel.datalogger_id === modalContent.dataloggerId)
-      : alarms.filter(alarm => 
-          alarm.datalogger_id === modalContent.dataloggerId && 
-          alarm.estado === 1
-        );
-
+      ? channels.filter(channel => channel.datalogger_id === modalContent.dataloggerId)      
+      : alarms.filter(alarm => alarm.is_active === 1 && currentChannels.some(ch => ch.uuid === alarm.channel_uuid));      
+ 
     return (
       <div className={styles.modalContent}>
         <h2>{modalContent.type === 'channels' ? 'Canales' : 'Alarmas'} de {modalContent.dataloggerName}</h2>
         {items.length > 0 ? (
           <ul className={styles.modalList}>
             {items.map(item => (
-              <li key={item.id} className={styles.modalItem}>
+              <li key={item.uuid} className={styles.modalItem}>
                 <CardBtnSmall
-                  title={modalContent.type === 'channels' ? item.canales_nombre : item.nombre}
+                  title={modalContent.type === 'channels' ? item.name : item.name}
                   url={modalContent.type === 'channels' 
-                    ? `/panel/dataloggers/${modalContent.dataloggerId}/canales/${item.canales_id}`
-                    : `/panel/dataloggers/${modalContent.dataloggerId}/canales/${item.canal_id}/alarmas/${item.id}`
+                    ? `/panel/dataloggers/${modalContent.dataloggerId}/canales/${item.uuid}`
+                    : `/panel/dataloggers/${modalContent.dataloggerId}/canales/${item.uuid}/alarmas/${item.uuid}`
                   }
                 />
               </li>
@@ -82,16 +80,15 @@ const ShowDataloggersCards = ({
   };
 
   const filteredDataloggers = dataloggers
-    .filter(datalogger => !showArchived ? datalogger.estado === 1 : true)
+    .filter(datalogger => !showArchived ? datalogger.is_active === 1 : true)
     .filter(datalogger => {
       const searchTermLower = searchTerm.toLowerCase();
       return (
-        datalogger.nombre.toLowerCase().includes(searchTermLower) ||
-        datalogger.descripcion?.toLowerCase().includes(searchTermLower)
+        datalogger?.name.toLowerCase().includes(searchTermLower) ||
+        datalogger?.description?.toLowerCase().includes(searchTermLower)
       );
     });
 
-    //console.log(locations)
 
   return (
     <>
@@ -124,14 +121,14 @@ const ShowDataloggersCards = ({
       <div className={styles.cardsContainer}>
         {filteredDataloggers.map(datalogger => (
           <CardInfo
-            key={datalogger.id}
+            key={datalogger.uuid}
             iconSrc={`/icons/${getIconFileName('dataloggers')}`}
-            title={datalogger.nombre}     
-            url={`/panel/dataloggers/${datalogger.id}`}   
+            title={datalogger.name}     
+            url={`/panel/ubicaciones/${datalogger.business.uuid}/dataloggers/${datalogger.uuid}`}   
           >
             <div className={cardInfoStyles.description}>
               {
-                datalogger.estado === 0 && (
+                datalogger.is_active === 0 && (
                   <CustomTag 
                     text="Archivado"
                     type="archive"
@@ -140,45 +137,35 @@ const ShowDataloggersCards = ({
                 )
               }
               <p className={cardInfoStyles.paragraph}>
-                <strong>{datalogger.descripcion}</strong>
+                <strong>{datalogger.description}</strong>
               </p>
-              {locations && (
+              
                 <p className={cardInfoStyles.paragraph}>                
-                  Instalado en: {' '}
+                  Instalado en: 
                   <CardBtnSmall 
-                    title={locations.find(loc => loc?.ubicaciones_id === datalogger.ubicacion_id || loc?.id === datalogger.ubicacion_id)?.ubicaciones_nombre || 
-                           locations.find(loc => loc?.ubicaciones_id === datalogger.ubicacion_id || loc?.id === datalogger.ubicacion_id)?.nombre || 
-                           'Sin ubicación'}
-                    url={`/panel/ubicaciones/${datalogger.ubicacion_id}`}       
+                    title={datalogger.business.name}
+                    url={`/panel/ubicaciones/${datalogger.business.uuid}`}       
                   />       
                 </p>
-              )}
               
+              {/* (type, dataloggerId, itemsCount, dataloggerName) */}
               <CardBtnSmall 
-                title={`Canales conectados (${channels?.filter(channel => 
-                  channel.datalogger_id === datalogger.id
-                ).length})`}
+                title={`Canales conectados (${datalogger?.channels.length  || 0})`}
                 onClick={() => openModal(
                   'channels', 
-                  datalogger.id,
-                  channels.filter(channel => channel.datalogger_id === datalogger.id).length,
-                  datalogger.nombre
+                  datalogger?.uuid,
+                  datalogger?.channels.length || 0,
+                  datalogger?.name
                 )}
               />
               
               <CardBtnSmall 
-                title={`Alarmas vigentes (${alarms.filter(alarm => 
-                  alarm.datalogger_id === datalogger.id && 
-                  alarm.estado === 1
-                ).length})`}
+                title={`Alarmas vigentes (${datalogger?.alarms.filter(alarm => alarm.is_active === 1).length})`}
                 onClick={() => openModal(
                   'alarms', 
-                  datalogger.id,
-                  alarms.filter(alarm => 
-                    alarm.datalogger_id === datalogger.id && 
-                    alarm.estado === 1
-                  ).length,
-                  datalogger.nombre
+                  datalogger?.uuid,
+                  datalogger?.alarms.filter(alarm => alarm?.is_active == 1).length,
+                  datalogger.name
                 )}
               />
             </div>

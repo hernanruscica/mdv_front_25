@@ -1,9 +1,9 @@
 import axiosClient from '../utils/axiosClient';
 
 export const usersService = {
-  getAll: async () => {
+  getAll: async (businessUuid) => {
     try {
-      const { data } = await axiosClient.get('/api/users');
+      const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/users/`);
       return data.users;
     } catch (error) {
       console.error('Get users error:', error);
@@ -11,9 +11,9 @@ export const usersService = {
     }
   },
 
-  getAllById: async (userId) => {
+  getAllById: async (businessUuid) => {
     try {
-      const { data } = await axiosClient.get(`/api/users/byuser/${userId}`);
+      const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/users/`);
       return data.users;
     } catch (error) {
       console.error('Get assigned users error:', error);
@@ -21,9 +21,10 @@ export const usersService = {
     }
   },
 
-  getById: async (id) => {
+  getById: async (uuid, uuidOrigin) => {    
+    
     try {
-      const { data } = await axiosClient.get(`/api/users/${id}`);
+      const { data } = await axiosClient.get(`/api/businesses/${uuidOrigin}/users/${uuid}`);
       return data.user;
     } catch (error) {
       console.error('Get user error:', error);
