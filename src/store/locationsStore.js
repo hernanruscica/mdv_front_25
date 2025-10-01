@@ -91,9 +91,11 @@ export const useLocationsStore = create((set, get) => ({
         
         const locations = await locationsService.getAll();
         set({ locations, error: null });
+        return locations;
       }else{
         const locations = await locationsService.getAllById();
         set({ locations, error: null });
+        return locations;
       }
     } catch (error) {
       set({ error: error.message });

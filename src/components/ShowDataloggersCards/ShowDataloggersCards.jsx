@@ -54,7 +54,7 @@ const ShowDataloggersCards = ({
     const items = modalContent.type === 'channels' 
       ? channels.filter(channel => channel.datalogger_id === modalContent.dataloggerId)      
       : alarms.filter(alarm => alarm.is_active === 1 && currentChannels.some(ch => ch.uuid === alarm.channel_uuid));      
- 
+    console.log('items',items)
     return (
       <div className={styles.modalContent}>
         <h2>{modalContent.type === 'channels' ? 'Canales' : 'Alarmas'} de {modalContent.dataloggerName}</h2>
@@ -65,8 +65,8 @@ const ShowDataloggersCards = ({
                 <CardBtnSmall
                   title={modalContent.type === 'channels' ? item.name : item.name}
                   url={modalContent.type === 'channels' 
-                    ? `/panel/dataloggers/${modalContent.dataloggerId}/canales/${item.uuid}`
-                    : `/panel/dataloggers/${modalContent.dataloggerId}/canales/${item.uuid}/alarmas/${item.uuid}`
+                    ? `/panel/ubicaciones/${item.business.uuid}/dataloggers/${modalContent.dataloggerId}/canales/${item.uuid}`
+                    : `/panel/ubicaciones/${item.business.uuid}/dataloggers/${modalContent.dataloggerId}/canales/${item.channel_uuid}/alarmas/${item.uuid}`
                   }
                 />
               </li>

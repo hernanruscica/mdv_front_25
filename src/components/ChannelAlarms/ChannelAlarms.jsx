@@ -38,15 +38,7 @@ const ChannelAlarms = ({ alarms, channelId, channelName = 'sin identificar', dat
   //console.log(preparedAlarms);
   return (
 
-    <div className={styles.alarmsContainer}>
-      {showAddButton && (
-        <BtnCallToAction
-          text="Agregar alarma"
-          icon="plus-circle-solid.svg"
-          type="normal"
-          url={`/panel/ubicaciones/zaraza/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
-        />
-      )}
+    <div className={styles.alarmsContainer}>      
 
       {preparedAlarms && preparedAlarms.length > 0 ? (
         <div className={styles.tableContainer}>

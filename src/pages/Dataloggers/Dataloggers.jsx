@@ -33,7 +33,10 @@ const Dataloggers = () => {
     return <div className={styles.error}>{error}</div>;
   }
 
-  const userCurrentRole = user.businesses_roles.find(br => br.uuid === businessUuid).role;
+   const userCurrentRole = 
+      user?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
   //console.log(dataloggers[0].business.name);
 
   return (
@@ -46,7 +49,7 @@ const Dataloggers = () => {
       
       <ShowDataloggersCards
         dataloggers={dataloggers}              
-        showAddButton={user.isOwner === 1 || userCurrentRole == 'Administrator'}
+        showAddButton={userCurrentRole === 'Owner' || userCurrentRole == 'Administrator'}
       />
       {/**/}
     </>

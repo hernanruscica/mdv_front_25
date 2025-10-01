@@ -32,7 +32,10 @@ const ViewDatalogger = () => {
   }
 
 
-  const userCurrentRole = user.businesses_roles.find(br => br.uuid === businessUuid).role;
+  const userCurrentRole = 
+    user?.businesses_roles.some(br => br.role === 'Owner')
+      ? 'Owner'
+      : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
 
     //console.log('datalogger', selectedDatalogger);
 

@@ -56,9 +56,6 @@ const ViewChannel = () => {
    console.log('channelId', channelId);  
   */
  
- const currentChannel = datalogger?.channels?.find(ch=>ch.uuid === channelId);
- const userCurrentRole = user.businesses_roles.find(br => br.uuid === businessUuid).role;
-
    useEffect(() => {
     const loadData = async () => {
       //fetchDataChannel: async (nombreTabla, nombreColumna, minutosAtras, tiempoPromedio, isSecondary = false)
@@ -78,6 +75,13 @@ const ViewChannel = () => {
   if (errorDatalogger) {
     return <div className={styles.error}>{errorDatalogger}</div>;
     }
+
+  const currentChannel = datalogger?.channels?.find(ch=>ch.uuid === channelId);  
+  const userCurrentRole = 
+  user?.businesses_roles.some(br => br.role === 'Owner')
+    ? 'Owner'
+    : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+  //console.log('currentChannel' ,currentChannel);
 
 
 //console.log(datalogger?.table_name);
@@ -179,7 +183,7 @@ const handleAlarmClick = (row) => {
           <CardImage
             image={`${import.meta.env.VITE_IMAGE_URL}/${currentChannel?.img}`}
             title={currentChannel?.name}
-            buttons={user.isOwner === 1 ? channelButtons : null}
+            buttons={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator' ? channelButtons : null}
           >
             {currentChannel?.is_active == '0' && (
               <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
@@ -200,7 +204,7 @@ const handleAlarmClick = (row) => {
         channelName={currentChannel.name}
         dataloggerId={dataloggerId}
         onAlarmClick={handleAlarmClick}
-        showAddButton={user.isOwner == 1 || userCurrentRole === 'Administrator'}
+        showAddButton={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator'}
       />}
 
        <div className={styles.chartContainer}>
