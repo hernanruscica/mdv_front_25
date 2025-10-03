@@ -48,7 +48,7 @@ const Dataloggers = () => {
       <Breadcrumb ubicacion={dataloggers[0]?.business.name}/>
       
       <ShowDataloggersCards
-        dataloggers={dataloggers}              
+        dataloggers={dataloggers.filter(dl=>dl.business.uuid === businessUuid)}              
         showAddButton={userCurrentRole === 'Owner' || userCurrentRole == 'Administrator'}
       />
       {/**/}

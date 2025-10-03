@@ -12,7 +12,7 @@ export const routes = [
   // Locations routes
   { path: "/panel/ubicaciones", element: <Locations />, private: true },//Done
   { path: "/panel/ubicaciones/:businessUuid", element: <ViewLocation />, private: true },//Done
-  { path: "/panel/ubicaciones/agregar", element: <CreatePage />, private: true },
+  { path: "/panel/ubicaciones/agregar", element: <CreatePage />, private: true },  //on progress
   { path: "/panel/ubicaciones/:businessUuid/editar", element: <CreatePage />, private: true },  
   { path: "/panel/ubicaciones/:businessUuid/eliminar", element: <UnderConstruction />, private: true },
   
@@ -42,7 +42,7 @@ export const routes = [
   /* Alarms routes */
   // Alarmas routes / dataloggers
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true },//done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true }, //on progress
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   // Alarmas routes / locations
   { path: "/panel/ubicaciones/:businessUuid/alarmas", element: <Alarms />, private: true }, //done
   { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId", element: <ViewAlarm />, private: true },

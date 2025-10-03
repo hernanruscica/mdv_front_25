@@ -1,4 +1,4 @@
-import React,{ useState, useEffect} from 'react'
+import { useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import stylesForms from './Forms.module.css';
@@ -40,13 +40,12 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
             })
         }
     }, [dataloggerData, isEditing])
-
+/*
     useEffect(() => {
         if (userStore) {
             fetchLocationUsers(userStore);
         }
     }, [userStore]);
-
     useEffect(() => {
         if (locationUsers && locationUsers.length > 0 && !isEditing) {
             setDatalogger(prev => ({
@@ -55,6 +54,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
             }));
         }
     }, [locationUsers, isEditing]);
+    */
     
     const handleChange = (e) => {
         setDatalogger({
@@ -103,7 +103,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
         return <div>Error al cargar las ubicaciones: {error}</div>;
     }
    //console.log(isEditing)
-    return (        
+    return ( 
         <form onSubmit={handleSubmit} className={stylesForms.form}>
             <CardImageLoadingPreview
                 imageFileName={(isEditing) ? datalogger.foto : profileImage}
@@ -188,6 +188,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
               Guardar datalogger
             </button>
         </form>
+          
     );
 };
 

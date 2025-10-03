@@ -20,10 +20,10 @@ const ShowLocationsCards = ({
   const filteredLocations = locations.filter(location => {
     const searchTermLower = searchTerm.toLowerCase();
     const matchesSearch = (
-      location.name.toLowerCase().includes(searchTermLower) ||
-      location.description.toLowerCase().includes(searchTermLower) ||
-      location.address.street.toLowerCase().includes(searchTermLower) ||
-      location.email.toLowerCase().includes(searchTermLower)
+      location?.name.toLowerCase().includes(searchTermLower) ||
+      location?.description.toLowerCase().includes(searchTermLower) ||
+      location?.address.street.toLowerCase().includes(searchTermLower) ||
+      location?.email.toLowerCase().includes(searchTermLower)
     );
 
     // Filtrar por estado - Corregido para usar el campo 'estado'
@@ -32,6 +32,7 @@ const ShowLocationsCards = ({
     return matchesSearch && matchesStatus;
   });
 
+  //console.log(locations);
   
   
 

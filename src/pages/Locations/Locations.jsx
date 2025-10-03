@@ -34,6 +34,11 @@ const Locations = () => {
     return <div className={styles.error}>{error}</div>;
   }
 
+  const userCurrentRole = 
+      user?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+
   return (
     <>
       <Breadcrumb />
@@ -46,7 +51,7 @@ const Locations = () => {
         locations={locations}                
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}        
-        showAddButton={user.isOwner == 1}
+        showAddButton={userCurrentRole === 'Owner'}
       />
     </>
   );

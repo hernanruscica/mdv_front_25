@@ -3,8 +3,7 @@ import axiosClient from '../utils/axiosClient';
 export const locationsService = {
   create: async (locationData) => {
     try {
-      // Cambiamos post por uploadFile para manejar correctamente el FormData
-      const { data } = await axiosClient.uploadFile('/api/locations', locationData);
+      const { data } = await axiosClient.uploadFile('/api/businesses', locationData);
       return data;
     } catch (error) {
       console.error('Create location error:', error);
@@ -14,7 +13,7 @@ export const locationsService = {
 
   update: async (locationId, locationData) => {
     try {
-      const { data } = await axiosClient.put(`/api/locations/${locationId}`, locationData, {
+      const { data } = await axiosClient.put(`/api/businesses/${locationId}`, locationData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

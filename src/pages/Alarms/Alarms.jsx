@@ -37,6 +37,8 @@ const {
       const currentLocationAlarms = await fetchAlarmsByLocation(businessUuid);
       setCurrentAlarms(currentLocationAlarms)
     }
+    
+    // Alarms by user and business
     const loadDataByUser = async () => {
       await fetchDataloggers(user, businessUuid);
       const currentUserAlarms = await fetchAlarmsByUser(userId, businessUuid);          
@@ -49,17 +51,16 @@ const {
       setCurrentAlarms(currentDataloggerResponse?.alarms);
       if (channelId){
         setCurrentChannel(currentDataloggerResponse?.channels.find(ch => ch.uuid === channelId));
-        setCurrentAlarms(currentDataloggerResponse?.alarms.filter(al => al.channel_uuid === channelId));
-        //console.log(currentDataloggerResponse?.alarms.find(al => al.channel_uuid === channelId));
-        
+        setCurrentAlarms(currentDataloggerResponse?.alarms.filter(al => al.channel_uuid === channelId));              
       }
-
     }
-    //fetchAlarmsByUser
+    
 
     if (businessUuid && !userId && !dataloggerId && !channelId){
       loadDataByLocation();
     }
+
+    // Alarms by user and business
     if (businessUuid && userId && !dataloggerId && !channelId) {                              
       loadDataByUser();
     }   
@@ -129,7 +130,8 @@ const {
 
     return filteredAlarms.map(alarm => ({
       nombreAlarma: alarm.name,
-      datalogger:  dataloggers.find(dl => dl.alarms.some(al => al.uuid === alarm.uuid))?.name || 'Sin nombre',             
+      // datalogger:  dataloggers?.find(dl => dl.channels.some(ch => ch.uuid === alarm.channel_uuid))?.name || 'no indentificado',             
+      datalogger:  alarm?.datalogger?.name || 'no indentificado',             
       condicion_mostrar: `${alarm.condition_show} ` || 'Sin condición',
       estado: alarm.is_active,
       url: `${baseUrl}/${alarm.uuid}`      
@@ -143,7 +145,9 @@ const {
   //console.log(`userId: ${userId}`, locationId, dataloggerId, channelId);
 //  console.log('current channel', currentChannel);
   //console.log('current datalogger alarms',currentDatalogger?.alarms);
-  console.log(currentAlarms);
+  //console.log('dataloggers', dataloggers);
+  //console.log('currentAlarms', currentAlarms);
+  
   
 
   return (

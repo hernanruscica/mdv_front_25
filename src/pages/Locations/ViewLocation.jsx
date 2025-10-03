@@ -56,7 +56,7 @@ const ViewLocation = () => {
         <BtnCallToAction
           text="Editar"
           icon="edit-regular.svg"          
-          url={`/panel/ubicaciones/${selectedLocation?.id}/editar`}
+          url={`/panel/ubicaciones/${selectedLocation?.uuid}/editar`}
         />  
         <BtnCallToAction
           text="Archivar"
@@ -78,14 +78,19 @@ const ViewLocation = () => {
           text="Eliminar"
           icon="trash-alt-regular.svg"
           type="danger"
-          url={`/panel/ubicaciones/${selectedLocation?.id}/eliminar`}
+          url={`/panel/ubicaciones/${selectedLocation?.uuid}/eliminar`}
         />
       </>)  
       }
 
     </>
   ); 
-
+  const userCurrentRole = 
+      user?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+  console.log(selectedLocation);
+  
   return (
     <>
     
@@ -104,9 +109,9 @@ const ViewLocation = () => {
       />
       <Breadcrumb ubicacion={selectedLocation?.name}/>
       <CardImage
-        image={selectedLocation?.logo_url ? `${import.meta.env.VITE_IMAGE_URL}/${selectedLocation?.logo_url}` : '/images/default-location.png'}
+        image={selectedLocation?.logo_url !== null ? `${selectedLocation?.logo_url}` : '/images/default_location.png'}
         title={selectedLocation?.name}
-        buttons={user.isOwner == 1 ? locationButtons : null}
+        buttons={userCurrentRole === 'Owner' ? locationButtons : null}
       >
         <div className={styles.locationInfo}>
           {
@@ -157,7 +162,7 @@ const ViewLocation = () => {
         text="Agregar datalogger"
         icon="plus-circle-solid.svg"
         type="normal"
-        url={`/panel/dataloggers/agregar`}
+        url={`/panel/ubicaciones/${businessUuid}/dataloggers/agregar`}
       />    
       {(selectedLocation?.dataloggers.length > 0) ?
         <ShowDataloggersCards

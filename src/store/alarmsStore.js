@@ -34,8 +34,8 @@ export const useAlarmsStore = create((set) => ({
     }
   },
   fetchAlarmsByUser: async (userUuid, businessUuid) => {
-    console.log("desde el store alarm, userUuid:", userUuid);
-    console.log('businessUuid', businessUuid);
+    // console.log("desde el store alarm, userUuid:", userUuid);
+    // console.log('businessUuid', businessUuid);
     
     if (!userUuid) return;
     set(state => ({

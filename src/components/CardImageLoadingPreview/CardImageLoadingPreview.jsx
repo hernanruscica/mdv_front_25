@@ -22,7 +22,7 @@ const CardImageLoadingPreview = (props) => {
                     />
                 ) : (
                     <img
-                        src={(imageFileName.startsWith('default')) ? `/images/${imageFileName}` : `${import.meta.env.VITE_IMAGE_URL}/${imageFileName}` }
+                        src={(imageFileName.startsWith('default')) ? `/images/${imageFileName}` : imageFileName }
                         alt="foto de perfil"
                         title="foto de perfil"
                         className={styles.locationDetailsContainerImage}

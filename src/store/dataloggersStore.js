@@ -36,7 +36,7 @@ export const useDataloggersStore = create((set) => ({
   },
 
   fetchDataloggers: async (currentUser, businessUuid) => {
-    console.log('fetchDataloggers')
+    //console.log('fetchDataloggers')
     if (!currentUser) return;
     
     set(state => ({
@@ -44,12 +44,7 @@ export const useDataloggersStore = create((set) => ({
       error: null
     }));
 
-    try {
-      /*
-      const dataloggers = currentUser.isOwner == 1 
-        ? await dataloggersService.getAll(businessUuid)
-        : await dataloggersService.getAllById(currentUser.id, businessUuid);
-        */
+    try {     
       const dataloggers = await dataloggersService.getAll(businessUuid);
       set(state => ({
         dataloggers,

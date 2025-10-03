@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.jsx";
 import { Title1 } from "../../components/Title1/Title1.jsx";
@@ -80,7 +80,7 @@ const CreatePage = () => {
   }, [dataloggerId]);
 
   useEffect(() => {
-    if (locationId && currentAction == 'editar') {      
+    if (locationId /*&& currentAction == 'editar'*/) {      
       fetchLocationById(locationId);
     }
   }, [locationId]);
@@ -103,22 +103,21 @@ const CreatePage = () => {
 
   const FormComponent = formComponents[currentEntityName] || formComponents.default;
 
-  // console.log(selectedUser);
+// console.log(locationId);
 
   return (
     <>
       <Title1
-        type="edicion"
+        type={(currentAction === 'editar') ? "edicion" : "construccion"}
         text={`Página de ${currentAction === 'editar' ? 'edición' : 'creación'} de ${currentEntityName}`}
       />
       <Breadcrumb 
         usuario={ selectedUser ? `${selectedUser?.nombre_1} ${selectedUser?.apellido_1}` : ''}
+        ubicacion={selectedLocation?.name || 'Agregar'}
         datalogger={selectedDatalogger?.nombre || ''}
         canal={selectedChannel?.nombre || ''}
         alarma={selectedAlarm?.nombre || ''}
-        ubicacion={selectedLocation?.nombre || ''}
-      />
-
+      />      
       <FormComponent 
         userId={userId}        
         userData={selectedUser}

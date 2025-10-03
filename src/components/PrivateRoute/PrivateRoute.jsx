@@ -11,6 +11,10 @@ export const PrivateRoute = ({ children }) => {
   // const { token: tokenParams } = useLocation().params || {};
   const { token: tokenParams } = useParams();
   
+  const userCurrentRole = 
+      user?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
 
   // Chequeo proactivo de expiración (solo si es JWT)
   if (token) {
@@ -34,12 +38,12 @@ export const PrivateRoute = ({ children }) => {
   }
 
   // Verificar permisos de propietario para rutas de agregar
-  if (path.endsWith('agregar') && (user?.espropietario !== 1 && user?.esadministrador !== true)) {
+  if (path.endsWith('agregar') && (userCurrentRole === 'Owner' && userCurrentRole === 'Administrator')) {
     return <Navigate to="/panel" replace />;
   }  
 
   // Verifica permisos de administrador para rutas de edición
-  if (path.endsWith('editar') && (user?.espropietario !== 1 && user?.esadministrador !== true)) {
+  if (path.endsWith('editar') && (userCurrentRole === 'Owner' && userCurrentRole === 'Administrator')) {
     return <Navigate to="/panel" replace />;
   }
 

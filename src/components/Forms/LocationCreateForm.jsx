@@ -1,36 +1,51 @@
-import React,{ useState, useEffect} from 'react'
+import { useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
 import { useLocationsStore } from '../../store/locationsStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
+import {LoadingSpinner} from '../../components/LoadingSpinner/LoadingSpinner.jsx';
 
 export const LocationCreateForm = ({ locationData, isEditing }) => {
     const navigate = useNavigate();   
     const { user: userStore } = useAuthStore();
-    const { createLocation, updateLocation, loadingStates } = useLocationsStore();
+    const { createLocation, 
+            updateLocation, 
+            loadingStates : {createLocation : isCreatingLocation, updateLocation: isUpdatingLocation},             
+        } = useLocationsStore();
     const [profileImage, setProfileImage] = useState("default_location.png");
     const [newImage, setNewImage] = useState("");
+    const isLoading = isCreatingLocation || isUpdatingLocation;
     
     const [location, setLocation] = useState({     
-        nombre: "", 
-        descripcion: "", 
-        foto: "", 
-        telefono: "", 
-        email: "",           
+        name: "", 
+        description: "", 
+        email: "", 
+        phone: "", 
+        logo_url: "", 
+        street: "", 
+        city: "", 
+        state: "", 
+        country: "", 
+        zip_code: "",           
     });    
 
     useEffect(() => {
         if (isEditing && locationData) {
             setLocation({
-                nombre: locationData.nombre || "",
-                descripcion: locationData.descripcion || "",
-                foto: locationData.foto || "",
-                telefono: locationData.telefono || "",
-                email: locationData.email || "",
+                name: locationData?.name || "",
+                description: locationData?.description || "",
+                email: locationData?.email || "",
+                phone: locationData?.phone || "",
+                logo_url: locationData?.logo_url || "",
+                street: locationData?.street || "",
+                city: locationData?.city || "",
+                state: locationData?.state || "",
+                country: locationData?.country || "",
+                zip_code: locationData?.zip_code || "",
             });
-            setProfileImage(locationData.foto || "default_location.png");
+            setProfileImage(locationData?.logo_url || "default_location.png");
         }
     }, [locationData, isEditing]);
     
@@ -44,39 +59,36 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();       
         const formData = new FormData();        
-        // Datos básicos
-        formData.append("nombre", location.nombre || "");
-        formData.append("descripcion", location.descripcion || "");
-        formData.append("telefono", location.telefono || "");
+        formData.append("name", location.name || "");
+        formData.append("description", location.description || "");
         formData.append("email", location.email || "");
+        formData.append("phone", location.phone || "");
+        formData.append("street", location.street || "");
+        formData.append("city", location.city || "");
+        formData.append("state", location.state || "");
+        formData.append("country", location.country || "");
+        formData.append("zip_code", location.zip_code || "");
+        formData.append("created_by", userStore.uuid);
         
-        // Manejo de la imagen con depuración
+        // Manejo de la imagen
         if (newImage instanceof File) {            
-            formData.append("foto", newImage);
+            formData.append("image", newImage); // Backend expects 'image' field for file upload
         } else {
-            formData.append("foto", profileImage || "default_location.png");
+            // If no new image, but there's an existing profile image, send its URL
+            // Or send a default if neither exists.
+            // The backend should handle if 'image' is not present or is a URL string.
+            formData.append("image", profileImage || "default_location.png");
         }
-        
-        // Datos adicionales
-        formData.append("usuarios_id", userStore.id.toString());
-        formData.append("calle", "calle falsa");
-        formData.append("numero", "1234");
-        formData.append("localidad", "54");
-        formData.append("partido", "14");
-        formData.append("provincia", "02");
-        formData.append("codigo_postal", "1478");
-        formData.append("latitud", "0");
-        formData.append("longitud", "0");
 
         try {
             if (isEditing) {
-                formData.append("id", locationData.id);
-                const response = await updateLocation(locationData.id, formData);
-                navigate(`/panel/ubicaciones/${locationData.id}`);
+                formData.append("uuid", locationData.uuid); // Assuming backend needs uuid for update
+                const response = await updateLocation(locationData.uuid, formData);
+                navigate(`/panel/ubicaciones/${locationData.uuid}`);
                 toast.success('Ubicación actualizada exitosamente');
             } else {                
                 const response = await createLocation(formData);
-                const newLocationId = response.location.id;
+                const newLocationId = response.business.uuid;
                 navigate(`/panel/ubicaciones/${newLocationId}`);
                 toast.success('Ubicación creada exitosamente');
             }
@@ -90,32 +102,36 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
             toast.error('Error al procesar la ubicación');
         }
     };    
+
+    //console.log('locationData', locationData)
     
     return (        
         <form onSubmit={handleSubmit} className={stylesForms.form}>
-            <CardImageLoadingPreview
-                imageFileName={profileImage}
-                setNewImageHandler={setNewImage}
-            /> 
+            {isLoading && <LoadingSpinner />}
+            <fieldset disabled={isLoading} style={{ border: 'none', padding: 0 }}>
+                <CardImageLoadingPreview
+                    imageFileName={profileImage}
+                    setNewImageHandler={setNewImage}
+                /> 
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="nombre">Nombre:</label>
+                    <label htmlFor="name">Nombre:</label>
                     <input
                         type="text"
-                        name="nombre"
-                        id="nombre"
-                        value={location.nombre}
+                        name="name"
+                        id="name"
+                        value={location.name}
                         onChange={handleChange}
                         required
                     />
                 </div>            
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="telefono">Teléfono:</label>
+                    <label htmlFor="phone">Teléfono:</label>
                     <input
                         type="text"
-                        name="telefono"
-                        id="telefono"
-                        value={location.telefono}
+                        name="phone"
+                        id="phone"
+                        value={location.phone}
                         onChange={handleChange}
                         required
                     />
@@ -134,12 +150,69 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
             </div>
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="descripcion">Descripción:</label>
+                    <label htmlFor="description">Descripción:</label>
                     <textarea
                         className={stylesForms.formInputTextarea}
-                        name="descripcion"
-                        id="descripcion"
-                        value={location.descripcion}
+                        name="description"
+                        id="description"
+                        value={location.description}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+            </div>
+            <div className={stylesForms.formInputGroup}>
+                <div className={stylesForms.formInput}>
+                    <label htmlFor="street">Calle:</label>
+                    <input
+                        type="text"
+                        name="street"
+                        id="street"
+                        value={location.street}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className={stylesForms.formInput}>
+                    <label htmlFor="city">Ciudad:</label>
+                    <input
+                        type="text"
+                        name="city"
+                        id="city"
+                        value={location.city}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className={stylesForms.formInput}>
+                    <label htmlFor="state">Provincia:</label>
+                    <input
+                        type="text"
+                        name="state"
+                        id="state"
+                        value={location.state}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className={stylesForms.formInput}>
+                    <label htmlFor="country">País:</label>
+                    <input
+                        type="text"
+                        name="country"
+                        id="country"
+                        value={location.country}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className={stylesForms.formInput}>
+                    <label htmlFor="zip_code">Código Postal:</label>
+                    <input
+                        type="text"
+                        name="zip_code"
+                        id="zip_code"
+                        value={location.zip_code}
                         onChange={handleChange}
                         required
                     />
@@ -147,12 +220,10 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
             </div>
             
 
-            <button type="submit" className={stylesForms.formBtn}>
+            </fieldset>
+            <button type="submit" className={stylesForms.formBtn} disabled={isLoading}>
                 Guardar Ubicación
             </button>
         </form>
     )
 };
-
-
-
