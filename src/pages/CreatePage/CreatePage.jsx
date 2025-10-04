@@ -31,7 +31,7 @@ const nameEntity = (path) => {
 
 const CreatePage = () => {
   
-  const { userId, locationId, dataloggerId, channelId, alarmId } = useParams();
+  const { userId, businessUuid, dataloggerId, channelId, alarmId } = useParams();
   const location = useLocation();  
   const fullPath = location.pathname.split('/').filter(path => path !== '');   
   const [currentEntityName, setCurrentEntityName] = useState(nameEntity(fullPath));
@@ -80,10 +80,10 @@ const CreatePage = () => {
   }, [dataloggerId]);
 
   useEffect(() => {
-    if (locationId /*&& currentAction == 'editar'*/) {      
-      fetchLocationById(locationId);
+    if (businessUuid /*&& currentAction == 'editar'*/) {      
+      fetchLocationById(businessUuid);
     }
-  }, [locationId]);
+  }, [businessUuid]);
   
   useEffect(() => {
     if (alarmId && currentAction === 'editar') {
@@ -103,7 +103,7 @@ const CreatePage = () => {
 
   const FormComponent = formComponents[currentEntityName] || formComponents.default;
 
-// console.log(locationId);
+ //console.log('businessUuid from createpage', businessUuid);
 
   return (
     <>
@@ -112,7 +112,7 @@ const CreatePage = () => {
         text={`Página de ${currentAction === 'editar' ? 'edición' : 'creación'} de ${currentEntityName}`}
       />
       <Breadcrumb 
-        usuario={ selectedUser ? `${selectedUser?.nombre_1} ${selectedUser?.apellido_1}` : ''}
+        usuario={ selectedUser ? `${selectedUser?.first_name} ${selectedUser?.last_name}` : ''}
         ubicacion={selectedLocation?.name || 'Agregar'}
         datalogger={selectedDatalogger?.nombre || ''}
         canal={selectedChannel?.nombre || ''}

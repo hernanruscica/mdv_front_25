@@ -9,7 +9,7 @@ export const PrivateRoute = ({ children }) => {
   const location = useLocation();
   const path = location.pathname;
   // const { token: tokenParams } = useLocation().params || {};
-  const { token: tokenParams } = useParams();
+  const { token: tokenParams, businessUuid } = useParams();
   
   const userCurrentRole = 
       user?.businesses_roles.some(br => br.role === 'Owner')

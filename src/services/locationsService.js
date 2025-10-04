@@ -13,11 +13,7 @@ export const locationsService = {
 
   update: async (locationId, locationData) => {
     try {
-      const { data } = await axiosClient.put(`/api/businesses/${locationId}`, locationData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const { data } = await axiosClient.uploadFilePUT(`/api/businesses/${locationId}/image`, locationData);
       return data;
     } catch (error) {
       console.error('Update location error:', error);

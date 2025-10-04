@@ -78,15 +78,21 @@ const Users = () => {
     estado: user.is_active
   }));  
 
+  const userCurrentRole = 
+      user?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+
+        console.log(userCurrentRole);
+        
   return (
     <>
       <Title1 
         type="usuarios"
         text="Usuarios" 
       />
-      <Breadcrumb 
-      ///posible issue when user is owner, because he hasnt all the business_roles, but one.
-        ubicacion={user.businesses_roles.find(br => br.uuid === businessUuid).name}
+      <Breadcrumb       
+        ubicacion={users[0]?.businesses_roles.find(br => br.uuid === businessUuid).name}
       />
       
       <div className={styles.tableContainer}>
@@ -94,7 +100,7 @@ const Users = () => {
           columns={columns} 
           data={preparedData} 
           onRowClick={handleRowClick}
-          showAddButton={ user?.espropietario == 1 || user?.esadministrador == true}
+          showAddButton={ userCurrentRole === 'Owner'  || userCurrentRole === 'Administrator'}
         />
       </div>
     </>

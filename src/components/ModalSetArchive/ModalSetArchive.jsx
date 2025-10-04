@@ -23,6 +23,7 @@ const ModalSetArchive = ({
   nuevoEstado,  // 0 o 1
   redirectTo,   // ruta para redireccionar luego de la acción
   nombre,       // nombre visible de la entidad (opcional, para mostrar en el mensaje)
+  businessUuid
 }) => {
   const navigate = useNavigate();
 
@@ -33,20 +34,26 @@ const ModalSetArchive = ({
 
   const handleAccept = async () => {
     if (updateFn && entidadId) {
-      const responseStore = await updateFn(entidadId, { estado: nuevoEstado });
+      const responseStore = await updateFn(entidadId, { is_active: nuevoEstado, businessUuid: businessUuid });
       console.log('Response from update:', responseStore);
       onRequestClose();
       navigate(redirectTo);
     }
   };
 
-  //console.log('nuevo estado:', nuevoEstado);
+  console.log('entidad:', entidad);
+  console.log('redirectto', redirectTo);
+  console.log('entidadId', entidadId);
+  
+  console.log('updateFn', updateFn);
+  
+  
 
   return (
     <ModalTemplate
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      title={`Confirmar ${nuevoEstado == 0 ? 'archivar' : 'desarchivar'}`}
+      title={`Confirmar ${nuevoEstado == false ? 'archivar' : 'desarchivar'}`}
       buttons={[
         { title: 'Cancelar', onClick: onRequestClose },
         { title: 'Aceptar', onClick: handleAccept }
@@ -54,7 +61,7 @@ const ModalSetArchive = ({
     >
       <p>
         {`
-        ¿Estás seguro que deseas ${nuevoEstado == 0 ? 'archivar' : 'desarchivar'} 
+        ¿Estás seguro que deseas ${nuevoEstado === false  ? 'archivar' : 'desarchivar'} 
         ${(entidad == 'ubicacion' || entidad == 'alarma') ? ' la ' : ' el '}
         `}
         <strong> {entidad} </strong><br/>

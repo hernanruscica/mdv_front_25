@@ -27,7 +27,7 @@ const ShowLocationsCards = ({
     );
 
     // Filtrar por estado - Corregido para usar el campo 'estado'
-    const matchesStatus = showArchived ? true : location.estado !== 0;
+    const matchesStatus = showArchived ? true : location.is_active !== 0;
 
     return matchesSearch && matchesStatus;
   });

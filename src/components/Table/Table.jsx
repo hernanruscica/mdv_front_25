@@ -137,7 +137,7 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
       ));
   };
 
-  //console.log('user', user);
+  //console.log('data', data[0].businessUuid, data[1].businessUuid);
   
 
   return (
@@ -145,13 +145,11 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
       <div className={styles.controls}>
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} placeholder="Buscar..." />
         {showAddButton && (
-          <>
-
-          
+          <>          
             <BtnCallToAction 
               text="Agregar" 
               icon="plus-circle-solid.svg" 
-              url='/panel/usuarios/agregar'
+              url={`/panel/ubicaciones/${data[0]?.businessUuid}/usuarios/agregar`}
             />
           
 

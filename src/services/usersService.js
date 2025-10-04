@@ -32,23 +32,27 @@ export const usersService = {
     }
   },
 
-  create: async (userData) => {
+  create: async (userData, businessUuid) => {
     try {
-      const { data } = await axiosClient.uploadFile('/api/users', userData);
+      const { data } = await axiosClient.uploadFile(`/api/businesses/${businessUuid}/users`, userData);
       return data;
     } catch (error) {
       console.error('Create user error:', error);
       throw error;
-    }
+    } 
   },
 
-  update: async (id, userData) => {
+  update: async (uuid, userData) => {
+    console.log('uuid userService', uuid);
+    console.log('userData', userData);
+    
+    //const businessUuid = userData.get('business_uuid');
+    const businessUuid = userData.businessUuid;
+    console.log('businessUuid - usersService', businessUuid);
+    
     try {
-      const { data } = await axiosClient.put(`/api/users/${id}`, userData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const { data } = await axiosClient.uploadFilePUT(`/api/businesses/${businessUuid}/users/${uuid}`, userData);
+      console.log(' from usrs service data', data);
       return data;
     } catch (error) {
       console.error('Update user error:', error);

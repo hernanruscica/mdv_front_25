@@ -46,10 +46,10 @@ export const useUsersStore = create((set, get) => ({
     }
   },
 
-  createUser: async (userData) => {
+  createUser: async (userData, businessUuid) => {
     set(state => ({ loadingStates: { ...state.loadingStates, createUser: true }, error: null }));
     try {
-      const response = await usersService.create(userData);
+      const response = await usersService.create(userData, businessUuid);
       if (response.success) {
         set(state => ({
           users: [...state.users, response.user]
@@ -63,20 +63,29 @@ export const useUsersStore = create((set, get) => ({
       set(state => ({ loadingStates: { ...state.loadingStates, createUser: false } }));
     }
   },
-
-  updateUser: async (id, userData) => {
+//businessUuid, userData nada mas ..
+  updateUser: async (uuid, userData) => {    
     set(state => ({ loadingStates: { ...state.loadingStates, updateUser: true }, error: null }));
     try {
-      const response = await usersService.update(id, userData);
-      if (response.success) {
+      console.log('userts Store update');
+      
+      console.log(uuid, userData) ;
+      
+      const response = await usersService.update(uuid, userData);
+      console.log('Response from usersService.update in usersStore:', response); // Added log
+      if (response && response.user) { // More robust check
         set(state => ({
           users: state.users.map(user =>
-            user.id === id ? response.user : user
+            user.uuid === uuid ? response.user : user
           ),
-          selectedUser: state.selectedUser?.id === id ? response.user : state.selectedUser
+          selectedUser: state.selectedUser?.uuid === uuid ? response.user : state.selectedUser
         }));
+        return { success: true, user: response.user }; // Standardize success response
+      } else {
+        // If no user object or response is null, assume failure or unexpected response
+        set({ error: response?.message || 'Error al actualizar usuario: respuesta inesperada' });
+        return { success: false, message: response?.message || 'Error al actualizar usuario' };
       }
-      return response;
     } catch (error) {
       set({ error: 'Error updating user' });
       return { success: false, message: 'Error al actualizar usuario' };

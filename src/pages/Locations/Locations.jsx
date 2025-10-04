@@ -6,6 +6,7 @@ import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
 
+
 const Locations = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const user = useAuthStore(state => state.user);  
@@ -14,7 +15,7 @@ const Locations = () => {
     loadingStates: { fetchLocations: isLoadingLocations }, 
     error,
     fetchLocations 
-  } = useLocationsStore();
+  } = useLocationsStore();  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +38,7 @@ const Locations = () => {
   const userCurrentRole = 
       user?.businesses_roles.some(br => br.role === 'Owner')
         ? 'Owner'
-        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+        : '';
 
   return (
     <>

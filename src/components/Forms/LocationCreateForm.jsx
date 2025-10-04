@@ -39,11 +39,11 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
                 email: locationData?.email || "",
                 phone: locationData?.phone || "",
                 logo_url: locationData?.logo_url || "",
-                street: locationData?.street || "",
-                city: locationData?.city || "",
-                state: locationData?.state || "",
-                country: locationData?.country || "",
-                zip_code: locationData?.zip_code || "",
+                street: locationData?.address.street || "",
+                city: locationData?.address.city || "",
+                state: locationData?.address.state || "",
+                country: locationData?.address.country || "",
+                zip_code: locationData?.address.zip_code || "",
             });
             setProfileImage(locationData?.logo_url || "default_location.png");
         }
@@ -82,8 +82,12 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
 
         try {
             if (isEditing) {
-                formData.append("uuid", locationData.uuid); // Assuming backend needs uuid for update
-                const response = await updateLocation(locationData.uuid, formData);
+                console.log('editing', locationData?.uuid);
+                
+                formData.append("uuid", locationData?.uuid); // Assuming backend needs uuid for update
+                const response = await updateLocation(locationData?.uuid, formData);
+                console.log('formData enviada:', formData);
+                
                 navigate(`/panel/ubicaciones/${locationData.uuid}`);
                 toast.success('Ubicación actualizada exitosamente');
             } else {                
@@ -103,7 +107,7 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
         }
     };    
 
-    //console.log('locationData', locationData)
+    console.log('locationData.uuid', locationData?.uuid)
     
     return (        
         <form onSubmit={handleSubmit} className={stylesForms.form}>

@@ -72,6 +72,20 @@ class ApiClient {
     });
   }
 
+    // Método específico para subidas multipart
+  async uploadFilePUT(url, formData, config = {}) {
+    return this.request({
+      ...config,
+      method: 'PUT',
+      url,
+      data: formData,
+      headers: {
+        ...config.headers,
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
+
   handleError(error) {
     if (error.code === 'ECONNREFUSED') {
       console.error('Error de conexión: El servidor no está disponible');

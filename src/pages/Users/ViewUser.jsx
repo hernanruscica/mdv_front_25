@@ -12,8 +12,7 @@ import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import CardImage from '../../components/CardImage/CardImage';
 import styles from './ViewUser.module.css';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
-import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
-import { filterEntitiesByStatus } from '../../utils/entityFilters';
+
 import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
@@ -50,13 +49,13 @@ const ViewUser = () => {
   
 
   const userButtons = (
-    selectedUser?.is_active === 1 ?
+    selectedUser?.is_active == 1 ?
     (<>
       <BtnCallToAction
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
-        url={`/panel/usuarios/${selectedUser?.uuid}/editar`}
+        url={`/panel/ubicaciones/${businessUuid}/usuarios/${selectedUser?.uuid}/editar`}
       />
       <BtnCallToAction
         text="Archivar"
@@ -75,12 +74,16 @@ const ViewUser = () => {
         text="Eliminar"
         icon="trash-alt-regular.svg"
         type="danger"
-        url={`/panel/usuarios/${selectedUser?.uuid}/eliminar`}
+        url={`/panel/ubicaciones/${businessUuid}/usuarios/${selectedUser?.uuid}/eliminar`}
       />
     </>)
   );
 
-  //console.log(selectedUser);
+    const userCurrentRole = 
+      selectedUser?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : selectedUser?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+  console.log(userCurrentRole);
 
   return (
     <>
@@ -89,9 +92,10 @@ const ViewUser = () => {
       onRequestClose={() => setModalOpen(false)}
       entidad="usuario"
       entidadId={selectedUser?.uuid}
-      nuevoEstado={selectedUser?.is_active == '1' ? 0 : 1}
-      redirectTo={`/panel/usuarios/${selectedUser?.uuid}`}
+      nuevoEstado={selectedUser?.is_active === 1 ? 0 : 1}
+      redirectTo={`/panel/ubicaciones/${businessUuid}/usuarios/${selectedUser?.uuid}`}
       nombre={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
+      businessUuid={businessUuid}
     />
 {/*}    */}
       {selectedUser && (
@@ -106,20 +110,20 @@ const ViewUser = () => {
           />
       
           <CardImage
-            image={selectedUser?.avatar_url ? `${import.meta.env.VITE_IMAGE_URL}/${selectedUser?.avatar_url}` : '/images/default-user.png'}
+            image={selectedUser?.avatar_url ? `${selectedUser?.avatar_url}` : '/images/default-user.png'}
             title={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
             buttons={userButtons}
           >
             <div className={styles.userInfo}>
                {
-                selectedUser.estado == '0' &&
+                selectedUser.is_active == '0' &&
                 (<CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />)
                 }
               <p><strong>DNI:</strong> {selectedUser?.dni}</p>
               <p><strong>Email:</strong> {selectedUser?.email}</p>
               <p><strong>Teléfono:</strong> {selectedUser?.phone}</p>
-              <p><strong>Estado:</strong> {selectedUser.estado ? 'Activo' : 'Inactivo'}</p>
-              <p><strong>Rol:</strong> {selectedUser?.isOwner ? 'Propietario' : 'Usuario'}</p>
+              <p><strong>Estado:</strong> {selectedUser.is_active ? 'Activo' : 'Inactivo'}</p>
+              <p><strong>Rol:</strong> {userCurrentRole} </p>
               <p><strong>Fecha de creación:</strong> {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : 'No disponible'}</p>
               {/*
               <p><strong>Alarmas Asignadas:</strong>{" "}

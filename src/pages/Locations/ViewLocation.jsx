@@ -21,7 +21,7 @@ const ViewLocation = () => {
   const { 
     selectedLocation,
     fetchLocationById,
-    loadingStates: { fetchLocation: isLoadingLocation },    
+    loadingStates: { fetchLocation: isLoadingLocation, updateLocation : isUpdattingLocation },    
     error: errorLocations 
   } = useLocationsStore();
 
@@ -37,7 +37,7 @@ const ViewLocation = () => {
       setAllAlarms(allAlarms);
     };
     loadLocation();
-  }, [businessUuid]);  
+  }, [businessUuid, isUpdattingLocation]);  
 
   if (isLoadingLocation && selectedLocation !== null) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -89,7 +89,7 @@ const ViewLocation = () => {
       user?.businesses_roles.some(br => br.role === 'Owner')
         ? 'Owner'
         : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-  console.log(selectedLocation);
+  //console.log(selectedLocation);
   
   return (
     <>
@@ -102,6 +102,7 @@ const ViewLocation = () => {
       nuevoEstado={selectedLocation?.is_active == '1' ? 0 : 1}
       redirectTo={`/panel/ubicaciones/${selectedLocation?.uuid}`}
       nombre={`${selectedLocation?.name}`}
+      businessUuid={selectedLocation?.uuid}
     />
       <Title1 
         text={`Ubicación: ${selectedLocation?.name}`}
@@ -170,7 +171,7 @@ const ViewLocation = () => {
           channels={selectedLocation?.dataloggers.flatMap(d => d.channels)}
           alarms={allAlarms}
           locations={[selectedLocation]}
-          showAddButton={user.isOwner == 1}
+          showAddButton={userCurrentRole === 'Owner'}
         /> :
         <p>No hay dataloggers en esta ubicación</p>
       }    
