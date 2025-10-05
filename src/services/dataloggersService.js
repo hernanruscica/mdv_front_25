@@ -1,9 +1,9 @@
 import axiosClient from '../utils/axiosClient';
 
 export const dataloggersService = {
-  create: async (formData) => {
+  create: async (businessUuid, formData) => {
     try {
-      const { data } = await axiosClient.uploadFile('/api/dataloggers', formData);
+      const { data } = await axiosClient.uploadFile(`/api/businesses/${businessUuid}/dataloggers`, formData);
       return data;
     } catch (error) {
       console.error('Error creating datalogger:', error);
@@ -54,8 +54,11 @@ export const dataloggersService = {
   },
 
   update: async (id, formData) => {
+    const businessUuid = (formData instanceof FormData) ? formData.get('businessUuid') : formData?.businessUuid;
+    //console.log('dataloggerService',formData);
+    
     try {
-      const { data } = await axiosClient.put(`/api/dataloggers/${id}`, formData, {
+      const { data } = await axiosClient.put(`/api/businesses/${businessUuid}/dataloggers/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

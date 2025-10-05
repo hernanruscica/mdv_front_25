@@ -75,7 +75,7 @@ const CreatePage = () => {
 
   useEffect(() => {
     if (dataloggerId) {
-      fetchDataloggerById(dataloggerId);
+      fetchDataloggerById(dataloggerId, businessUuid);
     }
   }, [dataloggerId]);
 
@@ -103,7 +103,7 @@ const CreatePage = () => {
 
   const FormComponent = formComponents[currentEntityName] || formComponents.default;
 
- //console.log('businessUuid from createpage', businessUuid);
+ console.log('seletedDatalogger', selectedDatalogger);
 
   return (
     <>
@@ -114,7 +114,7 @@ const CreatePage = () => {
       <Breadcrumb 
         usuario={ selectedUser ? `${selectedUser?.first_name} ${selectedUser?.last_name}` : ''}
         ubicacion={selectedLocation?.name || 'Agregar'}
-        datalogger={selectedDatalogger?.nombre || ''}
+        datalogger={selectedDatalogger?.name || ''}
         canal={selectedChannel?.nombre || ''}
         alarma={selectedAlarm?.nombre || ''}
       />      

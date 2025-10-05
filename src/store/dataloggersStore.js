@@ -14,12 +14,12 @@ export const useDataloggersStore = create((set) => ({
   },
   error: null,
 
-  createDatalogger: async (dataloggerData) => {
+  createDatalogger: async (businessUuid, dataloggerData) => {
     set(state => ({
       loadingStates: { ...state.loadingStates, createDatalogger: true }
     }));
     try {
-      const response = await dataloggersService.create(dataloggerData);
+      const response = await dataloggersService.create(businessUuid, dataloggerData);
       set(state => ({
         dataloggers: [...state.dataloggers, response.datalogger],
         error: null
@@ -108,7 +108,8 @@ export const useDataloggersStore = create((set) => ({
     }
   },
   
-  updateDatalogger: async (id, dataloggerData) => {
+  updateDatalogger: async (id, dataloggerData) => {    
+    
     set(state => ({
       loadingStates: { ...state.loadingStates, updateDatalogger: true }
     }));

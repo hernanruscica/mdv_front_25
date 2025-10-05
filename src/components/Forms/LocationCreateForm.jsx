@@ -45,7 +45,7 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
                 country: locationData?.address.country || "",
                 zip_code: locationData?.address.zip_code || "",
             });
-            setProfileImage(locationData?.logo_url || "default_location.png");
+            
         }
     }, [locationData, isEditing]);
     

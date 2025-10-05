@@ -8,10 +8,9 @@ import { useDataloggersStore } from '../../store/dataloggersStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
 
 export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
+    const [newImage, setNewImage] = useState(null); // Changed to null to properly check for file
+    const [profileImage, setProfileImage] = useState("default_location.png");    
     const { user: userStore } = useAuthStore();
-    const [profileImage, setProfileImage] = useState("default_datalogger.webp"); 
-    const [newImage, setNewImage] = useState(""); 
-    
     const { 
         locationUsers, 
         fetchLocationUsers,
@@ -20,46 +19,46 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
     } = useLocationUsersStore();
     
     const [datalogger, setDatalogger] = useState({ 
-        direccion_mac: "", 
-        nombre: "", 
-        descripcion: "", 
-        foto: "", 
-        nombre_tabla: "", 
-        ubicacion_id: ""    
+        mac_address: "", 
+        name: "", 
+        description: "", 
+        image: "default_datalogger.webp", // Default image name
+        table_name: "", 
+        is_active: true, // Added is_active field
+        business_uuid: "", // Added business_uuid
     }); 
 
     useEffect(() => {
         if (isEditing && dataloggerData) {
             setDatalogger({
-                direccion_mac: dataloggerData.direccion_mac || "",
-                nombre: dataloggerData.nombre || "",
-                descripcion: dataloggerData.descripcion || "",
-                foto: dataloggerData.foto || "",
-                nombre_tabla: dataloggerData.nombre_tabla || "",
-                //ubicacion_id: dataloggerData.ubicacion_id || ""
+                mac_address: dataloggerData.mac_address || "",
+                name: dataloggerData.name || "",
+                description: dataloggerData.description || "",
+                image: dataloggerData.image || "default_datalogger.webp",
+                table_name: dataloggerData.table_name || "",
+                is_active: dataloggerData.is_active ?? true, // Initialize is_active
+                business_uuid: dataloggerData.business_uuid || userStore?.business_uuid || "", // Initialize business_uuid
             })
-        }
-    }, [dataloggerData, isEditing])
-/*
-    useEffect(() => {
-        if (userStore) {
-            fetchLocationUsers(userStore);
-        }
-    }, [userStore]);
-    useEffect(() => {
-        if (locationUsers && locationUsers.length > 0 && !isEditing) {
+            setProfileImage(dataloggerData?.img || "default_location.png");
+        } else if (!isEditing && userStore) {
             setDatalogger(prev => ({
                 ...prev,
-                ubicacion_id: locationUsers[0].ubicaciones_id
+                business_uuid: userStore.business_uuid || ""
             }));
         }
-    }, [locationUsers, isEditing]);
-    */
+    }, [dataloggerData, isEditing, userStore]);
+
+    useEffect(() => {
+        if (userStore && !locationUsers) { // Fetch only if not already fetched
+            fetchLocationUsers(userStore);
+        }
+    }, [userStore, fetchLocationUsers, locationUsers]);
     
     const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
         setDatalogger({
             ...datalogger,
-            [e.target.name]: e.target.value,
+            [name]: type === 'checkbox' ? checked : value,
         });
     };
 
@@ -69,24 +68,42 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();    
         const formData = new FormData();
-        formData.append("direccion_mac", datalogger.direccion_mac || "");
-        formData.append("nombre", datalogger.nombre || "");
-        formData.append("descripcion", datalogger.descripcion || "");
-        formData.append("foto", newImage || datalogger.foto || "default_datalogger.webp");
-        formData.append("nombre_tabla", datalogger.nombre_tabla || "");
-        formData.append("ubicacion_id", datalogger.ubicacion_id || "");
+        formData.append("name", datalogger.name || "");
+        formData.append("description", datalogger.description || "");
+        formData.append("mac_address", datalogger.mac_address || "");
+        formData.append("table_name", datalogger.table_name || "");
+        formData.append("is_active", datalogger.is_active); // Boolean value
+        formData.append("businessUuid", datalogger.business_uuid);
+
+        if (newImage) {
+            formData.append("image", newImage); // Append the File object
+        } else if (!isEditing && datalogger.image) {
+            // For creation, if no new image is selected, but a default image name exists,
+            // we might need to handle it differently or ensure backend handles default.
+            // For now, if newImage is null and not editing, we don't send 'image' field
+            // unless it's a default string that the backend expects.
+            // Based on backend examples, if no image is provided, it's omitted.
+            // If a default image is needed, the backend should handle it.
+        }
+
+        // business_uuid is only needed for POST, and it's part of the URL for PUT
+        if (!isEditing && datalogger.business_uuid) {
+            formData.append("businessUuid", datalogger.business_uuid);
+        }
 
         try {
             let response;
+           // console.log('dataloggerData', dataloggerData);
+            
             if (isEditing) {
-                response = await updateDatalogger(dataloggerData.id, formData);
+                response = await updateDatalogger(dataloggerData?.uuid, formData);
                 toast.success('Datalogger actualizado con éxito');
-                navigate(`/panel/dataloggers/${dataloggerData.id}`);
+                navigate(`/panel/ubicaciones/${dataloggerData?.business_uuid}/dataloggers/${dataloggerData?.uuid}`);
             } else {
-                response = await createDatalogger(formData);
+                response = await createDatalogger(datalogger.business_uuid, formData);
                 toast.success(response.message);
                 if (response.success){                    
-                    navigate(`/panel/dataloggers/${response.datalogger.id}`);
+                    navigate(`/panel/ubicaciones/${dataloggerData?.business_uuid}/dataloggers/${response.datalogger?.uuid}`);
                 }
             }        
         } catch (error) {
@@ -102,79 +119,72 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
     if (error) {
         return <div>Error al cargar las ubicaciones: {error}</div>;
     }
-   //console.log(isEditing)
+
+    console.log('dataloggerData create form', dataloggerData);
+    
+   
     return ( 
-        <form onSubmit={handleSubmit} className={stylesForms.form}>
+        <form onSubmit={handleSubmit} className={stylesForms.form}>            
             <CardImageLoadingPreview
-                imageFileName={(isEditing) ? datalogger.foto : profileImage}
+                imageFileName={profileImage}
                 setNewImageHandler={setNewImage}
             /> 
+            
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="nombre">Nombre:</label>
+                    <label htmlFor="name">Nombre:</label>
                     <input
                         type="text"
-                        name="nombre"
-                        id="nombre"
-                        value={datalogger.nombre}
+                        name="name"
+                        id="name"
+                        value={datalogger.name}
                         onChange={handleChange}
                         required
                     />
                 </div>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="nombre_tabla">Nombre de Tabla:</label>
+                    <label htmlFor="table_name">Nombre de Tabla:</label>
                     <input
                         type="text"
-                        name="nombre_tabla"
-                        id="nombre_tabla"
-                        value={datalogger.nombre_tabla}
+                        name="table_name"
+                        id="table_name"
+                        value={datalogger.table_name}
                         onChange={handleChange}
                         required
                     />
                 </div>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="direccion_mac">Dirección MAC:</label>
+                    <label htmlFor="mac_address">Dirección MAC:</label>
                     <input
                         type="text"
-                        name="direccion_mac"
-                        id="direccion_mac"
-                        value={datalogger.direccion_mac}
+                        name="mac_address"
+                        id="mac_address"
+                        value={datalogger.mac_address}
                         onChange={handleChange}
                         required
                     />
                 </div>
                 
-                {!isEditing && 
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="ubicacion_id">Ubicación:</label>
-                    <select
-                        name="ubicacion_id"
-                        id="ubicacion_id"
-                        value={datalogger.ubicacion_id}
+                    <label htmlFor="is_active">Activo:</label>
+                    <input
+                        type="checkbox"
+                        name="is_active"
+                        id="is_active"
+                        checked={datalogger.is_active}
                         onChange={handleChange}
-                        required
-                    >
-                        <option value="">Seleccione una ubicación</option>
-                        {locationUsers.map((location) => (
-                            <option 
-                                key={location.ubicaciones_id} 
-                                value={location.ubicaciones_id}
-                            >
-                                {location.ubicaciones_nombre}
-                            </option>
-                        ))}
-                    </select>
-                </div>}
+                    />
+                </div>
                 
             </div>
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="descripcion">Descripción:</label>
+                    <label htmlFor="description">Descripción:</label>
                     <textarea
                         className={stylesForms.formInputTextarea}
-                        name="descripcion"
-                        id="descripcion"
-                        value={datalogger.descripcion}
+                        name="description"
+                        id="description"
+                        value={datalogger.description}
                         onChange={handleChange}
                         required
                     />
@@ -191,6 +201,3 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
           
     );
 };
-
-
-

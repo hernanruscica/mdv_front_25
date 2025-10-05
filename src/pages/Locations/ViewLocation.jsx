@@ -74,12 +74,14 @@ const ViewLocation = () => {
           //url={`/panel/ubicaciones/${selectedLocation?.id}/descarchivar`}
           onClick={() => setModalOpen(true)}
         />
+{/* 
         <BtnCallToAction
           text="Eliminar"
           icon="trash-alt-regular.svg"
           type="danger"
           url={`/panel/ubicaciones/${selectedLocation?.uuid}/eliminar`}
         />
+         */}
       </>)  
       }
 
@@ -158,13 +160,7 @@ const ViewLocation = () => {
         </div>
       </CardImage>
 
-      <Title2 text={`Dataloggers en ${selectedLocation?.name}`} type="dataloggers"/>            
-       <BtnCallToAction
-        text="Agregar datalogger"
-        icon="plus-circle-solid.svg"
-        type="normal"
-        url={`/panel/ubicaciones/${businessUuid}/dataloggers/agregar`}
-      />    
+      <Title2 text={`Dataloggers en ${selectedLocation?.name}`} type="dataloggers"/>                   
       {(selectedLocation?.dataloggers.length > 0) ?
         <ShowDataloggersCards
           dataloggers={selectedLocation?.dataloggers}

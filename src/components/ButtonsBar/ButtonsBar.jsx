@@ -1,4 +1,3 @@
-import React from 'react'
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 
 import styles from './ButtonsBar.module.css';

@@ -12,9 +12,9 @@ import CustomTag from '../CustomTag/CustomTag';
 
 
 const ShowDataloggersCards = ({ 
-  dataloggers,   
-  showAddButton = false 
-}) => {
+      dataloggers,   
+      showAddButton = false 
+    }) => {
   const [showArchived, setShowArchived] = useState(showAddButton);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalContent, setModalContent] = useState({
@@ -54,7 +54,7 @@ const ShowDataloggersCards = ({
     const items = modalContent.type === 'channels' 
       ? channels.filter(channel => channel.datalogger_id === modalContent.dataloggerId)      
       : alarms.filter(alarm => alarm.is_active === 1 && currentChannels.some(ch => ch.uuid === alarm.channel_uuid));      
-    console.log('items',items)
+    //console.log('items',items)
     return (
       <div className={styles.modalContent}>
         <h2>{modalContent.type === 'channels' ? 'Canales' : 'Alarmas'} de {modalContent.dataloggerName}</h2>
@@ -93,11 +93,12 @@ const ShowDataloggersCards = ({
   return (
     <>
       <div className={styles.controlsContainer}>
+
         <ButtonsBar 
           itemsName='dataloggers' 
           itemsQty={filteredDataloggers.length}
-          showAddButton={showAddButton}
-        >
+          showAddButton={false}
+        >          
           <div className={styles.controls}>
             <SearchBar
               searchTerm={searchTerm}
@@ -105,14 +106,22 @@ const ShowDataloggersCards = ({
               placeholder="Buscar dataloggers..."
             />
             {showAddButton && (
-              <label className={styles.checkboxContainer}>
-                <input
-                  type="checkbox"
-                  checked={showArchived}
-                  onChange={(e) => setShowArchived(e.target.checked)}
-                />
-                <span>Mostrar también los archivados</span>
-              </label>
+              <>
+                <BtnCallToAction
+                  text="Agregar"
+                  icon="plus-circle-solid.svg"
+                  type="normal"
+                  url={`/panel/ubicaciones/${dataloggers[0]?.business_uuid}/dataloggers/agregar`}
+                />               
+                <label className={styles.checkboxContainer}>
+                  <input
+                    type="checkbox"
+                    checked={showArchived}
+                    onChange={(e) => setShowArchived(e.target.checked)}
+                  />
+                  <span>Mostrar también los archivados</span>
+                </label>
+              </>
             )}
           </div>
         </ButtonsBar>

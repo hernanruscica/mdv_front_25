@@ -70,12 +70,14 @@ const ViewUser = () => {
         icon="archive-solid.svg"
         onClick={() => setModalOpen(true)}
       />
+{/* 
       <BtnCallToAction
         text="Eliminar"
         icon="trash-alt-regular.svg"
         type="danger"
         url={`/panel/ubicaciones/${businessUuid}/usuarios/${selectedUser?.uuid}/eliminar`}
       />
+       */}
     </>)
   );
 

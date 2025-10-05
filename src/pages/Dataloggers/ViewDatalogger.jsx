@@ -37,27 +37,7 @@ const ViewDatalogger = () => {
       ? 'Owner'
       : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
 
-    //console.log('datalogger', selectedDatalogger);
-
-  // // Efecto para actualizar el datalogger después de cerrar el modal
-  // useEffect(() => {
-  //   if (!modalOpen && currentDatalogger?.id) {
-  //     const timeout = setTimeout(() => {
-  //       refreshDatalogger();
-  //     }, 200);
-  //     return () => clearTimeout(timeout);
-  //   }
-  // }, [modalOpen, currentDatalogger?.id]);
-/*
-  if (isLoading) {
-    return <LoadingSpinner message="Cargando datos..." />;
-  }
-
-  if (error || !currentDatalogger) {
-    return <div className={styles.error}>Error: {error || 'Datalogger no encontrado'}</div>;
-  }
-
-  
+ 
 
   const columns = [
     { label: 'NOMBRE DE LA ALARMA', accessor: 'nombreAlarma' },
@@ -69,7 +49,7 @@ const ViewDatalogger = () => {
   const handleAlarmClick = (row) => {
     navigate(`/panel/dataloggers/${currentDatalogger.id}/canales/${row.canalId}/alarmas/${row.id}`);
   };
-
+/*
   const preparedAlarms = dataloggerAlarms.map(alarm => ({
     nombreAlarma: alarm.nombre,
     //nombreCanal: alarm.canal_nombre,
@@ -104,17 +84,33 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
         icon="save-regular.svg"
         onClick={() => setModalOpen(true)}
       />
+      {/*
       <BtnCallToAction
         text="Eliminar"
         icon="trash-alt-regular.svg"
         type="danger"
         url={`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${datalogger?.uuid}/eliminar`}
       />
+      */}
     </>
   );
+  // console.log('datalogger id',datalogger?.uuid);
+  // console.log('business id',datalogger?.business_uuid);
+
+  
 
   return (
     <>
+     <ModalSetArchive
+      isOpen={modalOpen}
+      onRequestClose={() => setModalOpen(false)}
+      entidad="datalogger"
+      entidadId={datalogger?.uuid}
+      nuevoEstado={datalogger?.is_active == '1' ? 0 : 1}
+      redirectTo={`/panel/ubicaciones/${datalogger?.business_uuid}/dataloggers/${datalogger?.uuid}`}
+      nombre={`${datalogger?.name}`}
+      businessUuid={datalogger?.business_uuid}
+    />
       <Title1 
         type="dataloggers"
         text={datalogger?.name}
@@ -123,7 +119,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
      
       
       <CardImage
-        image={datalogger?.img ? `${import.meta.env.VITE_IMAGE_URL}/${datalogger?.img}` : '/images/default-datalogger.webp'}
+        image={datalogger?.img ? `${datalogger?.img}` : '/images/default-datalogger.webp'}
         title={datalogger?.name}
         buttons={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator' ? dataloggerButtons : null}
       >

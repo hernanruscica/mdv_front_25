@@ -40,14 +40,14 @@ const ModalSetArchive = ({
       navigate(redirectTo);
     }
   };
-
+/*
   console.log('entidad:', entidad);
   console.log('redirectto', redirectTo);
   console.log('entidadId', entidadId);
   
   console.log('updateFn', updateFn);
   
-  
+  */
 
   return (
     <ModalTemplate
