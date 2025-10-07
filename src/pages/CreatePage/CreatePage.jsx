@@ -69,7 +69,8 @@ const CreatePage = () => {
 
   useEffect(() => {
     if (channelId) {
-      fetchChannelById(channelId);
+      fetchChannelById(channelId, businessUuid);
+      //console.log('channelId', channelId);      
     }
   }, [channelId]);
 
@@ -82,7 +83,7 @@ const CreatePage = () => {
   useEffect(() => {
     if (businessUuid /*&& currentAction == 'editar'*/) {      
       fetchLocationById(businessUuid);
-    }
+    }     
   }, [businessUuid]);
   
   useEffect(() => {
@@ -103,7 +104,7 @@ const CreatePage = () => {
 
   const FormComponent = formComponents[currentEntityName] || formComponents.default;
 
- console.log('seletedDatalogger', selectedDatalogger);
+console.log('selectedDatalogger on createPAge', selectedDatalogger);
 
   return (
     <>
@@ -115,8 +116,8 @@ const CreatePage = () => {
         usuario={ selectedUser ? `${selectedUser?.first_name} ${selectedUser?.last_name}` : ''}
         ubicacion={selectedLocation?.name || 'Agregar'}
         datalogger={selectedDatalogger?.name || ''}
-        canal={selectedChannel?.nombre || ''}
-        alarma={selectedAlarm?.nombre || ''}
+        canal={selectedChannel?.name || ''}
+        alarma={selectedAlarm?.name || ''}
       />      
       <FormComponent 
         userId={userId}        

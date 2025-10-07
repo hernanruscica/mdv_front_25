@@ -7,6 +7,8 @@ export const useChannelsStore = create((set) => ({
   loadingStates: {
     fetchChannels: false,
     fetchChannel: false,
+    updateChannel: false,
+    createChannel: false
   },
   error: null,
 
@@ -35,7 +37,7 @@ export const useChannelsStore = create((set) => ({
     }
   },
 
-  fetchChannelById: async (channelId) => {
+  fetchChannelById: async (channelId, businessId) => {
     if (!channelId) return;
     
     set(state => ({
@@ -44,7 +46,7 @@ export const useChannelsStore = create((set) => ({
     }));
 
     try {
-      const channel = await channelsService.getById(channelId);
+      const channel = await channelsService.getById(channelId, businessId);     
       
       set(state => ({
         selectedChannel: channel,
@@ -61,14 +63,14 @@ export const useChannelsStore = create((set) => ({
     }
   },
 
-  createChannel: async (channelData) => {
+  createChannel: async (businessId, channelData) => {
     set(state => ({
       loadingStates: { ...state.loadingStates, createChannel: true },
       error: null
     }));
     
     try {
-      const response = await channelsService.create(channelData);
+      const response = await channelsService.create(businessId, channelData);
       if (response.success) {
         set(state => ({
           channels: [...state.channels, response.channel],

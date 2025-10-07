@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import stylesForms from './Forms.module.css';
@@ -6,28 +6,31 @@ import { useAuthStore } from '../../store/authStore';
 import { useChannelsStore } from '../../store/channelsStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
 
-export const ChannelCreateForm = ({ channelData, isEditing }) => {
-    const { dataloggerId, channelId } = useParams();
+export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
+    const { dataloggerId, channelId, businessUuid } = useParams();
     const { user: userStore } = useAuthStore();
-    const [profileImage, setProfileImage] = useState(channelData?.foto || "default_channel.png");
+    const [profileImage, setProfileImage] = useState(channelData?.img || "default_channel.png");
     const [newImage, setNewImage] = useState("");
     
     const [channel, setChannel] = useState({ 
         datalogger_id: dataloggerId, 
-        nombre: "", 
-        descripcion: "", 
-        nombre_columna: "", 
-        tiempo_a_promediar: "720", 
-        foto: "", 
-        multiplicador: "1" 
+        name: "", 
+        description: "", 
+        column_name: "", 
+        averaging_period: "60", 
+        factor: "1.0",
+        is_active: true,
+        image: ""
     }); 
     
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setChannel({
             ...channel,
-            [e.target.name]: e.target.value,
+            [name]:  value,
         });
     };
+
     const navigate = useNavigate();
     const { createChannel, updateChannel } = useChannelsStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,28 +39,34 @@ export const ChannelCreateForm = ({ channelData, isEditing }) => {
         e.preventDefault();    
         setIsSubmitting(true);
         const formData = new FormData();
-        formData.append("datalogger_id", channel.datalogger_id || "");
-        formData.append("nombre", channel.nombre || "");
-        formData.append("descripcion", channel.descripcion || "");
-        formData.append("nombre_columna", channel.nombre_columna || "");
-        formData.append("tiempo_a_promediar", channel.tiempo_a_promediar || "");    
-        formData.append("foto", newImage || "default_channel.webp");
-        formData.append("multiplicador", channel.multiplicador || "");
-        
+
+        formData.append("name", channel.name || "");
+        formData.append("description", channel.description || "");
+        formData.append("averaging_period", channel.averaging_period || "");
+        formData.append("factor", channel.factor || "");
+        formData.append("is_active", channel.is_active);
+        formData.append("businessUuid", businessUuid || "");
+
+        if (newImage) {
+            formData.append("image", newImage);
+        }
+
         try {
             if (isEditing) {
                 const response = await updateChannel(channelId, formData);
                 if (response.success) {
                     toast.success(response.message);
-                    navigate(`/panel/dataloggers/${dataloggerId}/canales/${channelId}`);
+                    navigate(`/panel/ubicaciones/${channelData.business_uuid}/dataloggers/${dataloggerId}/canales/${channelId}`);
                 } else {
                     toast.error(response.message || 'Error al actualizar el canal');
                 }
             } else {
-                const response = await createChannel(formData);                
+                formData.append("datalogger_id", channel.datalogger_id || "");
+                formData.append("column_name", channel.column_name || "");
+                const response = await createChannel(businessUuid, formData);                
                 if (response.success) {
                     toast.success(response.message);
-                    navigate(`/panel/dataloggers/${dataloggerId}/canales/${channelId}`);
+                    navigate(`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${response.item.uuid}`);
                 } else {
                     toast.error(response.message || 'Error al crear el canal');
                 }
@@ -71,16 +80,17 @@ export const ChannelCreateForm = ({ channelData, isEditing }) => {
     };
 
     useEffect(() => {
-        if (isEditing && channelData) {
+        if (isEditing ) {
             setChannel({
-                nombre: channelData.nombre || "",
-                descripcion: channelData.descripcion || "",
-                nombre_columna: channelData.nombre_columna || "",
-                tiempo_a_promediar: channelData.tiempo_a_promediar || "",
-                foto: channelData.foto || "",
-                multiplicador: channelData.multiplicador || "",
+                name: channelData.name || "",
+                description: channelData.description || "",
+                column_name: channelData.column_name || "",
+                averaging_period: channelData.averaging_period || "",
+                factor: channelData.factor || "",
+                is_active: channelData.is_active,
+                image: channelData.image || "",
             });
-            setProfileImage(channelData.foto || "default_channel.webp");
+            setProfileImage(channelData.img || "default_channel.webp");
         }
         
     }, [channelData, isEditing])
@@ -88,6 +98,12 @@ export const ChannelCreateForm = ({ channelData, isEditing }) => {
     if (isSubmitting) {
         return <div>Guardando cambios...</div>;
     }
+
+    console.log('channelData create form', channelData);
+    console.log('dataloggerId, channelId, businessUuid', dataloggerId, channelId, businessUuid);
+    console.log('locationData create form', locationData);
+    
+    
     
     return (        
         <form onSubmit={handleSubmit} className={stylesForms.form}>
@@ -97,58 +113,72 @@ export const ChannelCreateForm = ({ channelData, isEditing }) => {
             /> 
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="nombre">Nombre:</label>
+                    <label htmlFor="name">Nombre:</label>
                     <input
                         type="text"
-                        name="nombre"
-                        id="nombre"
-                        value={channel.nombre}
+                        name="name"
+                        id="name"
+                        value={channel.name}
                         onChange={handleChange}
                         required
                     />
                 </div>            
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="nombre_columna">Nombre de Columna:</label>
+                    <label htmlFor="column_name">Nombre de Columna:</label>
                     <input
                         type="text"
-                        name="nombre_columna"
-                        id="nombre_columna"
-                        value={channel.nombre_columna}
+                        name="column_name"
+                        id="column_name"
+                        value={channel.column_name}
+                        onChange={handleChange}
+                        required
+                        disabled={isEditing}
+                    />
+                </div>
+                <div className={stylesForms.formInput}>
+                    <label htmlFor="averaging_period">Tiempo a Promediar (segundos):</label>
+                    <input
+                        type="number"
+                        name="averaging_period"
+                        id="averaging_period"
+                        value={channel.averaging_period}
                         onChange={handleChange}
                         required
                     />
                 </div>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="tiempo_a_promediar">Tiempo a Promediar (minutos):</label>
+                    <label htmlFor="factor">Factor:</label>
                     <input
                         type="number"
-                        name="tiempo_a_promediar"
-                        id="tiempo_a_promediar"
-                        value={channel.tiempo_a_promediar}
+                        step="0.01"
+                        name="factor"
+                        id="factor"
+                        value={channel.factor}
                         onChange={handleChange}
                         required
                     />
                 </div>
+{/*}
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="multiplicador">Multiplicador:</label>
+                    <label htmlFor="is_active">Activo:</label>
                     <input
-                        type="number"
-                        name="multiplicador"
-                        id="multiplicador"
-                        value={channel.multiplicador}
+                        type="checkbox"
+                        name="is_active"
+                        id="is_active"
+                        checked={channel.is_active}
                         onChange={handleChange}
-                        required
                     />
-                </div>               
+                </div>
+*/}
             </div>
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="descripcion">Descripción:</label>
+                    <label htmlFor="description">Descripción:</label>
                     <textarea
                         className={stylesForms.formInputTextarea}
-                        name="descripcion"
-                        id="descripcion"
-                        value={channel.descripcion}
+                        name="description"
+                        id="description"
+                        value={channel.description}
                         onChange={handleChange}
                         required
                     />
@@ -161,6 +191,3 @@ export const ChannelCreateForm = ({ channelData, isEditing }) => {
         </form>
     );
 };
-
-
-

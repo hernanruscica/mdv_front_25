@@ -7,9 +7,9 @@ import { useLocationUsersStore } from '../../store/locationUsersStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
 
-export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
+export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }) => {
     const [newImage, setNewImage] = useState(null); // Changed to null to properly check for file
-    const [profileImage, setProfileImage] = useState("default_location.png");    
+    const [profileImage, setProfileImage] = useState("default_datalogger.png");    
     const { user: userStore } = useAuthStore();
     const { 
         locationUsers, 
@@ -25,7 +25,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
         image: "default_datalogger.webp", // Default image name
         table_name: "", 
         is_active: true, // Added is_active field
-        business_uuid: "", // Added business_uuid
+        business_uuid: locationData?.uuid || "", // Added business_uuid
     }); 
 
     useEffect(() => {
@@ -36,16 +36,20 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
                 description: dataloggerData.description || "",
                 image: dataloggerData.image || "default_datalogger.webp",
                 table_name: dataloggerData.table_name || "",
-                is_active: dataloggerData.is_active ?? true, // Initialize is_active
-                business_uuid: dataloggerData.business_uuid || userStore?.business_uuid || "", // Initialize business_uuid
+                is_active: dataloggerData.is_active, // Initialize is_active
+                business_uuid: dataloggerData?.business_uuid || "", // Initialize business_uuid
             })
             setProfileImage(dataloggerData?.img || "default_location.png");
-        } else if (!isEditing && userStore) {
+        }
+        /* else 
+            
+            if (!isEditing && userStore) {
             setDatalogger(prev => ({
                 ...prev,
                 business_uuid: userStore.business_uuid || ""
             }));
-        }
+        }*/
+
     }, [dataloggerData, isEditing, userStore]);
 
     useEffect(() => {
@@ -58,7 +62,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
         const { name, value, type, checked } = e.target;
         setDatalogger({
             ...datalogger,
-            [name]: type === 'checkbox' ? checked : value,
+            [name]:  value,
         });
     };
 
@@ -103,7 +107,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
                 response = await createDatalogger(datalogger.business_uuid, formData);
                 toast.success(response.message);
                 if (response.success){                    
-                    navigate(`/panel/ubicaciones/${dataloggerData?.business_uuid}/dataloggers/${response.datalogger?.uuid}`);
+                    navigate(`/panel/ubicaciones/${locationData?.uuid}/dataloggers/${response.item?.uuid}`);
                 }
             }        
         } catch (error) {
@@ -120,7 +124,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
         return <div>Error al cargar las ubicaciones: {error}</div>;
     }
 
-    console.log('dataloggerData create form', dataloggerData);
+    //console.log('locationData create form', locationData);
     
    
     return ( 
@@ -164,7 +168,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
                         required
                     />
                 </div>
-                
+{/*                 
                 <div className={stylesForms.formInput}>
                     <label htmlFor="is_active">Activo:</label>
                     <input
@@ -175,7 +179,7 @@ export const DataloggerCreateForm = ({ dataloggerData, isEditing }) => {
                         onChange={handleChange}
                     />
                 </div>
-                
+                 */}
             </div>
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>

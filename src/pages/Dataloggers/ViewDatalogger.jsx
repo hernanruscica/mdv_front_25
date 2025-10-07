@@ -96,6 +96,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
   );
   // console.log('datalogger id',datalogger?.uuid);
   // console.log('business id',datalogger?.business_uuid);
+console.log('datalogger active',datalogger?.is_active);
 
   
 

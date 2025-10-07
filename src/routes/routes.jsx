@@ -28,16 +28,16 @@ export const routes = [
   // Dataloggers routes 
   { path: "/panel/ubicaciones/:businessUuid/dataloggers", element: <Dataloggers />, private: true },//Done
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:uuid", element: <ViewDatalogger />, private: true },//Done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/agregar", element: <CreatePage />, private: true },//on progress
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/editar", element: <CreatePage />, private: true }, 
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/eliminar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/agregar", element: <CreatePage />, private: true },//done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/editar", element: <CreatePage />, private: true }, //done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/eliminar", element: <UnderConstruction />, private: true },//Done (put is_active === 0)
 
   // Channels routes
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales", element: <Channels />, private: true },//done
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId", element: <ViewChannel />, private: true },//done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/agregar", element: <CreatePage />, private: true },
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/editar", element: <CreatePage />, private: true },
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/eliminar", element: <UnderConstruction />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/agregar", element: <CreatePage />, private: true },//done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/editar", element: <CreatePage />, private: true },//done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/eliminar", element: <UnderConstruction />, private: true },//Done (put is_active === 0)
 
   /* Alarms routes */
   // Alarmas routes / dataloggers
