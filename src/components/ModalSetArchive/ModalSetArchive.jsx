@@ -34,9 +34,9 @@ const ModalSetArchive = ({
 
   const handleAccept = async () => {
     if (updateFn && entidadId) {
-      console.log('Updating entity:', entidad, 'ID:', entidadId, 'to new state:', nuevoEstado);
+      //console.log('Updating entity:', entidad, 'ID:', entidadId, 'to new state:', nuevoEstado);
       const responseStore = await updateFn(entidadId, { is_active: nuevoEstado, businessUuid: businessUuid });
-      console.log('Response from update:', responseStore);
+      //console.log('Response from update:', responseStore);
       onRequestClose();
       navigate(redirectTo);
     }

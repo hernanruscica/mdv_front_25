@@ -25,7 +25,9 @@ const Channels = () => {
   }  
 
   //console.log(user.businesses_roles.find(br => br.uuid === businessUuid).role);
-  const userCurrentRole = user.businesses_roles.find(br => br.uuid === businessUuid).role;
+  //console.log('user', user);
+  
+  const userCurrentRole = user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
   
 
   return (

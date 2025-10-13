@@ -169,7 +169,15 @@ const ViewLocation = () => {
           locations={[selectedLocation]}
           showAddButton={userCurrentRole === 'Owner'}
         /> :
-        <p>No hay dataloggers en esta ubicación</p>
+       (userCurrentRole === 'Owner') && ( <>
+          <BtnCallToAction
+            text="Agregar"
+            icon="plus-circle-solid.svg"
+            type="normal"
+            url={`/panel/ubicaciones/${businessUuid}/dataloggers/agregar`}
+          />        
+          <p>No hay dataloggers en esta ubicación</p>
+        </>)
       }    
     </>    
   );

@@ -1,5 +1,5 @@
-import { useState, useEffect, use } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
@@ -24,10 +24,10 @@ const ViewDatalogger = () => {
   const { businessUuid, uuid } = useParams();
   
   const user = useAuthStore(state => state.user);    
-  const { datalogger, isLoadingDatalogger, errorDatalogger } = useFetchDatalogger(uuid, businessUuid);  
+  const { datalogger, isLoadingDatalogger, isCreatingDatalogger, isUpdattingDatalogger, errorDatalogger } = useFetchDatalogger(uuid, businessUuid);  
   
 
-  if (isLoadingDatalogger) {
+  if (isLoadingDatalogger || isCreatingDatalogger || isUpdattingDatalogger) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
@@ -96,7 +96,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
   );
   // console.log('datalogger id',datalogger?.uuid);
   // console.log('business id',datalogger?.business_uuid);
-console.log('datalogger active',datalogger?.is_active);
+//console.log('datalogger?.channels',datalogger?.channels);
 
   
 
@@ -120,7 +120,7 @@ console.log('datalogger active',datalogger?.is_active);
      
       
       <CardImage
-        image={datalogger?.img ? `${datalogger?.img}` : '/images/default-datalogger.webp'}
+        image={datalogger?.img ? `${datalogger?.img}` : '/images/default_datalogger.webp'}
         title={datalogger?.name}
         buttons={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator' ? dataloggerButtons : null}
       >

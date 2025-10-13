@@ -9,7 +9,7 @@ import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/Ca
 
 export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }) => {
     const [newImage, setNewImage] = useState(null); // Changed to null to properly check for file
-    const [profileImage, setProfileImage] = useState("default_datalogger.png");    
+    const [profileImage, setProfileImage] = useState("default_datalogger.webp");    
     const { user: userStore } = useAuthStore();
     const { 
         locationUsers, 
@@ -24,7 +24,7 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
         description: "", 
         image: "default_datalogger.webp", // Default image name
         table_name: "", 
-        is_active: true, // Added is_active field
+        is_active: 1, // Added is_active field
         business_uuid: locationData?.uuid || "", // Added business_uuid
     }); 
 
@@ -41,15 +41,7 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
             })
             setProfileImage(dataloggerData?.img || "default_location.png");
         }
-        /* else 
-            
-            if (!isEditing && userStore) {
-            setDatalogger(prev => ({
-                ...prev,
-                business_uuid: userStore.business_uuid || ""
-            }));
-        }*/
-
+        
     }, [dataloggerData, isEditing, userStore]);
 
     useEffect(() => {
@@ -82,12 +74,7 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
         if (newImage) {
             formData.append("image", newImage); // Append the File object
         } else if (!isEditing && datalogger.image) {
-            // For creation, if no new image is selected, but a default image name exists,
-            // we might need to handle it differently or ensure backend handles default.
-            // For now, if newImage is null and not editing, we don't send 'image' field
-            // unless it's a default string that the backend expects.
-            // Based on backend examples, if no image is provided, it's omitted.
-            // If a default image is needed, the backend should handle it.
+           
         }
 
         // business_uuid is only needed for POST, and it's part of the URL for PUT
@@ -96,8 +83,7 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
         }
 
         try {
-            let response;
-           // console.log('dataloggerData', dataloggerData);
+            let response;           
             
             if (isEditing) {
                 response = await updateDatalogger(dataloggerData?.uuid, formData);
@@ -122,9 +108,7 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
 
     if (error) {
         return <div>Error al cargar las ubicaciones: {error}</div>;
-    }
-
-    //console.log('locationData create form', locationData);
+    }  
     
    
     return ( 
@@ -168,18 +152,7 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
                         required
                     />
                 </div>
-{/*                 
-                <div className={stylesForms.formInput}>
-                    <label htmlFor="is_active">Activo:</label>
-                    <input
-                        type="checkbox"
-                        name="is_active"
-                        id="is_active"
-                        checked={datalogger.is_active}
-                        onChange={handleChange}
-                    />
-                </div>
-                 */}
+
             </div>
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>

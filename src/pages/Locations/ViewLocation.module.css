@@ -83,7 +83,9 @@
 .btnContainer{
   width: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: start;
   align-items: center;
   gap: 4px;
 }

@@ -9,7 +9,7 @@ import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/Ca
 export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
     const { dataloggerId, channelId, businessUuid } = useParams();
     const { user: userStore } = useAuthStore();
-    const [profileImage, setProfileImage] = useState(channelData?.img || "default_channel.png");
+    const [profileImage, setProfileImage] = useState("default_channel.png");
     const [newImage, setNewImage] = useState("");
     
     const [channel, setChannel] = useState({ 
@@ -19,7 +19,7 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
         column_name: "", 
         averaging_period: "60", 
         factor: "1.0",
-        is_active: true,
+        is_active: 1,
         image: ""
     }); 
     
@@ -66,7 +66,7 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                 const response = await createChannel(businessUuid, formData);                
                 if (response.success) {
                     toast.success(response.message);
-                    navigate(`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${response.item.uuid}`);
+                    navigate(`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}`);
                 } else {
                     toast.error(response.message || 'Error al crear el canal');
                 }
@@ -82,15 +82,15 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
     useEffect(() => {
         if (isEditing ) {
             setChannel({
-                name: channelData.name || "",
-                description: channelData.description || "",
-                column_name: channelData.column_name || "",
-                averaging_period: channelData.averaging_period || "",
-                factor: channelData.factor || "",
-                is_active: channelData.is_active,
-                image: channelData.image || "",
+                name: channelData?.name || "",
+                description: channelData?.description || "",
+                column_name: channelData?.column_name || "",
+                averaging_period: channelData?.averaging_period || "",
+                factor: channelData?.factor || "",
+                is_active: channelData?.is_active,
+                image: channelData?.image || "",
             });
-            setProfileImage(channelData.img || "default_channel.webp");
+            setProfileImage(channelData?.img || "default_channel.webp");
         }
         
     }, [channelData, isEditing])
@@ -98,11 +98,11 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
     if (isSubmitting) {
         return <div>Guardando cambios...</div>;
     }
-
+/*
     console.log('channelData create form', channelData);
     console.log('dataloggerId, channelId, businessUuid', dataloggerId, channelId, businessUuid);
     console.log('locationData create form', locationData);
-    
+  */
     
     
     return (        
@@ -158,18 +158,7 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                         required
                     />
                 </div>
-{/*}
-                <div className={stylesForms.formInput}>
-                    <label htmlFor="is_active">Activo:</label>
-                    <input
-                        type="checkbox"
-                        name="is_active"
-                        id="is_active"
-                        checked={channel.is_active}
-                        onChange={handleChange}
-                    />
-                </div>
-*/}
+
             </div>
             <div className={stylesForms.formInputGroup}>
                 <div className={stylesForms.formInput}>

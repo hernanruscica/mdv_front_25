@@ -21,8 +21,7 @@ const ShowChannelsCards = ({
   const [showArchived, setShowArchived] = useState(false);
   
 
-  const filteredChannels = channels
-    .filter(channel => !showArchived ? channel?.is_active == 1 : true)
+  const filteredChannels = channels    
     .filter(channel => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
@@ -30,6 +29,8 @@ const ShowChannelsCards = ({
       channel?.description.toLowerCase().includes(searchTermLower)      
     );
   });  
+
+  const channelsToShow = showArchived ? filteredChannels : filteredChannels.filter(channel => channel?.is_active == 1);
 
   const timeRangesCards = [
     { hours: 1, label: '1 Hr' },
@@ -51,16 +52,20 @@ const ShowChannelsCards = ({
     }));
   };
   const oneChannel = channels[0];
-  const dataloggerId = oneChannel ? oneChannel.uuid : null;
-  const businessUuid = oneChannel ? oneChannel.business.uuid : null;
-  //console.log(dataloggerId.datalogger_id);
+  const dataloggerId = oneChannel ? oneChannel?.datalogger_id : null;
+  const businessUuid = oneChannel ? oneChannel?.business.uuid : null;
+ // console.log('channels', channels);
+  //console.log('oneChannel', oneChannel);
+  console.log('showArchived', showArchived);
 
   return (
     <>
       <div className={styles.controlsContainer}>
+        {/* .filter(channel => !showArchived ? channel?.is_active == 1 : true) */}
         <ButtonsBar 
           itemsName={`ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales` }
           itemsQty={filteredChannels.length}
+          itemsActiveQty={filteredChannels.filter(channel => channel?.is_active == 1).length}
           showAddButton={showAddButton}
         >
         <div className={styles.controls}>
@@ -78,7 +83,7 @@ const ShowChannelsCards = ({
                 checked={showArchived}
                 onChange={(e) => setShowArchived(e.target.checked)}
               />
-              <span>Mostrar también los archivados</span>
+              <span>Mostrar {filteredChannels.filter(channel => channel?.is_active == 0).length} archivados</span>
             </label>
           )}
         </div>
@@ -86,7 +91,7 @@ const ShowChannelsCards = ({
       </div>
 
       <div className={styles.cardsContainer}>
-        {filteredChannels.map(channel => {
+        {channelsToShow.map(channel => {
           const channelAlarms = alarms.filter(
             alarm => alarm.channel_id == channel.uuid
           );
@@ -102,7 +107,7 @@ const ShowChannelsCards = ({
             <div className={cardInfoStyles.cardContent}>
               <div className={cardInfoStyles.cardImage}>
                 <img
-                  src={channel?.img ? `${import.meta.env.VITE_IMAGE_URL}/${channel.img}` : '/images/default-channel.webp'}
+                  src={channel?.img ? `${channel.img}` : '/images/default-channel.webp'}
                   alt={`Foto del canal ${channel?.name}`}
                   title={`Este es el canal ${channel?.name}`}
                   className={cardInfoStyles.image}
@@ -110,7 +115,7 @@ const ShowChannelsCards = ({
               </div>
               <div className={cardInfoStyles.description}>
                 {
-                  channel.is_active == 0 && (
+                  channel.is_active == '0' && (
                     <CustomTag 
                       text="Archivado"
                       type="archive"

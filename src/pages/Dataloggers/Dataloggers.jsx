@@ -13,7 +13,7 @@ const Dataloggers = () => {
   const { businessUuid } = useParams();
   const { 
     dataloggers, 
-    loadingStates: { fetchDataloggers: isLoading }, 
+    loadingStates: { fetchDataloggers: isLoading  }, 
     error,
     fetchDataloggers 
   } = useDataloggersStore();  
@@ -37,7 +37,7 @@ const Dataloggers = () => {
       user?.businesses_roles.some(br => br.role === 'Owner')
         ? 'Owner'
         : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-  //console.log(dataloggers[0].business.name);
+  //console.log(dataloggers.find(dl => dl.business.uuid === businessUuid));
 
   return (
     <>
@@ -45,7 +45,7 @@ const Dataloggers = () => {
         type="dataloggers"
         text="Dataloggers" 
       />
-      <Breadcrumb ubicacion={dataloggers[0]?.business.name}/>
+      <Breadcrumb ubicacion={dataloggers.find(dl => dl.business.uuid === businessUuid)?.business.name}/>
       
       <ShowDataloggersCards
         dataloggers={dataloggers.filter(dl=>dl.business.uuid === businessUuid)}              

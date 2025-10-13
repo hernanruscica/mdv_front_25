@@ -8,12 +8,13 @@ export const useFetchDatalogger = (dataloggerId, businessUuid) => {
     if (dataloggerId && businessUuid) {
       fetchDataloggerById(dataloggerId, businessUuid);
     }
-  }, [dataloggerId, businessUuid, fetchDataloggerById, loadingStates.updateDatalogger]);
+  }, [dataloggerId, businessUuid, fetchDataloggerById, loadingStates.updateDatalogger, loadingStates.createDatalogger]);
 
   return {
     datalogger: selectedDatalogger,
     isLoadingDatalogger: loadingStates.fetchDatalogger,
     isUpdattingDatalogger: loadingStates.updateDatalogger,
+    isCreatingDatalogger: loadingStates.createDatalogger,
     errorDatalogger: error,
   };
 };

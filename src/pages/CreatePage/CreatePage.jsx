@@ -68,7 +68,7 @@ const CreatePage = () => {
   } = useUsersStore();
 
   useEffect(() => {
-    if (channelId) {
+    if (channelId && businessUuid) {
       fetchChannelById(channelId, businessUuid);
       //console.log('channelId', channelId);      
     }
@@ -77,26 +77,30 @@ const CreatePage = () => {
   useEffect(() => {
     if (dataloggerId) {
       fetchDataloggerById(dataloggerId, businessUuid);
+       const fullPath = location.pathname.split('/').filter(path => path !== '');  
+      setCurrentAction(fullPath[fullPath.length - 1]);
     }
   }, [dataloggerId]);
 
   useEffect(() => {
     if (businessUuid /*&& currentAction == 'editar'*/) {      
       fetchLocationById(businessUuid);
+      const fullPath = location.pathname.split('/').filter(path => path !== '');  
+      setCurrentAction(fullPath[fullPath.length - 1]);
     }     
   }, [businessUuid]);
-  
+  /*
   useEffect(() => {
     if (alarmId && currentAction === 'editar') {
       fetchAlarmById(alarmId);
     }
   }, [alarmId, currentAction, fetchAlarmById]);
-
+*/
   useEffect(() => {
-    if (userId && currentAction == 'editar') {
+    if (userId /*&& currentAction == 'editar'*/) {
       fetchUserById(userId); 
     }
-  }, [userId]);
+  }, [userId, currentAction]);
 
   if (loadingChannel || loadingDatalogger || loadingLocation || loadingAlarm || loadingUser) {
     return <LoadingSpinner message='Cargando datos...' />
@@ -104,7 +108,7 @@ const CreatePage = () => {
 
   const FormComponent = formComponents[currentEntityName] || formComponents.default;
 
-console.log('selectedDatalogger on createPAge', selectedDatalogger);
+//console.log('dataloggerId', dataloggerId);
 
   return (
     <>
@@ -114,8 +118,8 @@ console.log('selectedDatalogger on createPAge', selectedDatalogger);
       />
       <Breadcrumb 
         usuario={ selectedUser ? `${selectedUser?.first_name} ${selectedUser?.last_name}` : ''}
-        ubicacion={selectedLocation?.name || 'Agregar'}
-        datalogger={selectedDatalogger?.name || ''}
+        ubicacion={ currentAction !== 'agregar' ? selectedLocation?.name : 'Agregar'}
+        datalogger={selectedLocation?.dataloggers.find(dl => dl.uuid === dataloggerId)?.name || ''}
         canal={selectedChannel?.name || ''}
         alarma={selectedAlarm?.name || ''}
       />      

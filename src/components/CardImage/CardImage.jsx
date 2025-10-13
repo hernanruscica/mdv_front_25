@@ -1,7 +1,3 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import CardTitle from '../CardTitle/CardTitle';
-import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import styles from './CardImage.module.css';
 
 const CardImage = ({ image, title, children, buttons }) => {

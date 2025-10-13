@@ -98,38 +98,9 @@ const ViewChannel = () => {
 
 const handleAlarmClick = (row) => {
   navigate(`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/alarmas/${row.id}`);
-};
-      /*
-
-  /*
-  const {
-    selectedChannel,
-    channelAlarms,
-    channelMainAlarm,
-    dataChannel,
-    isLoading,
-    error,
-    refreshChannel
-  } = useChannelDetails(channelId, hoursBackView);*/
-
-  // // Actualizar canal después de archivar/desarchivar
-  // useEffect(() => {
-  //   if (!modalOpen && selectedChannel?.id) {
-  //     const timeout = setTimeout(() => {
-  //       refreshChannel();
-  //     }, 200);
-  //     return () => clearTimeout(timeout);
-  //   }
-  // }, [modalOpen, selectedChannel?.id]);
-  
-
-
-  //console.log(channelAlarms);
- //console.log('currenChannels',selectedChannel);
+}; 
  
- 
- 
-  const channelButtons = (!selectedChannel?.is_active) ? (
+  const channelButtons = (selectedChannel?.is_active == '1') ? (
     <>
       <BtnCallToAction
         text="Editar"
@@ -167,6 +138,8 @@ const handleAlarmClick = (row) => {
     }));
   };
   
+  //console.log('selectedChannel', selectedChannel);
+  
   
   return (
     <>
@@ -176,7 +149,8 @@ const handleAlarmClick = (row) => {
         entidad="canal"
         entidadId={selectedChannel?.uuid}
         nuevoEstado={selectedChannel?.is_active == '1' ? 0 : 1}
-        redirectTo={`/panel/ubicaciones/${businessUuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}`}
+        /* {`/panel/ubicaciones/${businessUuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}`} */
+        redirectTo=''
         nombre={`${selectedChannel?.name}`}
         businessUuid={businessUuid}
       />     
@@ -192,7 +166,7 @@ const handleAlarmClick = (row) => {
             title={selectedChannel?.name}
             buttons={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator' ? channelButtons : ''}
           >
-            {selectedChannel?.is_active 
+            {selectedChannel?.is_active == '0'
               ? (<CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />)
               : ''
           }

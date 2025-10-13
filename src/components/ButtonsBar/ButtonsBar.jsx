@@ -3,7 +3,7 @@ import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import styles from './ButtonsBar.module.css';
 
 const ButtonsBar = (props) => {
-    const {itemsName, itemsQty, showAddButton = false, children} = props;
+    const {itemsName, itemsQty, itemsActiveQty, showAddButton = false, children} = props;
     let itemNameCleaned = itemsName.split('/');
     itemNameCleaned = itemNameCleaned.length > 1 ? itemNameCleaned.pop() : itemNameCleaned;
 
@@ -19,7 +19,7 @@ const ButtonsBar = (props) => {
                
             : ''}
             {children}
-            <span>Mostrando <strong>{itemsQty || "0"}</strong> {itemNameCleaned}</span>   
+            <span>Mostrando <strong>{itemsQty - itemsActiveQty || "0"} resultados</strong> </span>   
             
         </div>
     )
