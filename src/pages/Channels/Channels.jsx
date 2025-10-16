@@ -25,10 +25,14 @@ const Channels = () => {
   }  
 
   //console.log(user.businesses_roles.find(br => br.uuid === businessUuid).role);
-  //console.log('user', user);
+  //console.log('user', user);  
+
+  const userCurrentRole = user?.businesses_roles.some(br => br.role === 'Owner')
+         ? 'Owner'
+         : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role
+
   
-  const userCurrentRole = user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-  
+//console.log(userCurrentRole);
 
   return (
     <>
@@ -47,7 +51,7 @@ const Channels = () => {
         alarms={datalogger?.alarms}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        showAddButton={user?.isOwner === 1 || userCurrentRole === 'Administrator'}
+        showAddButton={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator'}
       />
       }
     </>

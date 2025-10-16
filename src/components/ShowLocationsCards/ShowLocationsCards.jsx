@@ -2,7 +2,6 @@ import { useState } from 'react';
 import CardInfo from '../CardInfo/CardInfo';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import ButtonsBar from '../ButtonsBar/ButtonsBar';
-import SearchBar from '../SearchBar/SearchBar';
 import { getIconFileName } from "../../utils/iconsDictionary";
 import styles from './ShowLocationsCards.module.css';
 import cardInfoStyles from "../CardInfo/CardInfo.module.css";
@@ -39,6 +38,7 @@ const ShowLocationsCards = ({
   return (
     <>
       <div className={styles.controlsContainer}>
+        {/*}
         <ButtonsBar 
           itemsName='ubicaciones' 
           itemsQty={filteredLocations.length}
@@ -62,6 +62,18 @@ const ShowLocationsCards = ({
             )}
           </div>
         </ButtonsBar>
+        */}
+         <ButtonsBar
+          itemsName='ubicaciones'
+          items={locations}
+          filteredItems={filteredLocations}
+          showAddButton={showAddButton}
+          addLink={`ubicaciones`}
+          searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
+          showArchived={showArchived}
+          onShowArchivedChange={setShowArchived}
+        />
       </div>
 
       <div className={styles.cardsContainer}>

@@ -70,14 +70,7 @@ const ViewUser = () => {
         icon="archive-solid.svg"
         onClick={() => setModalOpen(true)}
       />
-{/* 
-      <BtnCallToAction
-        text="Eliminar"
-        icon="trash-alt-regular.svg"
-        type="danger"
-        url={`/panel/ubicaciones/${businessUuid}/usuarios/${selectedUser?.uuid}/eliminar`}
-      />
-       */}
+
     </>)
   );
 
@@ -85,7 +78,7 @@ const ViewUser = () => {
       selectedUser?.businesses_roles.some(br => br.role === 'Owner')
         ? 'Owner'
         : selectedUser?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-  console.log(userCurrentRole);
+// console.log(userCurrentRole);
 
   return (
     <>
@@ -112,7 +105,7 @@ const ViewUser = () => {
           />
       
           <CardImage
-            image={selectedUser?.avatar_url ? `${selectedUser?.avatar_url}` : '/images/default-user.png'}
+            image={selectedUser?.avatar_url ? `${selectedUser?.avatar_url}` : '/images/default_avatar.png'}
             title={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
             buttons={userButtons}
           >

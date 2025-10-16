@@ -83,7 +83,7 @@ const Users = () => {
         ? 'Owner'
         : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
 
-        console.log(userCurrentRole);
+        //console.log(userCurrentRole);
         
   return (
     <>

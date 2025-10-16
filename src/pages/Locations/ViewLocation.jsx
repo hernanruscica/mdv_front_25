@@ -28,6 +28,7 @@ const ViewLocation = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [alarmsQuantity, setAlarmsQuantity ] = useState(0);
   const [allAlarms, setAllAlarms] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const loadLocation = async () => {
@@ -163,10 +164,9 @@ const ViewLocation = () => {
       <Title2 text={`Dataloggers en ${selectedLocation?.name}`} type="dataloggers"/>                   
       {(selectedLocation?.dataloggers.length > 0) ?
         <ShowDataloggersCards
-          dataloggers={selectedLocation?.dataloggers}
-          channels={selectedLocation?.dataloggers.flatMap(d => d.channels)}
-          alarms={allAlarms}
-          locations={[selectedLocation]}
+          dataloggers = {selectedLocation?.dataloggers}
+          searchTerm = {searchTerm}
+          onSearchChange = {setSearchTerm}
           showAddButton={userCurrentRole === 'Owner'}
         /> :
        (userCurrentRole === 'Owner') && ( <>

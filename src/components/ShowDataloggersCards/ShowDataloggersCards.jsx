@@ -13,10 +13,15 @@ import CustomTag from '../CustomTag/CustomTag';
 
 const ShowDataloggersCards = ({ 
       dataloggers,   
-      showAddButton = false 
+      searchTerm,
+      onSearchChange,      
+      showAddButton = false ,
     }) => {
   const [showArchived, setShowArchived] = useState(showAddButton);
-  const [searchTerm, setSearchTerm] = useState('');
+  //const [searchTerm, setSearchTerm] = useState('');
+
+  const sourceDataloggers = showArchived ? dataloggers : dataloggers.filter(datalogger => datalogger.is_active == 1);
+
   const [modalContent, setModalContent] = useState({
     isOpen: false,
     type: null,
@@ -79,8 +84,7 @@ const ShowDataloggersCards = ({
     );
   };
 
-  const filteredDataloggers = dataloggers
-    .filter(datalogger => !showArchived ? datalogger.is_active === 1 : true)
+  const filteredDataloggers = sourceDataloggers    
     .filter(datalogger => {
       const searchTermLower = searchTerm.toLowerCase();
       return (
@@ -89,42 +93,23 @@ const ShowDataloggersCards = ({
       );
     });
 
+const businessUuid = dataloggers[0]?.business.uuid; 
+
 
   return (
     <>
       <div className={styles.controlsContainer}>
-
-        <ButtonsBar 
-          itemsName='dataloggers' 
-          itemsQty={filteredDataloggers.length}
-          showAddButton={false}
-        >          
-          <div className={styles.controls}>
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              placeholder="Buscar dataloggers..."
-            />
-            {showAddButton && (
-              <>
-                <BtnCallToAction
-                  text="Agregar"
-                  icon="plus-circle-solid.svg"
-                  type="normal"
-                  url={`/panel/ubicaciones/${dataloggers[0]?.business_uuid}/dataloggers/agregar`}
-                />               
-                <label className={styles.checkboxContainer}>
-                  <input
-                    type="checkbox"
-                    checked={showArchived}
-                    onChange={(e) => setShowArchived(e.target.checked)}
-                  />
-                  <span>Mostrar también los archivados</span>
-                </label>
-              </>
-            )}
-          </div>
-        </ButtonsBar>
+        <ButtonsBar
+          itemsName='dataloggers'
+          items={dataloggers}
+          filteredItems={filteredDataloggers}
+          showAddButton={showAddButton}
+          addLink={`ubicaciones/${businessUuid}/dataloggers`}
+          searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
+          showArchived={showArchived}
+          onShowArchivedChange={setShowArchived}
+        />
       </div>
 
       <div className={styles.cardsContainer}>

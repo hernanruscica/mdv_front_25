@@ -102,6 +102,34 @@ tr:hover {
   cursor: default;
 }
 
+
+.checkboxContainer{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.9em;
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #333;    
+    background-color: #F6B510;
+    padding: 8px 13px;
+    border-radius: 15px;
+}
+
+.showIcon{
+    width: 24px;
+    height: 24px;
+    
+}
+
+.checkbox{
+    display: none;
+}
+
 /* Estilos para móvil */
 @media screen and (max-width: 768px) {
   /* Ocultar encabezados en móvil */

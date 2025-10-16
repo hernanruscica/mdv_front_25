@@ -166,6 +166,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       />      
       
       {datalogger?.channels.length > 0 ? (
+        
         <ShowChannelsCards
           channels={datalogger?.channels}
           alarms={datalogger?.alarms}

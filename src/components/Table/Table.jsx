@@ -137,7 +137,9 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
       ));
   };
 
-  //console.log('data', data[0].businessUuid, data[1].businessUuid);
+  //console.log('data', data);
+  //console.log('showAddButton', showAddButton);
+  
   
 
   return (
@@ -151,16 +153,19 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
               icon="plus-circle-solid.svg" 
               url={`/panel/ubicaciones/${data[0]?.businessUuid}/usuarios/agregar`}
             />
-          
-
-          <label className={styles.checkboxContainer}>
-            <input
-              type="checkbox"
-              checked={showArchived}
-              onChange={handleCheckArchived}
-            />
-            <span>Mostrar también los archivados</span>
-          </label>        
+             <label className={styles.checkboxContainer}>
+                <input
+                    type="checkbox"
+                    checked={showArchived}
+                    onChange={handleCheckArchived}
+                    className={styles.checkbox}
+                />
+                <img
+                    src={!showArchived ? `/icons/eye-regular.svg` : `/icons/eye-slash-regular.svg`}
+                    className={styles.showIcon}
+                />
+                <span>{!showArchived ? 'Mostrar' : 'Ocultar'} {data.filter(fd=>fd.estado == 0).length} archivados</span>
+            </label>        
           </>        
         )}
         <span>Mostrando {filteredData.length} resultados</span>

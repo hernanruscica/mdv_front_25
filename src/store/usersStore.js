@@ -80,7 +80,7 @@ export const useUsersStore = create((set, get) => ({
           ),
           selectedUser: state.selectedUser?.uuid === uuid ? response.user : state.selectedUser
         }));
-        return { success: true, user: response.user }; // Standardize success response
+        return { success: true, user: response.user, message: response?.message }; // Standardize success response
       } else {
         // If no user object or response is null, assume failure or unexpected response
         set({ error: response?.message || 'Error al actualizar usuario: respuesta inesperada' });

@@ -176,7 +176,7 @@ const {
         columns={columns}
         data={getTableData()}
         onRowClick={handleRowClick}
-        showAddButton={ user?.isOwner == 1 || userCurrentRole === 'Administrator' }
+        showAddButton={ userCurrentRole === 'Owner' || userCurrentRole === 'Administrator' }
       />{/* */}
     </>
   );

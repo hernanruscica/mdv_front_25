@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Title1 } from '../../components/Title1/Title1';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useAuthStore } from '../../store/authStore';
@@ -13,17 +13,16 @@ const Dataloggers = () => {
   const { businessUuid } = useParams();
   const { 
     dataloggers, 
-    loadingStates: { fetchDataloggers: isLoading  }, 
+    loadingStates: { fetchDataloggers: isLoading, updateDatalogger: isUpdatting, createDatalogger: isCreating }, 
     error,
     fetchDataloggers 
   } = useDataloggersStore();  
 
-  useEffect(() => {
-    if (!dataloggers || dataloggers.length === 0) {
-      fetchDataloggers(user, businessUuid);
-    }
-    
-  }, [user]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {    
+    fetchDataloggers(user, businessUuid);  
+  }, [user, businessUuid]);
 
   if (isLoading ) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -50,6 +49,8 @@ const Dataloggers = () => {
       <ShowDataloggersCards
         dataloggers={dataloggers.filter(dl=>dl.business.uuid === businessUuid)}              
         showAddButton={userCurrentRole === 'Owner' || userCurrentRole == 'Administrator'}
+        searchTerm = {searchTerm}
+        onSearchChange = {setSearchTerm}
       />
       {/**/}
     </>

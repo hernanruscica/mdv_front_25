@@ -100,7 +100,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
         setIsSubmitting(true);
         
         if (isEditing) {
-          console.log('editing', user.uuid);
+          //console.log('editing', user.uuid);
           
             const formData = new FormData();
             formData.append("uuid", user.uuid); 
@@ -131,10 +131,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
 
             try {
                 const response = await updateUser(user.uuid, formData);
-                console.log('response from usercreateform', response);
+                //console.log('response from usercreateform', response);
                 
                 if (response?.success) {
-                    toast.success(response.message);
+                    toast.success('Usuario actualizado con éxito');
                     navigate(`/panel/ubicaciones/${businessUuid}/usuarios/${user.uuid}`);
                 } else {
                     toast.error(response.message || 'Error al actualizar usuario');
@@ -169,7 +169,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
         try {
             const {success, message, user} = await createUser(formData, locationData?.uuid);
             if (success) {               
-                toast.success(message);
+                toast.success('Usuario creado con éxito');
                 navigate(`/panel/ubicaciones/${businessUuid}/usuarios/${user.uuid}`);
             } else {
                 toast.error(message);                

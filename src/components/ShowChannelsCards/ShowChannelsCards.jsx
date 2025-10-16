@@ -1,8 +1,7 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 import CardInfo from '../CardInfo/CardInfo';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import ButtonsBar from '../ButtonsBar/ButtonsBar';
-import SearchBar from '../SearchBar/SearchBar';
 import { getIconFileName } from "../../utils/iconsDictionary";
 import styles from './ShowChannelsCards.module.css';
 import cardInfoStyles from "../CardInfo/CardInfo.module.css";
@@ -19,18 +18,18 @@ const ShowChannelsCards = ({
 }) => {
 
   const [showArchived, setShowArchived] = useState(false);
-  
 
-  const filteredChannels = channels    
-    .filter(channel => {
+  // Determine the base list of channels (active only, or all)
+  const sourceChannels = showArchived ? channels : channels.filter(channel => channel.is_active == 1);
+
+  // Filter the base list by the search term
+  const channelsToShow = sourceChannels.filter(channel => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
       channel?.name.toLowerCase().includes(searchTermLower) ||
-      channel?.description.toLowerCase().includes(searchTermLower)      
+      channel?.description.toLowerCase().includes(searchTermLower)
     );
-  });  
-
-  const channelsToShow = showArchived ? filteredChannels : filteredChannels.filter(channel => channel?.is_active == 1);
+  });
 
   const timeRangesCards = [
     { hours: 1, label: '1 Hr' },
@@ -56,38 +55,22 @@ const ShowChannelsCards = ({
   const businessUuid = oneChannel ? oneChannel?.business.uuid : null;
  // console.log('channels', channels);
   //console.log('oneChannel', oneChannel);
-  console.log('showArchived', showArchived);
+  //console.log('showArchived', showArchived);
 
   return (
     <>
       <div className={styles.controlsContainer}>
-        {/* .filter(channel => !showArchived ? channel?.is_active == 1 : true) */}
-        <ButtonsBar 
-          itemsName={`ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales` }
-          itemsQty={filteredChannels.length}
-          itemsActiveQty={filteredChannels.filter(channel => channel?.is_active == 1).length}
+        <ButtonsBar
+          itemsName='canales'
+          items={channels}
+          filteredItems={channelsToShow}
           showAddButton={showAddButton}
-        >
-        <div className={styles.controls}>
-          { channels.length > 0 && (
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchChange={onSearchChange}
-              placeholder="Buscar canales..."
-            />
-          )}
-          {showAddButton && (
-            <label className={styles.checkboxContainer}>
-              <input
-                type="checkbox"
-                checked={showArchived}
-                onChange={(e) => setShowArchived(e.target.checked)}
-              />
-              <span>Mostrar {filteredChannels.filter(channel => channel?.is_active == 0).length} archivados</span>
-            </label>
-          )}
-        </div>
-        </ButtonsBar>
+          addLink={`ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales`}
+          searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
+          showArchived={showArchived}
+          onShowArchivedChange={setShowArchived}
+        />
       </div>
 
       <div className={styles.cardsContainer}>
