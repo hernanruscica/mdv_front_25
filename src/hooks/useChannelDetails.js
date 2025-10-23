@@ -3,7 +3,7 @@ import { useChannelsStore } from '../store/channelsStore';
 import { useAlarmsStore } from '../store/alarmsStore';
 import { useDataStore } from '../store/dataStore';
 
-export const useChannelDetails = (channelId, hoursBackView = 120, isSecondary = false) => {
+export const useChannelDetails = (channelId, datalogger, hoursBackView = 120, isSecondary = false) => {
   const [currentChannel, setCurrentChannel] = useState(null);
   const [channelAlarms, setChannelAlarms] = useState([]);
   const [channelMainAlarm, setChannelMainAlarm] = useState(null);
@@ -12,7 +12,7 @@ export const useChannelDetails = (channelId, hoursBackView = 120, isSecondary = 
 
   const { 
     fetchChannelById, 
-    loadingStates: { fetchChannel: isLoadingChannel }, 
+    loadingStates: { fetchChannel: isLoadingChannel, updateChannel : isUpdatingChannel }, 
     errorChannel 
   } = useChannelsStore();
 
@@ -58,7 +58,7 @@ export const useChannelDetails = (channelId, hoursBackView = 120, isSecondary = 
       }
     };
     loadAlarms();
-  }, [currentChannel]);
+  }, [currentChannel, isUpdatingChannel]);
 
   // Filtrar alarmas del canal
   useEffect(() => {
@@ -72,12 +72,12 @@ export const useChannelDetails = (channelId, hoursBackView = 120, isSecondary = 
   // Cargar datos del canal
   useEffect(() => {
     const loadData = async () => {
-      if (currentChannel) {
+      if (currentChannel && datalogger) {
         try {
-          const nombreTabla = currentChannel.datalogger_nombre_tabla;
-          const nombreColumna = currentChannel.nombre_columna;
+          const nombreTabla = datalogger.table_name;
+          const nombreColumna = currentChannel.column_name;
           const minutosAtras = hoursBackView * 60;
-          const tiempoPromedio = currentChannel.tiempo_a_promediar;
+          const tiempoPromedio = currentChannel.averaging_period;
           await fetchDataChannel(nombreTabla, nombreColumna, minutosAtras, tiempoPromedio, isSecondary);
         } catch (err) {
           setError(err.message || 'Error al cargar los datos del canal');
@@ -85,12 +85,12 @@ export const useChannelDetails = (channelId, hoursBackView = 120, isSecondary = 
       }
     };
     loadData();
-  }, [currentChannel, hoursBackView, isSecondary]);
+  }, [currentChannel, datalogger, hoursBackView, isSecondary]);
 
   // Actualizar estado de carga
   useEffect(() => {
     setIsLoading(isLoadingChannel || isLoadingAlarmsByChannel || isLoadingData);
-  }, [isLoadingChannel, isLoadingAlarmsByChannel, isLoadingData]);
+  }, [isLoadingChannel, isUpdatingChannel, isLoadingAlarmsByChannel, isLoadingData]);
 
   // Actualizar estado de error
   useEffect(() => {
@@ -106,4 +106,4 @@ export const useChannelDetails = (channelId, hoursBackView = 120, isSecondary = 
     error,
     refreshChannel: () => fetchChannelById(channelId).then(setCurrentChannel)
   };
-}; 
+};

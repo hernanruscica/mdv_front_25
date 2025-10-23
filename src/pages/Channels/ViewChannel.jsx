@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
@@ -6,21 +6,21 @@ import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import CardImage from '../../components/CardImage/CardImage';
-import CardInfo from '../../components/CardInfo/CardInfo';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import styles from './ViewChannel.module.css';
 import cardInfoStyles from '../../components/CardInfo/CardInfo.module.css';
 import DigitalPorcentageOn from '../../components/Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
 import AnalogData from '../../components/Graphics/AnalogData/AnalogData';
-import Gauge from '../../components/Gauge/Gauge';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import ChannelInfo from '../../components/ChannelInfo/ChannelInfo';
 import ChannelAlarms from '../../components/ChannelAlarms/ChannelAlarms';
-import { useChannelDetails } from '../../hooks/useChannelDetails';
 import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
 import { useDataStore } from '../../store/dataStore';
 import { useChannelsStore } from '../../store/channelsStore';
+import CardInfo from '../../components/CardInfo/CardInfo';
+import Gauge from '../../components/Gauge/Gauge';
+import { useChannelDetails } from '../../hooks/useChannelDetails';
 
 // Definimos los rangos de tiempo personalizados para los gráficos
 const customTimeRanges = [
@@ -41,51 +41,14 @@ const ViewChannel = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [currentAlarms, setCurrentAlarms] = useState([]);
   const hoursBackView = 8760; // un año
-  const [currentChannel, setCurrentChannel] = useState(null);
-  const [userCurrentRole, setUserCurrentRole] = useState(null);
+  //const [currentChannel, setCurrentChannel] = useState(null);
+  //const [userCurrentRole, setUserCurrentRole] = useState(null);
 
   const { datalogger, isLoadingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
-  const {fetchChannelById, selectedChannel, loadingStates: { fetchChannelById : isLoadingChannels, updateChannel: isUpdatingChannel }} = useChannelsStore();
+  const {fetchChannelById, loadingStates: { fetchChannelById : isLoadingChannels, updateChannel: isUpdatingChannel }} = useChannelsStore();
+  const { currentChannel: selectedChannel, dataChannel, isLoading } = useChannelDetails(channelId, datalogger, hoursBackView, false);
 
-   const { 
-      fetchDataChannel,
-      dataChannel,
-      dataChannelSecondary,
-      loadingStates: { fetchData: isLoadingData }
-    } = useDataStore();
-  /*
-   console.log('businessUuid', businessUuid);
-   console.log('dataloggerId', dataloggerId);
-   console.log('channelId', channelId);  
-  */
- /*
-   useEffect(() => {
-    const loadData = async () => {
-      //fetchDataChannel: async (nombreTabla, nombreColumna, minutosAtras, tiempoPromedio, isSecondary = false)
-      const responseData = await fetchDataChannel(datalogger?.table_name, currentChannel?.column_name, hoursBackView, currentChannel?.averaging_period);
-      //console.log(responseData)
-    }
-    if (!isLoadingDatalogger){
-      loadData();
-      setCurrentAlarms(datalogger?.alarms.filter(al => al.channel_uuid === channelId));
-    }
-   }, [isLoadingDatalogger]);
-   */
-  useEffect(() => {
-    // if (!isLoadingDatalogger && datalogger) {
-       //setCurrentChannel(datalogger?.channels?.find(ch=>ch.uuid === channelId));         
-       
-    // }    
-    const loadChannel = async () => {
-      await fetchChannelById(channelId, businessUuid);
-      setUserCurrentRole(user?.businesses_roles.some(br => br.role === 'Owner')
-         ? 'Owner'
-         : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role)
-    }    
-    loadChannel();
-  }, [channelId, isUpdatingChannel]);
-
-  if (isLoadingDatalogger || isLoadingData || isUpdatingChannel) {
+  if (isLoadingDatalogger || isLoading || isUpdatingChannel) {
     return <LoadingSpinner message="Cargando datos..." />;
     }
     
@@ -94,11 +57,17 @@ const ViewChannel = () => {
     }
 
 
-  //console.log(datalogger?.table_name);
+  
 
 const handleAlarmClick = (row) => {
   navigate(`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/alarmas/${row.id}`);
 }; 
+
+const userCurrentRole = 
+    user?.businesses_roles.some(br => br.role === 'Owner')
+      ? 'Owner'
+      : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+
  
   const channelButtons = (selectedChannel?.is_active == '1') ? (
     <>
@@ -134,7 +103,7 @@ const handleAlarmClick = (row) => {
     return data.map(point => ({
       timestamp: point.fecha,
       porcentaje_encendido: point.porcentaje_encendido,
-      failure: point.tiempo_total >= 900 // 15 minutos en segundos
+      failure: false // Se anula la detección de fallas de comunicación
     }));
   };
   
@@ -150,7 +119,7 @@ const handleAlarmClick = (row) => {
         entidadId={selectedChannel?.uuid}
         nuevoEstado={selectedChannel?.is_active == '1' ? 0 : 1}
         /* {`/panel/ubicaciones/${businessUuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}`} */
-        redirectTo=''
+        redirectTo={`/panel/ubicaciones/${businessUuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/`}
         nombre={`${selectedChannel?.name}`}
         businessUuid={businessUuid}
       />     
@@ -181,6 +150,7 @@ const handleAlarmClick = (row) => {
 
       {datalogger &&
         <ChannelAlarms 
+        businessUuid={businessUuid}
         alarms={currentAlarms}
         channelId={channelId}
         channelName={selectedChannel?.name}
@@ -194,11 +164,11 @@ const handleAlarmClick = (row) => {
           selectedChannel?.column_name.startsWith('d') ? (
             <DigitalPorcentageOn
               data={prepareDigitalData(dataChannel)}
-              selectedChannelName={selectedChannel?.name}
-              selectedChannelTimeProm={selectedChannel?.averaging_period}
+              currentChannelName={selectedChannel?.name}
+              currentChannelTimeProm={selectedChannel?.averaging_period}
               customTimeRanges={customTimeRanges}
             />
-          ) : selectedChannel?.nombre_columna.startsWith('a') ? (
+          ) : selectedChannel?.column_name.startsWith('a') ? (
             <AnalogData
               data={dataChannel}
               mult={selectedChannel?.factor}
@@ -218,43 +188,3 @@ const handleAlarmClick = (row) => {
 };
 
 export default ViewChannel;
-
-
-{/*}
-   <>
-       
-
-        {channelMainAlarm != null && (
-          <CardInfo
-            iconSrc="/icons/bell-regular.svg"
-            title={channelMainAlarm?.nombre || 'Sin alarma configurada'}
-            url={channelMainAlarm ? `/panel/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.id}/alarmas/${channelMainAlarm.id}` : '#'}
-          >
-            <div className={cardInfoStyles.description}>            
-              <p><strong>Creado el:</strong> {new Date(channelMainAlarm?.fecha_creacion).toLocaleDateString()}</p>
-              <p><strong>Descripcion: </strong>{channelMainAlarm?.descripcion}</p>
-              <p><strong>Condicion: </strong>{`${channelMainAlarm?.condicion_mostrar} ${channelMainAlarm?.variable01}`}</p>
-              <div className={styles.gaugePlaceholder}>              
-                {channelMainAlarm?.tipo_alarma == "PORCENTAJE_ENCENDIDO" && (() => {
-                  const conditionOperator = channelMainAlarm.condicion.split(" ")[1];
-                  const conditionValue = channelMainAlarm.variable01;  
-                  const max = (conditionOperator.includes(">")) ? conditionValue : 100;
-                  const min = (conditionOperator.includes("<")) ? conditionValue : 0;
-                  const preparedData = prepareDigitalData(dataChannel);
-                  const lastData = parseFloat(preparedData[preparedData.length - 1]?.porcentaje_encendido, 2);
-                  //console.log(lastData)
-                  return (
-                    <Gauge 
-                      currentValue={lastData}
-                      alarmMin={min}
-                      alarmMax={max}                              
-                    />
-                  );
-                })()}
-              </div>
-            </div>
-          </CardInfo>
-        )}
-      </div>    
-    
-    */}

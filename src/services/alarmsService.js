@@ -67,8 +67,8 @@ export const alarmsService = {
   },
   
   create: async (alarmData) => {
-    try {
-      const { data } = await axiosClient.post('/api/alarms', alarmData);
+    try {      
+      const { data } = await axiosClient.post(`/api/businesses/${alarmData?.businessUuid}/alarms`, alarmData);
       return data;
     } catch (error) {
       console.error('Create alarm error:', error);

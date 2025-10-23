@@ -124,6 +124,7 @@ const CreatePage = () => {
         alarma={selectedAlarm?.name || ''}
       />      
       <FormComponent 
+        businessUuid={businessUuid}
         userId={userId}        
         userData={selectedUser}
         dataloggerId={dataloggerId}

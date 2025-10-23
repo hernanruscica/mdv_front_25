@@ -9,8 +9,8 @@ export const useDataStore = create((set) => ({
   },
   error: null,
 
-  fetchDataChannel: async (nombreTabla, nombreColumna, minutosAtras, tiempoPromedio, isSecondary = false) => {
-    console.log('parametros de fetchDataChannel en datastore:', nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);        
+  fetchDataChannel: async (table_name, column_name, minutosAtras, tiempoPromedio, isSecondary = false) => {
+    //console.log('parametros de fetchDataChannel en datastore:', table_name, column_name, minutosAtras, tiempoPromedio);        
     
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchData: true },
@@ -20,14 +20,14 @@ export const useDataStore = create((set) => ({
     try {
       let data = null;
       
-      if (nombreColumna.startsWith('d')) {        
-        data = await dataService.getPorcentages(nombreTabla, nombreColumna, minutosAtras, tiempoPromedio);        
+      if (column_name.startsWith('d')) {        
+        data = await dataService.getPorcentages(table_name, column_name, minutosAtras, tiempoPromedio);        
         
         
-        // console.log('Datos obtenidos en datastore', `${nombreTabla}_${nombreColumna}`, data);
+        // console.log('Datos obtenidos en datastore', `${table_name}_${column_name}`, data);
 
-      } else if (nombreColumna.startsWith('a')) {        
-        data = await dataService.getAnalogData(nombreTabla, nombreColumna, minutosAtras);        
+      } else if (column_name.startsWith('a')) {        
+        data = await dataService.getAnalogData(table_name, column_name, minutosAtras);        
       }
 
       set(state => ({

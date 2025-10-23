@@ -1,51 +1,89 @@
 import { useState, useEffect, useMemo } from 'react';
 
 const WEEK_IN_HOURS = 168; // 7 días * 24 horas
+const MONTH_IN_HOURS = 720; // 30 días * 24 horas
 
-const calculateStatistics = (data, field) => {
-  if (!data || data.length === 0) return { max: 0, min: 0, avg: 0 };
-  
-  const values = data.map(item => parseFloat(item[field])).filter(val => !isNaN(val));
-  const max = Math.max(...values);
-  const min = Math.min(...values);
-  const avg = (values.reduce((sum, val) => sum + val, 0) / values.length).toFixed(2);
-  
-  return { max, min, avg };
-};
-
-// Función auxiliar para agrupar datos por día
+// Función auxiliar para agrupar datos por día y calcular min, max y avg
 const groupDataByDay = (data) => {
   const groupedData = {};
-  
+
   data.forEach(point => {
     const date = new Date(point.x);
     const dayKey = date.toISOString().split('T')[0];
-    
+
     if (!groupedData[dayKey]) {
       groupedData[dayKey] = {
         values: [],
         failures: []
       };
     }
-    
+
     groupedData[dayKey].values.push(point.y);
     if (point.failure) {
       groupedData[dayKey].failures.push(point.failure);
     }
   });
 
-  // Calcular promedio por día
   return Object.entries(groupedData).map(([dayKey, dayData]) => {
-    const avgValue = dayData.values.reduce((a, b) => a + b, 0) / dayData.values.length;
+    const values = dayData.values;
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
     const hasFailure = dayData.failures.length > 0;
-    
+
     return {
       x: new Date(dayKey).getTime(),
-      y: Number(avgValue.toFixed(2)),
+      min: Number(min.toFixed(2)),
+      max: Number(max.toFixed(2)),
+      avg: Number(avg.toFixed(2)),
       failure: hasFailure
     };
   }).sort((a, b) => a.x - b.x);
 };
+
+// Función auxiliar para agrupar datos por semana (bloques de 7 días)
+const groupDataByWeek = (data) => {
+  if (!data.length) return [];
+
+  const groupedData = {};
+  const firstPointTimestamp = data[0].x; // Anclar al primer punto de datos
+  const sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000;
+
+  data.forEach(point => {
+    const timeDiff = point.x - firstPointTimestamp;
+    const weekIndex = Math.floor(timeDiff / sevenDaysInMillis);
+    const weekStartTimestamp = firstPointTimestamp + (weekIndex * sevenDaysInMillis);
+    
+    if (!groupedData[weekStartTimestamp]) {
+      groupedData[weekStartTimestamp] = {
+        values: [],
+        failures: []
+      };
+    }
+
+    groupedData[weekStartTimestamp].values.push(point.y);
+    if (point.failure) {
+      groupedData[weekStartTimestamp].failures.push(point.failure);
+    }
+  });
+
+  return Object.entries(groupedData).map(([weekStartTimestamp, weekData]) => {
+    const values = weekData.values;
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+    const hasFailure = weekData.failures.length > 0;
+
+    return {
+      x: Number(weekStartTimestamp),
+      min: Number(min.toFixed(2)),
+      max: Number(max.toFixed(2)),
+      avg: Number(avg.toFixed(2)),
+      failure: hasFailure
+    };
+  }).sort((a, b) => a.x - b.x);
+};
+
 
 export const useTimeSeriesChart = ({
   dataSets,
@@ -78,37 +116,53 @@ export const useTimeSeriesChart = ({
         }))
         .sort((a, b) => a.x - b.x);
 
-      // Si el rango es mayor a una semana, agrupar por días
-      if (hoursBackView > WEEK_IN_HOURS) {
-        return groupDataByDay(filteredData);
+      // Agrupar datos según el rango de tiempo
+      if (hoursBackView > MONTH_IN_HOURS) {
+        return groupDataByWeek(filteredData); // Agrupar por semana para vistas largas
+      } else if (hoursBackView > WEEK_IN_HOURS) {
+        return groupDataByDay(filteredData); // Agrupar por día para vistas de mes
       }
 
-      return filteredData;
+      return filteredData; // Sin agrupación para vistas cortas
     });
   }, [dataSets, series, hoursBackView]);
 
   // Calcular estadísticas para cada serie
   const statistics = useMemo(() => {
+    const isGrouped = hoursBackView > WEEK_IN_HOURS;
     const stats = {};
     processedData.forEach((data, index) => {
       if (!data.length) return;
 
-      const values = data.map(point => point.y);
       const seriesName = series[index].name;
       
-      stats[seriesName] = {
-        max: Math.max(...values).toFixed(2),
-        min: Math.min(...values).toFixed(2),
-        avg: (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2)
-      };
+      if (isGrouped) {
+        const maxValues = data.map(point => point.max);
+        const minValues = data.map(point => point.min);
+        const avgValues = data.map(point => point.avg);
+        
+        stats[seriesName] = {
+          max: Math.max(...maxValues).toFixed(2),
+          min: Math.min(...minValues).toFixed(2),
+          avg: (avgValues.reduce((a, b) => a + b, 0) / avgValues.length).toFixed(2)
+        };
+      } else {
+        const values = data.map(point => point.y);
+        stats[seriesName] = {
+          max: Math.max(...values).toFixed(2),
+          min: Math.min(...values).toFixed(2),
+          avg: (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2)
+        };
+      }
     });
     return stats;
-  }, [processedData, series]);
+  }, [processedData, series, hoursBackView]);
 
   // Configurar las opciones del gráfico
   const chartOptions = useMemo(() => {
-    const tooltipFormat = hoursBackView > WEEK_IN_HOURS ? 'dd MMM yyyy' : 'dd MMM yyyy HH:mm';
-    
+    const isGrouped = hoursBackView > WEEK_IN_HOURS;
+    const tooltipFormat = isGrouped ? 'dd MMM yyyy' : 'dd MMM yyyy HH:mm';
+
     return {
       chart: {
         type: 'line',
@@ -132,10 +186,14 @@ export const useTimeSeriesChart = ({
       },
       stroke: {
         curve: 'smooth',
-        width: 2
+        width: [1, 2, 1] // Min, Avg, Max
+      },
+      fill: {
+        type: 'solid',
+        opacity: [0.35, 1, 0.35],
       },
       markers: {
-        size: hoursBackView > WEEK_IN_HOURS ? 4 : 0, // Mostrar marcadores para datos diarios
+        size: 0,
         hover: {
           size: 5
         }
@@ -158,6 +216,14 @@ export const useTimeSeriesChart = ({
       tooltip: {
         x: {
           format: tooltipFormat
+        },
+        shared: true,
+        intersect: false,
+        y: {
+          formatter: (value, { seriesIndex, w }) => {
+            const seriesName = w.globals.seriesNames[seriesIndex];
+            return `${seriesName}: ${value.toFixed(2)}%`;
+          }
         }
       },
       annotations: showFailureMarkers ? {
@@ -181,12 +247,42 @@ export const useTimeSeriesChart = ({
 
   // Preparar las series para el gráfico
   const chartSeries = useMemo(() => {
-    return series.map((seriesConfig, index) => ({
-      name: seriesConfig.name,
-      data: processedData[index] || [],
-      color: seriesConfig.color
-    }));
-  }, [processedData, series]);
+    const isGrouped = hoursBackView > WEEK_IN_HOURS;
+    
+    if (isGrouped) {
+      const groupedData = processedData[0] || [];
+      return [
+        {
+          name: 'Máximo',
+          type: 'area',
+          data: groupedData.map(p => ({ x: p.x, y: p.max })),
+          color: '#00B746'
+        },
+        {
+          name: 'Promedio',
+          type: 'line',
+          data: groupedData.map(p => ({ x: p.x, y: p.avg })),
+          color: '#008FFB'
+        },
+        {
+          name: 'Mínimo',
+          type: 'area',
+          data: groupedData.map(p => ({ x: p.x, y: p.min })),
+          color: '#EF403C'
+        }
+      ];
+    }
+
+    return series.map((seriesConfig, index) => {
+      const data = processedData[index] || [];
+      return {
+        name: seriesConfig.name,
+        type: 'line',
+        data: data,
+        color: seriesConfig.color
+      };
+    });
+  }, [processedData, series, hoursBackView]);
 
   useEffect(() => {
     setLoading(false);
@@ -198,4 +294,4 @@ export const useTimeSeriesChart = ({
     chartSeries,
     statistics
   };
-}; 
+};

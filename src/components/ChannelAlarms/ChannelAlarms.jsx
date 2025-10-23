@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import Table from '../Table/Table';
 import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
 import styles from './ChannelAlarms.module.css';
 
-const ChannelAlarms = ({ alarms, channelId, channelName = 'sin identificar', dataloggerId, onAlarmClick, showAddButton = false }) => {
+const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin identificar', dataloggerId, onAlarmClick, showAddButton = false }) => {
   const columns = useMemo(() => [
     { 
       label: 'NOMBRE ALARMA', 
@@ -29,13 +29,13 @@ const ChannelAlarms = ({ alarms, channelId, channelName = 'sin identificar', dat
       tipo: alarm.type,  
       condicion_mostrar: `${alarm.condition_show} ` || 'Sin condición',
       estado: alarm.is_active,
-      url: `/panel/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${alarm.uuid}`,  
+      url: `/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${alarm.uuid}`,  
       id: alarm.uuid
     })), 
     [alarms, dataloggerId, channelId]
   );
 
-  //console.log(preparedAlarms);
+  //console.log('showAddButton', showAddButton);
   return (
 
     <div className={styles.alarmsContainer}>      
@@ -50,7 +50,14 @@ const ChannelAlarms = ({ alarms, channelId, channelName = 'sin identificar', dat
           />
         </div>
       ) : (
-        <p className={styles.noAlarms}>No hay alarmas configuradas para este canal.</p>
+        <>
+          <BtnCallToAction 
+              text="Agregar" 
+              icon="plus-circle-solid.svg" 
+              url={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
+            />
+          <p className={styles.noAlarms}>No hay alarmas configuradas para este canal.</p>
+        </>
       )}
     </div>
     

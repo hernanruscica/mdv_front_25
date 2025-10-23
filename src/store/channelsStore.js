@@ -73,7 +73,7 @@ export const useChannelsStore = create((set) => ({
       const response = await channelsService.create(businessId, channelData);
       if (response.success) {
         set(state => ({
-          channels: [...state.channels, response.channel],
+          channels: [...state.channels, response.item],
           loadingStates: { ...state.loadingStates, createChannel: false }
         }));
         return response;
