@@ -7,11 +7,11 @@ import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardImage from '../../components/CardImage/CardImage';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import { useAuthStore } from '../../store/authStore';
-import { useDataloggersStore } from '../../store/dataloggersStore';
+
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import styles from './ViewDatalogger.module.css';
 import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCards';
-import Table from '../../components/Table/Table';
+
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
@@ -21,10 +21,10 @@ const ViewDatalogger = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   
-  const { businessUuid, uuid } = useParams();
+  const { businessUuid, dataloggerId } = useParams();
   
   const user = useAuthStore(state => state.user);    
-  const { datalogger, isLoadingDatalogger, isCreatingDatalogger, isUpdattingDatalogger, errorDatalogger } = useFetchDatalogger(uuid, businessUuid);  
+  const { datalogger, isLoadingDatalogger, isCreatingDatalogger, isUpdattingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
   
 
   if (isLoadingDatalogger || isCreatingDatalogger || isUpdattingDatalogger) {

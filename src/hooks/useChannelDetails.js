@@ -44,7 +44,7 @@ export const useChannelDetails = (channelId, datalogger, hoursBackView = 120, is
     if (channelId) {
       loadChannel();
     }
-  }, [channelId]);
+  }, [channelId, isUpdatingChannel]);
 
   // Cargar alarmas
   useEffect(() => {

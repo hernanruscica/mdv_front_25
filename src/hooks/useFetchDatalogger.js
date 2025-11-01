@@ -3,12 +3,17 @@ import { useDataloggersStore } from '../store/dataloggersStore';
 
 export const useFetchDatalogger = (dataloggerId, businessUuid) => {
   const { selectedDatalogger, loadingStates, error, fetchDataloggerById, updateDatalogger } = useDataloggersStore();
-
+  
   useEffect(() => {
-    if (dataloggerId && businessUuid) {
-      fetchDataloggerById(dataloggerId, businessUuid);
+    const loadDatalogger = async () => {
+      await fetchDataloggerById(dataloggerId, businessUuid);
+    };
+//console.log('useeffect en useFetchdatalogger');
+
+    if (dataloggerId && businessUuid && (!selectedDatalogger || selectedDatalogger.uuid !== dataloggerId)) {
+      loadDatalogger();
     }
-  }, [dataloggerId, businessUuid, fetchDataloggerById, loadingStates.updateDatalogger, loadingStates.createDatalogger]);
+  }, [dataloggerId]);
 
   return {
     datalogger: selectedDatalogger,

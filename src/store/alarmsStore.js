@@ -84,7 +84,7 @@ export const useAlarmsStore = create((set) => ({
     }
   },
   
-  fetchAlarmById: async (alarmId) => {
+  fetchAlarmById: async (businessUuid, alarmId) => {
     if (!alarmId) return;
     
     set(state => ({
@@ -93,7 +93,7 @@ export const useAlarmsStore = create((set) => ({
     }));
 
     try {
-      const alarm = await alarmsService.getById(alarmId);
+      const alarm = await alarmsService.getById(businessUuid, alarmId);
       
       set(state => ({
         selectedAlarm: alarm,

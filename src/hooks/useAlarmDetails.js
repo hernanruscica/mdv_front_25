@@ -3,10 +3,12 @@ import { useAlarmsStore } from '../store/alarmsStore';
 import { useAlarmLogsStore } from '../store/alarmLogsStore';
 import { useChannelsStore } from '../store/channelsStore';
 import { useDataloggersStore } from '../store/dataloggersStore';
+import { useLocationsStore } from '../store/locationsStore';
 
-export const useAlarmDetails = (alarmId) => {
+export const useAlarmDetails = (businessUuid, alarmId) => {
   const [currentAlarm, setCurrentAlarm] = useState(null);
   const [alarmLogs, setAlarmLogs] = useState([]);
+  const [currentLocation, setCurrentLocation] = useState(null);
   const [currentChannel, setCurrentChannel] = useState(null);
   const [secondaryChannel, setSecondaryChannel] = useState(null);
   const [currentDatalogger, setCurrentDatalogger] = useState(null);
@@ -15,7 +17,7 @@ export const useAlarmDetails = (alarmId) => {
 
   const { 
     fetchAlarmById,
-    loadingStates: { fetchAlarm: isLoadingAlarm }
+    loadingStates: { fetchAlarm: isLoadingAlarm, updateAlarm : isUpdatingAlarm }
   } = useAlarmsStore();
 
   const { 
@@ -35,12 +37,28 @@ export const useAlarmDetails = (alarmId) => {
     loadingStates: { fetchDatalogger: isLoadingDatalogger }
   } = useDataloggersStore();
 
+   const {
+    selectedLocation,
+    fetchLocationById,
+    loadingStates: { fetchLocation: isLoadingLocation },
+    error: errorLocation
+  } = useLocationsStore();
+
   // Cargar alarma
   useEffect(() => {
     const loadAlarm = async () => {
       try {
-        const alarm = await fetchAlarmById(alarmId);
+        const alarm = await fetchAlarmById(businessUuid, alarmId);
         setCurrentAlarm(alarm);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    const loadLocation = async () => {
+      try {
+        const location = await fetchLocationById(businessUuid);
+        setCurrentLocation(location);                   
       } catch (err) {
         setError(err.message);
       }
@@ -49,7 +67,10 @@ export const useAlarmDetails = (alarmId) => {
     if (alarmId) {
       loadAlarm();
     }
-  }, [alarmId]);
+    if (businessUuid) {
+      loadLocation();
+    }
+  }, [businessUuid, alarmId, isUpdatingAlarm]);
 
   // Cargar logs y canales cuando la alarma está disponible
   useEffect(() => {
@@ -90,9 +111,13 @@ export const useAlarmDetails = (alarmId) => {
 
   // Cargar datalogger cuando el canal está disponible
   useEffect(() => {
-    const loadDatalogger = async () => {
+    const loadDatalogger = async () => {      
+      if (currentChannel){
+        console.log('currenChannel', currentChannel);
+        
+      }
       if (!currentChannel?.datalogger_id) return;
-
+      
       try {
         const dataloggerFromStore = dataloggers.find(d => d.id === currentChannel.datalogger_id);
         if (dataloggerFromStore) {
@@ -105,7 +130,9 @@ export const useAlarmDetails = (alarmId) => {
         setError(err.message);
       }
     };
+    const loadDatalogger2 = async () => {
 
+    }
     loadDatalogger();
   }, [currentChannel, dataloggers]);
 
@@ -115,13 +142,20 @@ export const useAlarmDetails = (alarmId) => {
       isLoadingAlarm || 
       isLoadingLogs || 
       isLoadingChannel || 
-      isLoadingDatalogger
+      isLoadingDatalogger ||
+      isUpdatingAlarm
     );
-  }, [isLoadingAlarm, isLoadingLogs, isLoadingChannel, isLoadingDatalogger]);
+  }, [isLoadingAlarm, isLoadingLogs, isLoadingChannel, isLoadingDatalogger, isUpdatingAlarm]);
+
+  //console.log('dataloggers in useAlarmDetails', dataloggers);
+  //console.log('channels', channels);
+  
+  
 
   return {
     currentAlarm,
     alarmLogs,
+    currentLocation,
     currentChannel,
     secondaryChannel,
     currentDatalogger,

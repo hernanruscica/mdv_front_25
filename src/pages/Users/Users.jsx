@@ -101,6 +101,7 @@ const Users = () => {
           data={preparedData} 
           onRowClick={handleRowClick}
           showAddButton={ userCurrentRole === 'Owner'  || userCurrentRole === 'Administrator'}
+          addUrl={`/panel/ubicaciones/${businessUuid}/usuarios/agregar`}
         />
       </div>
     </>

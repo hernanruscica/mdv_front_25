@@ -1,19 +1,21 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+//import { useNavigate } from 'react-router-dom';
 import SearchBar from '../SearchBar/SearchBar';
 import CustomTag from '../CustomTag/CustomTag';
 import styles from './Table.module.css';
 import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
-import { useAuthStore } from '../../store/authStore';
+//import { useAuthStore } from '../../store/authStore';
 
-const Table = ({ columns, data, onRowClick, showAddButton }) => {
+const Table = ({ columns, data, onRowClick, showAddButton, addUrl = '/' }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [showArchived, setShowArchived] = useState(showAddButton);
   //const [showAddButton, setShowAddButton] = useState(true);
-  const { user } = useAuthStore();
+  //const { user } = useAuthStore();
+
+
 
   const sortedData = useMemo(() => {
     let sortableData = [...data];
@@ -151,7 +153,7 @@ const Table = ({ columns, data, onRowClick, showAddButton }) => {
             <BtnCallToAction 
               text="Agregar" 
               icon="plus-circle-solid.svg" 
-              url={`/panel/ubicaciones/${data[0]?.businessUuid}/usuarios/agregar`}
+              url={addUrl}
             />
              <label className={styles.checkboxContainer}>
                 <input

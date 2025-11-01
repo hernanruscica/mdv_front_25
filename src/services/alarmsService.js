@@ -56,10 +56,10 @@ export const alarmsService = {
     }
   },
   
-  getById: async (alarmId) => {
+  getById: async (businessUuid, alarmId) => {
     try {
-      const { data } = await axiosClient.get(`/api/alarms/${alarmId}`);
-      return data.alarm;
+      const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/alarms/${alarmId}`);
+      return data.item;
     } catch (error) {
       console.error('Get alarm by id error:', error);
       return null;
@@ -78,7 +78,7 @@ export const alarmsService = {
   
   update: async (alarmId, alarmData) => {
     try {
-      const { data } = await axiosClient.put(`/api/alarms/${alarmId}`, alarmData);
+      const { data } = await axiosClient.put(`/api/businesses/${alarmData?.businessUuid}/alarms/${alarmId}`, alarmData);
       return data;
     } catch (error) {
       console.error('Update alarm error:', error);

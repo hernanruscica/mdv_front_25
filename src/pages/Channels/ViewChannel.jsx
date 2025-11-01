@@ -16,10 +16,7 @@ import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import ChannelInfo from '../../components/ChannelInfo/ChannelInfo';
 import ChannelAlarms from '../../components/ChannelAlarms/ChannelAlarms';
 import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
-import { useDataStore } from '../../store/dataStore';
 import { useChannelsStore } from '../../store/channelsStore';
-import CardInfo from '../../components/CardInfo/CardInfo';
-import Gauge from '../../components/Gauge/Gauge';
 import { useChannelDetails } from '../../hooks/useChannelDetails';
 
 // Definimos los rangos de tiempo personalizados para los gráficos
@@ -68,7 +65,8 @@ const userCurrentRole =
       ? 'Owner'
       : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
 
- 
+const seletedChannelAlarms = datalogger?.alarms.filter(al => al.channel_uuid === selectedChannel?.uuid);
+      
   const channelButtons = (selectedChannel?.is_active == '1') ? (
     <>
       <BtnCallToAction
@@ -108,6 +106,8 @@ const userCurrentRole =
   };
   
   //console.log('selectedChannel', selectedChannel);
+  //console.log('alarms by channel', seletedChannelAlarms);
+  
   
   
   return (
@@ -141,7 +141,7 @@ const userCurrentRole =
           }
             <ChannelInfo 
               channel={selectedChannel} 
-              alarms={currentAlarms.filter(alarm => alarm.is_active == '1')} 
+              alarms={seletedChannelAlarms.filter(alarm => alarm.is_active == '1')} 
               datalogger={datalogger}
             />
           </CardImage>
@@ -151,7 +151,7 @@ const userCurrentRole =
       {datalogger &&
         <ChannelAlarms 
         businessUuid={businessUuid}
-        alarms={currentAlarms}
+        alarms={seletedChannelAlarms}
         channelId={channelId}
         channelName={selectedChannel?.name}
         dataloggerId={dataloggerId}

@@ -47,6 +47,7 @@ const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin ide
             data={preparedAlarms}
             onRowClick={onAlarmClick}
             showAddButton={showAddButton}
+            addUrl={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
           />
         </div>
       ) : (
