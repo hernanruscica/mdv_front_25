@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
 import styles from './TimeSeriesChart.module.css';
 import { useTimeSeriesChart } from '../../../hooks/useTimeSeriesChart';
@@ -61,10 +61,10 @@ const TimeSeriesChart = ({
   height = 300,
   timeRanges = defaultTimeRanges
 }) => {
-  const [hoursBackView, setHoursBackView] = React.useState(initialHoursBackView);
+  const [hoursBackView, setHoursBackView] = useState(initialHoursBackView);
 
   // Validar que el número de dataSets coincida con el número de series
-  React.useEffect(() => {
+  useEffect(() => {
     if (dataSets.length !== series.length) {
       console.error('El número de conjuntos de datos debe coincidir con el número de series');
     }
@@ -90,6 +90,7 @@ const TimeSeriesChart = ({
   if (loading) {
     return <div className={styles.loading}>Cargando...</div>;
   }
+console.log(chartSeries);
 
   return (
     <div className={styles.container}>

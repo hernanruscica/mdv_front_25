@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Title1 } from "../../../components/Title1/Title1.jsx";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "../../../store/authStore.js";
@@ -22,9 +22,9 @@ const ActivateUser = () => {
       }
       
       setCurrentUser({
-        userName: response.userName, 
-        dni: response.dni, 
-        userId: response.userId
+        userName: response.user.first_name + ' ' + response.user.last_name, 
+        dni: response.user.dni, 
+        uuid: response.user.uuid
       });
     } catch (error) {
       setError(error.message || 'Error al activar el usuario');
@@ -59,7 +59,7 @@ const ActivateUser = () => {
         text={`Reseteo de contraseña`}
       />
       <p className="page__maincontent__p">{`Reseteo de contraseña para ${currentUser?.userName || ''} con D.N.I.: ${currentUser?.dni}`}</p>
-       <ResetPassword userId={currentUser.userId}/>       
+       <ResetPassword userId={currentUser.uuid}/>       
       
     </main>
   );

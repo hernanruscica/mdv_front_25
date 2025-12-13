@@ -1,4 +1,3 @@
-import React from 'react';
 import TimeSeriesChart from '../TimeSeriesChart/TimeSeriesChart';
 
 const DigitalPorcentageOn = ({ data, currentChannelName, currentChannelTimeProm, customTimeRanges }) => {

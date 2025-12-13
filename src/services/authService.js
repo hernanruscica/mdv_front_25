@@ -24,19 +24,19 @@ export const authService = {
     }
   },
   
-  activateUser: async (token) => {
+  activateUser: async (token) => { 
     try {
-      const { data } = await axiosClient.get(`/api/users/activate/${token}`);
-      
+      const response = await axiosClient.get(`/api/auth/users/activate/${token}`);
+      const { success, message, user } = response.data;
       // Guardamos el token en localStorage si la activación fue exitosa
-      if (data.success && token) {
+      if (success && token) {
         localStorage.setItem('token', token);
       }
       
       return {
-        success: data.success,
-        message: data.message,
-        ...data.data
+        success: success,
+        message: message,
+        user: user,
       };
     } catch (error) {
       console.error('Error de activación:', error);
