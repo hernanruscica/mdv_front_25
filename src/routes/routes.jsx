@@ -6,6 +6,7 @@ import { UnderConstruction, Home, Contact, Login, Dashboard, Users, Dataloggers,
 export const routes = [
   { path: "/", element: <Home /> },
   { path: "/ingresar", element: <Login /> },
+  { path: "/resetear", element: <SendActivationEmail /> },
   { path: "/contacto", element: <Contact /> },
   { path: "/panel", element: <Dashboard />, private: true },
   
@@ -20,7 +21,6 @@ export const routes = [
   { path: "/panel/ubicaciones/:businessUuid/usuarios", element: <Users />, private: true },//Done
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId", element: <ViewUser />, private: true },//Done
   { path: "/panel/ubicaciones/:businessUuid/usuarios/activar/:token", element: <ActivateUser /> },
-  { path: "/panel/ubicaciones/:businessUuid/usuarios/resetear", element: <SendActivationEmail /> },
   { path: "/panel/ubicaciones/:businessUuid/usuarios/agregar", element: <CreatePage />, private: true }, //Done
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/editar", element: <CreatePage />, private: true },  //Done
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/eliminar", element: <UnderConstruction />, private: true },//Done (put is_active === 0)

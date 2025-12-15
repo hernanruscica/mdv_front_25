@@ -44,7 +44,7 @@ function ResetPassword({ userId }) {
       userData.append("password", password);
       
       const userUpdatedOk = await updateUser(userId, userData);
-      //console.log('Response en resetPassWord', response)
+      
       if (userUpdatedOk) {
         setModalMessage(userUpdatedOk.message || "Contraseña actualizada con éxito.");
       } else {
@@ -101,6 +101,14 @@ function ResetPassword({ userId }) {
     navigate(`/`); 
   };
 
+  const getValidationStyle = (isValid) => ({
+    color: isValid ? '#28a745' : '#dc3545', // Verde éxito / Rojo error
+    fontSize: '0.9rem',
+    display: 'block', // Para que queden uno debajo del otro
+    marginBottom: '2px',
+    transition: 'color 0.3s ease' // Suaviza el cambio de color
+  });
+
   return (
     <>
       <form onSubmit={handleSubmit} className={styles.form}>
@@ -127,10 +135,27 @@ function ResetPassword({ userId }) {
               </button>
             </div>
             <div className={styles['password-input-message']}>
-              {!hasUpper && password && <label className="form_error_label">Debe contener al menos una mayúscula</label>}
+
+              {/* {!hasUpper && password && <label className="form_error_label">Debe contener al menos una mayúscula</label>}
               {!hasLower && password && <label className="form_error_label">Debe contener al menos una minúscula</label>}
               {!hasNumber && password && <label className="form_error_label">Debe contener al menos un número</label>}
               {!isLongEnough && password && <label className="form_error_label">Debe tener al menos 8 caracteres</label>}
+               */}
+              <span style={getValidationStyle(hasUpper)}>
+                {hasUpper ? '✓' : '•'} Al menos una mayúscula
+              </span>
+              <span style={getValidationStyle(hasLower)}>
+                {hasLower ? '✓' : '•'} Al menos una minúscula
+              </span>
+              <span style={getValidationStyle(hasNumber)}>
+                {hasNumber ? '✓' : '•'} Al menos un número
+              </span>
+              <span style={getValidationStyle(isLongEnough)}>
+                {isLongEnough ? '✓' : '•'} Al menos 8 caracteres
+              </span>
+              <span>
+                {passwordMatchError && <label className={styles['form_error_label']}>{passwordMatchError}</label>}
+              </span> 
             </div>
           </div>
           <div className={styles.form_input}>
@@ -153,14 +178,11 @@ function ResetPassword({ userId }) {
                   className={styles['pass-btn-icon']}
                 />                
               </button>
-            </div>
-            <div className={styles['password-input-message']}>
-              {passwordMatchError && <label className="form_error_label">{passwordMatchError}</label>}
-            </div>
+            </div>           
           </div>
         </div>
 
-        <button type="submit" className={styles.form_btn} disabled={isSubmitDisabled}>
+        <button type="submit" className={isSubmitDisabled ? styles.form_btn_disabled : styles.form_btn} disabled={isSubmitDisabled}>
           Guardar cambios
         </button>
       </form>

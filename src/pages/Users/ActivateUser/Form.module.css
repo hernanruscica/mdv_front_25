@@ -1,21 +1,20 @@
 .form{
     width: 100%;
-    padding: 2em;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1em;
+
 }
 
 .form_input_group{
     width: 100%;
     display: flex;
     flex-direction: row;
-    align-items: center;
-    justify-content: center;
+    align-items: start;
+    justify-content: start;
     flex-wrap: wrap;
-    gap: 2em;
-    padding: 0.5em 0;    
+    column-gap: 2em;
+    padding: 1em 0;
 }
 
 .form_input{
@@ -23,25 +22,29 @@
     flex-direction: column;
     width: 45%;
     min-width: 300px;
-    gap: 0.2em;    
+    gap: 0.5em;
 }
 
 .password-input-container{
     display: flex;
     flex-direction: row;
-    column-gap: 16px;
+
 }
 
 .password-input-container>input{
     width: 100%;
     max-width: 340px;
     border: #646464 solid 1px;
+    font-size: 1.2em;
+    padding: 8px;
 }
 
 .password-toggle-button{
     padding: 6px 6px 0px 6px;
-    border: solid #222 1px;
-    background-color: #f3e3bb;
+    /* border: solid #222 1px;
+    background-color: #f3e3bb; */
+    border: none;
+    background-color: #F6B510;
     cursor: pointer;
 }
 
@@ -51,8 +54,50 @@
 }
 
 .password-input-message{
-    height: 60px;
+    height: 160px;
     display: flex;
     flex-direction: column;
-    
+    padding: 8px 0;
+    row-gap: 8px;
+}
+
+.form_error_label{
+    color: #dc3545;
+    font-size: 0.9rem;
+}
+
+.form_btn{
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    width: fit-content;   
+    height: fit-content; 
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 15px;
+    border-radius: 15px;    
+    background-color: #F6B510;
+    color: #000;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.form_btn_disabled{
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    width: fit-content;   
+    height: fit-content; 
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 15px;
+    border-radius: 15px;    
+    background-color: #aaa;
+    color: #eee;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: not-allowed;
 }

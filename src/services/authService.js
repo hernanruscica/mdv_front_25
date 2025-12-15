@@ -14,9 +14,9 @@ export const authService = {
     }
   },
   
-  sendActivationEmail: async (email) => {
+  sendActivationEmail: async (email) => { 
     try {
-      const { data } = await axiosClient.get(`/api/users/sendactivation/${email}`);
+      const { data } = await axiosClient.get(`/api/auth/users/sendactivation/${email}`);
       return data;
     } catch (error) {
       console.error('Send activation email error:', error);

@@ -25,6 +25,7 @@ export const useAuthStore = create(
       sendActivationEmail: async (email) => {
         try {
           const response = await authService.sendActivationEmail(email);
+          //console.log('response sendActivationEmail in store:', response);
           return response;
         } catch (error) {
           console.error('Error sending activation email:', error);

@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Title1 } from "../../../components/Title1/Title1";
 import { useAuthStore } from '../../../store/authStore';
 import styles from './SendActivationEmail.module.css';
+import { LoadingSpinner } from "../../../components/LoadingSpinner/LoadingSpinner";
 
 const SendActivationEmail = () => {
   const [email, setEmail] = useState('');
@@ -15,8 +16,7 @@ const SendActivationEmail = () => {
   const navigate = useNavigate();
   const { sendActivationEmail } = useAuthStore();
   
-  const handleChangeEmail = (e) => {
-    //console.log('Click en email input');
+  const handleChangeEmail = (e) => {    
     const newEmail = e.target.value;
     setEmail(newEmail);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,11 +26,11 @@ const SendActivationEmail = () => {
   const handleEmail = async (email) => {
     try {
       setLoading(true);
-      setIsModalOpen(true);
-      setModalMessage('Revisando dirección de correo...');
+      //setIsModalOpen(true);
+      //setModalMessage('procesando la solicitud...');
       
       const response = await sendActivationEmail(email);
-      
+      /*
       if (response?.emailExists) {
         setModalMessage('Correo electrónico encontrado. Revise su casilla de correo.');
         setEmailFound(true);
@@ -38,6 +38,12 @@ const SendActivationEmail = () => {
         setModalMessage('Correo electrónico no encontrado.');
         setEmailFound(false);
       }
+      */
+      //console.log('response sendActivationEmail:', response);
+      setLoading(false);
+      setIsModalOpen(true);
+      setModalMessage(`Si el correo electrónico: ${email} existe en nuestro sistema, se ha enviado un correo para restablecer la contraseña.
+                      Por favor, revise su bandeja de entrada.`);
     } catch (error) {
       console.error("Error al verificar el correo:", error);
       setModalMessage('Error al verificar el correo electrónico.');
@@ -54,9 +60,16 @@ const SendActivationEmail = () => {
 
   const handleAcceptModal = () => {
     setIsModalOpen(false);
-    if (emailFound) {
+    /*if (emailFound) {
       navigate('/');
-    }
+    }*/
+    navigate('/');
+  }
+
+  if (loading) {
+    return (
+      <LoadingSpinner />
+    )
   }
 
   return (
@@ -76,6 +89,7 @@ const SendActivationEmail = () => {
                 name="email"
                 id="email"
                 value={email}
+                placeholder="Ingrese el correo electrónico con el cual está registrado."
                 onChange={handleChangeEmail}
               />
             </div>

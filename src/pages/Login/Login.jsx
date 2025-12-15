@@ -83,7 +83,7 @@ const Login = () => {
             placeholder="Ingrese su contraseña"
           />
         </div>
-        <p>😕 Se olvidó la contraseña?<br/><Link to='/panel/usuarios/resetear'>Haga CLICK ACÁ para restablecerla</Link></p>
+        <p>😕 Se olvidó la contraseña?<br/><Link to='/resetear'>Haga CLICK ACÁ para restablecerla</Link></p>
         
         <button className={styles.loginFormBtn} type="submit">Ingresar</button>
       </form>      
