@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-
 import { useNavigate } from "react-router-dom";
-import { useUsersStore } from "../../../store/usersStore";
+import { useAuthStore } from "../../../store/authStore.js";
 import styles from "./Form.module.css";
 import Modal from "react-modal";
 
 // Modal.setAppElement("#root");
 
-function ResetPassword({ userId }) {
+function ResetPassword({ token }) {
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [passwordMatchError, setPasswordMatchError] = useState('');
@@ -20,8 +19,8 @@ function ResetPassword({ userId }) {
   const [loading, setLoading] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const navigate = useNavigate();
-  const { updateUser } = useUsersStore();
+  const navigate = useNavigate();  
+  const { activateUser } = useAuthStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,12 +42,13 @@ function ResetPassword({ userId }) {
       const userData = new FormData();
       userData.append("password", password);
       
-      const userUpdatedOk = await updateUser(userId, userData);
-      
-      if (userUpdatedOk) {
-        setModalMessage(userUpdatedOk.message || "Contraseña actualizada con éxito.");
+      //const userUpdatedOk = await updateUser(userId, userData);            
+      const userActivateOk = await activateUser(token, password);
+
+      if (userActivateOk.success) {
+        setModalMessage(userActivateOk.message || "Usuario activado y contraseña actualizada con éxito.");
       } else {
-        setModalMessage(userUpdatedOk.message || "Error al actualizar la contraseña. Usuario no encontrado.");
+        setModalMessage(userActivateOk.message  || "Error al actualizar la contraseña. Usuario no encontrado.");
       }
     } catch (error) {
       console.error("Error al actualizar la contraseña:", error);

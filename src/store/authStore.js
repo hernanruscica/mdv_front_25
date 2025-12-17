@@ -33,9 +33,9 @@ export const useAuthStore = create(
         }
       },
       
-      activateUser: async (token) => {
+      activateUser: async (token, password) => {
         try {
-          const response = await authService.activateUser(token);
+          const response = await authService.activateUser(token, password);
           if (response?.token) {
             set({ token: response.token });
           }
