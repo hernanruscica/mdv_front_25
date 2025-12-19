@@ -11,14 +11,14 @@ export const useSolutionsStore = create((set) => ({
   },
 
   // Crear una nueva solución
-  createSolution: async (solutionData) => {
+  createSolution: async (businessUuid, solutionData) => {
     set((state) => ({
       loadingStates: { ...state.loadingStates, createSolution: true },
       error: null,
     }));
 
     try {
-      const newSolution = await solutionsService.createSolution(solutionData);
+      const newSolution = await solutionsService.createSolution(businessUuid, solutionData);
       set((state) => ({
         solutions: [...state.solutions, newSolution],
         loadingStates: { ...state.loadingStates, createSolution: false },
@@ -34,14 +34,14 @@ export const useSolutionsStore = create((set) => ({
   },
 
   // Obtener soluciones por ID de log de alarma
-  fetchSolutionsByAlarmLogId: async (alarmLogId) => {
+  fetchSolutionsByAlarmLogId: async (businessUuid, alarmLogId) => {
     set((state) => ({
       loadingStates: { ...state.loadingStates, fetchSolutions: true },
       error: null,
     }));
 
     try {
-      const solutions = await solutionsService.getSolutionsByAlarmLogId(alarmLogId);
+      const solutions = await solutionsService.getSolutionsByAlarmLogId(businessUuid, alarmLogId);
       set((state) => ({
         solutions: solutions.solutions,
         loadingStates: { ...state.loadingStates, fetchSolutions: false },
@@ -56,7 +56,7 @@ export const useSolutionsStore = create((set) => ({
     }
   },
 
-  // Obtener soluciones por ID de usuario
+  // Obtener soluciones por ID de usuario - todavia no esta implementado en el service, ni en el endpoint
   fetchSolutionsByUserId: async (userId) => {
     set((state) => ({
       loadingStates: { ...state.loadingStates, fetchSolutions: true },

@@ -46,7 +46,7 @@ const Header = () => {
               ALARMAS
             </Link>
             {/* panel/ubicaciones/:businessUuid/usuarios/:userId */}
-            <Link to={`/panel/ubicaciones/${user.businesses_roles[0].uuid}/usuarios/${user.uuid}`} 
+            <Link to={`/panel/ubicaciones/${user?.businesses_roles[0]?.uuid}/usuarios/${user?.uuid}`} 
               className={`${styles.headerLink} ${location.pathname.split('/')[location.pathname.split('/').length-2] === 'usuarios' ? styles.headerLinkSelected : ''}`} 
               id='usuarios' onClick={menuBtnHandler}>
               {`${user.first_name} ${user.last_name}`}

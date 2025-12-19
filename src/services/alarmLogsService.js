@@ -1,10 +1,11 @@
 import axiosClient  from '../utils/axiosClient';
 
 export const alarmLogsService = {
-  getByAlarmId: async (alarmId) => {
+  getByAlarmId: async (businessUuid, alarmId) => {
     try {
-      const response = await axiosClient.get(`/api/alarmlogs/byalarm/${alarmId}`);
-      return response.data.alarmLogs;
+      // /businesses/{{business_uuid}}/alarmlogs/alarm/b1c2d3e4-0003-4a7b-8c9d-0e1f2a3b4c5d
+      const response = await axiosClient.get(`/api/businesses/${businessUuid}/alarmlogs/alarm/${alarmId}`);
+      return response?.data?.items || [];
     } catch (error) {
       console.error('Error fetching alarm logs:', error);
       throw error;
@@ -13,9 +14,9 @@ export const alarmLogsService = {
 
   update: async (id, data) => {
     try {
-      //console.log('Service - Updating alarm log with id:', id, 'and data:', data);
+      // 
       const response = await axiosClient.put(`/api/alarmLogs/${id}`, data);
-      return response.data;
+      return response?.data;
     } catch (error) {
       console.error(`Error updating alarm log with id ${id}:`, error);
       throw error;

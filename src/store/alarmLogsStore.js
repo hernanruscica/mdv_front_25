@@ -8,7 +8,7 @@ export const useAlarmLogsStore = create((set) => ({
   },
   error: null,
 
-  fetchAlarmLogsByAlarmId: async (alarmId) => {
+  fetchAlarmLogsByAlarmId: async (businessUuid, alarmId) => {
     if (!alarmId) return;
     
     set(state => ({
@@ -17,7 +17,7 @@ export const useAlarmLogsStore = create((set) => ({
     }));
 
     try {
-      const logs = await alarmLogsService.getByAlarmId(alarmId);
+      const logs = await alarmLogsService.getByAlarmId(businessUuid, alarmId);
       
       set(state => ({
         alarmLogs: logs,

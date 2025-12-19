@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Title1 } from "../../../components/Title1/Title1.jsx";
 import { useParams } from "react-router-dom";
-//import { useAuthStore } from "../../../store/authStore.js";
 import ResetPassword from "./ResetPassword.jsx";
 import styles from "../SendActivationEmail/SendActivationEmail.module.css";
 import { jwtDecode } from "jwt-decode";

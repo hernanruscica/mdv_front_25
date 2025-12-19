@@ -90,7 +90,7 @@ const TimeSeriesChart = ({
   if (loading) {
     return <div className={styles.loading}>Cargando...</div>;
   }
-console.log(chartSeries);
+//console.log(chartSeries);
 
   return (
     <div className={styles.container}>

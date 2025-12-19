@@ -18,8 +18,7 @@ import { useChannelDetails } from '../../hooks/useChannelDetails';
 import DigitalPorcentageOn from '../../components/Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
 import AnalogData from '../../components/Graphics/AnalogData/AnalogData';
 import TimeSeriesChart from '../../components/Graphics/TimeSeriesChart/TimeSeriesChart';
-//import { useFetchDatalogger } from '../../hooks/useFetchDatalogger';
-import { useAlarmLogs } from '../../hooks/useAlarmLogs';
+import { useFetchDatalogger } from '../../hooks/useFetchDatalogger';
 
 // Definimos los rangos de tiempo personalizados para los gráficos
 const customTimeRanges = [
@@ -41,12 +40,20 @@ const ViewAlarm = () => {
   // Hook para datos de la alarma
   const {
     currentAlarm,
-    //alarmLogs,    
-    secondaryChannel,    
-    isLoading,
-    errorAlarm,    
+    alarmLogs,
+    currentLocation,    
+    secondaryChannel,
+    currentDatalogger,
+    isLoadingAlarm,
+    errorAlarm,
+    refreshAlarm 
   } = useAlarmDetails(businessUuid, alarmId);
-  //console.log('parametros en viewalarm', businessUuid, alarmId);  
+
+  const {
+    datalogger,
+    isLoadingDatalogger,
+    errorDatalogger
+  } = useFetchDatalogger(dataloggerId, businessUuid)
 
   // Hooks para datos de los canales
   const {
@@ -56,15 +63,28 @@ const ViewAlarm = () => {
     error: errorPrimaryChannel
   } = useChannelDetails(channelId || null);
 
-  const { alarmLogs, status, actions } = useAlarmLogs(businessUuid, alarmId);
+  
+  const isLoading = isLoadingAlarm ||   
+                   isLoadingPrimaryChannel || 
+                   (secondaryChannel && isLoadingSecondaryChannel);
 
 
-  if (isLoading || isLoadingPrimaryChannel || status.isLoading) {
+
+  if (isLoading) {
     return <LoadingSpinner message="Cargando detalles de la alarma..." />;
-  }  
+  }
+  
 
-  if (errorAlarm) {
-    return <div className={styles.error}>{errorAlarm}</div>;
+  const error = errorAlarm ||  
+                errorPrimaryChannel || 
+                (secondaryChannel && errorSecondaryChannel);
+
+  if (error) {
+    return <div className={styles.error}>{error}</div>;
+  }
+
+  if (!currentAlarm) {
+    return <div className={styles.error}>Alarma no encontrada</div>;
   }
 
   // Preparar los datos para el gráfico digital
@@ -218,33 +238,35 @@ const ViewAlarm = () => {
   const eventosMap = new Map();
 
   alarmLogs.forEach(log => {
-    if (!eventosMap.has(log.uuid)) {
-      eventosMap.set(log.uuid, {
-        fecha: new Date(log.triggered_at).toLocaleString(),
-        fecha_vista: new Date(log.seen_at).toLocaleString(),
-        evento: log.triggered == 0 ? 'Reset' : 'Disparo',
-        id: log.uuid,
-        mensaje: log.message,
+    if (!eventosMap.has(log.id)) {
+      eventosMap.set(log.id, {
+        fecha: new Date(log.fecha_disparo).toLocaleString(),
+        fecha_vista: new Date(log.fecha_vista).toLocaleString(),
+        evento: log.disparada == 0 ? 'Reset' : 'Disparo',
+        id: log.id,
+        mensaje: log.mensaje,
         usuarios: 1,
         usuarios_afectados: [{
-          nombre: log.user.first_name,
-          apellido: log.user.last_name,
-          email: log.user.email
+          nombre: log.nombre_1,
+          apellido: log.apellido_1,
+          email: log.email
         }]
       });
     } else {
       const evento = eventosMap.get(log.id);
       evento.usuarios += 1;
       evento.usuarios_afectados.push({
-        nombre: log.user.first_name,
-        apellido: log.user.last_name,
-        email: log.user.email,
-        vista: (log.seen_at == '2024-01-01T03:00:00.000Z') ? false : true,
+        nombre: log.nombre_1,
+        apellido: log.apellido_1,
+        email: log.email,
+        vista: (log.fecha_vista == '2024-01-01T03:00:00.000Z') ? false : true,
       });
     }
   });
-/**/
-  const preparedLogs = Array.from(eventosMap.values()); 
+
+  const preparedLogs = Array.from(eventosMap.values());
+
+  //console.log('currentChannel', currentChannel)
 
   return (
     <>
@@ -255,7 +277,7 @@ const ViewAlarm = () => {
         entidadId={currentAlarm?.uuid}
         nuevoEstado={currentAlarm?.is_active == '1' ? '0' : '1'}
         // redirectTo={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/`}
-        redirectTo={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${alarmId}`}
+        redirectTo={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${currentAlarm?.uuid}`}
         nombre={`${currentAlarm?.name}`}
       />
       {selectedLog && (
@@ -272,10 +294,10 @@ const ViewAlarm = () => {
       />
       <Breadcrumb
         // usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
-        ubicacion={currentAlarm?.business?.name}
-        datalogger={`${currentAlarm?.datalogger?.name}`}
+        ubicacion={currentLocation?.name}
+        datalogger={datalogger?.name}
         canal={currentChannel?.name }
-        alarma={currentAlarm?.name}
+        alarma={currentAlarm.name}
       />
       <CardImage
         image="/images/default_channel.png"
@@ -286,12 +308,11 @@ const ViewAlarm = () => {
           {currentAlarm?.is_active == '0' && (
             <CustomTag text="Archivada" type="archive" icon="/icons/archive-solid.svg" />
           )}
-          <p><strong>Condición:</strong> {currentAlarm?.condition_show}</p>
-          <p><strong>Tipo de Alarma:</strong> {currentAlarm?.alarm_type}</p>
-          <p><strong>Descripción:</strong> {currentAlarm?.description}</p>
+          <p><strong>Condición:</strong> {currentAlarm.condition_show}</p>
+          <p><strong>Tipo de Alarma:</strong> {currentAlarm.alarm_type}</p>
+          <p><strong>Descripción:</strong> {currentAlarm.description}</p>
           <div className={styles.gaugePlaceholder}>              
-{/*                 
-                {currentAlarm?.alarm_type == "upper_threshold" && (() => {
+                {currentAlarm?.alarm_type == "PORCENTAJE_ENCENDIDO" && (() => {
                   const conditionOperator = currentAlarm.condition_logic.split(" ")[1];
                   const conditionValue = currentAlarm.var01;  
                   const max = (conditionOperator.includes(">")) ? conditionValue : 100;
@@ -307,18 +328,17 @@ const ViewAlarm = () => {
                     />
                   );
                 })()}
-                 */}
               </div>
 
           <p><strong>Canales monitoreados:</strong> <br/>
             <CardBtnSmall 
               title={currentChannel?.name || 'Canal principal'} 
-              url={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}`} 
+              url={`/panel/ubicaciones/${businessUuid}/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.uuid}`} 
             />
-            {currentAlarm?.alarm_type === 'FUNCIONAMIENTO_SIMULTANEO' && secondaryChannel && (
+            {currentAlarm.alarm_type === 'FUNCIONAMIENTO_SIMULTANEO' && secondaryChannel && (
               <CardBtnSmall 
                 title={secondaryChannel?.name || 'Canal secundario'} 
-                url={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${secondaryChannel?.uuid}`} 
+                url={`/panel/dataloggers/${currentDatalogger?.uuid}/canales/${secondaryChannel.uuid}`} 
               />
             )}
           </p>
@@ -328,30 +348,26 @@ const ViewAlarm = () => {
       </CardImage>
 
       <div className={styles.chartContainer}>
-        {/* {renderChart()} */}
+        {renderChart()}
       </div>
 
-      <Title2 type="historial" text={`Historial de disparos para alarma ${currentAlarm?.name}`} />
+      <Title2 type="historial" text={`Historial de disparos para alarma ${currentAlarm.name}`} />
       
       {isLoading ? (
         <LoadingSpinner message="Cargando historial de alarmas..." />
-      ) : errorAlarm 
-      
-       ? (
-         <div className={styles.error}>{error}</div>
-       ) : alarmLogs.length === 0 ? (
-         <div className={styles.noData}>No hay registros de disparos para esta alarma</div>
-       ) : (
-         <div className={styles.tableContainer}>
-           <Table
-             columns={columns}
-             data={preparedLogs}
-             onRowClick={(row) => handleOpenLogModal(row)}
-           />
-         </div>
-       )
-      
-      }
+      ) : error ? (
+        <div className={styles.error}>{error}</div>
+      ) : alarmLogs.length === 0 ? (
+        <div className={styles.noData}>No hay registros de disparos para esta alarma</div>
+      ) : (
+        <div className={styles.tableContainer}>
+          <Table
+            columns={columns}
+            data={preparedLogs}
+            onRowClick={(row) => handleOpenLogModal(row)}
+          />
+        </div>
+      )}
     </>
   );
 };
