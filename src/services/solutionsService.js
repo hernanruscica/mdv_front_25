@@ -5,7 +5,9 @@ export const solutionsService = {
   createSolution: async (businessUuid, solutionData) => {
     try {      
       const response = await axiosClient.post(`/api/businesses/${businessUuid}/solutions`, solutionData);
-      return response.data;
+      //console.log('response.data de solutionservice create', response.data.item);
+      
+      return response.data.item;
     } catch (error) {
       throw error.response?.data || error.message;
     }
@@ -16,7 +18,9 @@ export const solutionsService = {
   getSolutionsByAlarmLogId: async (businessUuid, alarmLogId) => {
     try {
       const response = await axiosClient.get(`/api/businesses/${businessUuid}/solutions/alarmlogs/${alarmLogId}`);
-      return response.data;
+      //console.log('response solutionsService', response.data.items);
+      
+      return response.data.items;
     } catch (error) {
       throw error.response?.data || error.message;
     }

@@ -18,7 +18,6 @@ import { useChannelDetails } from '../../hooks/useChannelDetails';
 import DigitalPorcentageOn from '../../components/Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
 import AnalogData from '../../components/Graphics/AnalogData/AnalogData';
 import TimeSeriesChart from '../../components/Graphics/TimeSeriesChart/TimeSeriesChart';
-//import { useFetchDatalogger } from '../../hooks/useFetchDatalogger';
 import { useAlarmLogs } from '../../hooks/useAlarmLogs';
 
 // Definimos los rangos de tiempo personalizados para los gráficos
@@ -40,13 +39,12 @@ const ViewAlarm = () => {
 
   // Hook para datos de la alarma
   const {
-    currentAlarm,
-    //alarmLogs,    
+    currentAlarm,    
     secondaryChannel,    
     isLoading,
     errorAlarm,    
   } = useAlarmDetails(businessUuid, alarmId);
-  //console.log('parametros en viewalarm', businessUuid, alarmId);  
+  
 
   // Hooks para datos de los canales
   const {
@@ -56,15 +54,15 @@ const ViewAlarm = () => {
     error: errorPrimaryChannel
   } = useChannelDetails(channelId || null);
 
-  const { alarmLogs, status, actions } = useAlarmLogs(businessUuid, alarmId);
+  const { alarmLogs, status: {isLoading : isLoadingAlarmLogs, isError: errorAlarmLogs}, actions } = useAlarmLogs(businessUuid, alarmId);
 
 
-  if (isLoading || isLoadingPrimaryChannel || status.isLoading) {
+  if (isLoading || isLoadingPrimaryChannel || isLoadingAlarmLogs) {
     return <LoadingSpinner message="Cargando detalles de la alarma..." />;
   }  
 
-  if (errorAlarm) {
-    return <div className={styles.error}>{errorAlarm}</div>;
+  if (errorAlarm || errorPrimaryChannel || errorAlarmLogs) {
+    return <div className={styles.error}>Error cargando los datos</div>;
   }
 
   // Preparar los datos para el gráfico digital
@@ -179,8 +177,12 @@ const ViewAlarm = () => {
   };
 
   const handleCloseLogModal = () => {
-    setModalLogOpen(false);
-    setSelectedLog(null);
+    setModalLogOpen(false); // 1. Ordenar cierre visual
+    
+    // 2. Limpiar datos SOLO después de que termine la animación (300ms es el default usual)
+    setTimeout(() => {
+      setSelectedLog(null);
+    }, 300);
   };
 
   const alarmButtons = (
@@ -246,6 +248,9 @@ const ViewAlarm = () => {
 /**/
   const preparedLogs = Array.from(eventosMap.values()); 
 
+  //console.log('alarmLogs', alarmLogs);
+  
+
   return (
     <>
       <ModalSetArchive
@@ -258,13 +263,15 @@ const ViewAlarm = () => {
         redirectTo={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${alarmId}`}
         nombre={`${currentAlarm?.name}`}
       />
-      {selectedLog && (
-        <ModalViewAlarmLog
+     
+        <ModalViewAlarmLog          
           isOpen={modalLogOpen}
           onRequestClose={handleCloseLogModal}
           evento={selectedLog}
+          businessUuid={businessUuid}
         />
-      )}
+      
+
 
       <Title1
         type="alarmas"

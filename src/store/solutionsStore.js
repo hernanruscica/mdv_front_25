@@ -19,6 +19,8 @@ export const useSolutionsStore = create((set) => ({
 
     try {
       const newSolution = await solutionsService.createSolution(businessUuid, solutionData);
+      //console.log('solutionStore createSolution solution: ', response.item);      
+      
       set((state) => ({
         solutions: [...state.solutions, newSolution],
         loadingStates: { ...state.loadingStates, createSolution: false },
@@ -43,7 +45,7 @@ export const useSolutionsStore = create((set) => ({
     try {
       const solutions = await solutionsService.getSolutionsByAlarmLogId(businessUuid, alarmLogId);
       set((state) => ({
-        solutions: solutions.solutions,
+        solutions: solutions,
         loadingStates: { ...state.loadingStates, fetchSolutions: false },
       }));
       return solutions;
