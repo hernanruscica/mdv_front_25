@@ -9,10 +9,13 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
     alarms, 
     loadingStates, 
     // Asumimos que tu store tiene estas acciones distintas:
-    fetchAlarms, 
+    fetchAlarms,    
+    fetchAlarmsByLocation, 
+    fetchAlarmsByDatalogger,
+    fetchAlarmsByChannel,
     fetchAlarmsByUser, 
-    fetchAlarmsByDatalogger, 
-    fetchAlarmsByChannel 
+    // fetchAlarmsByDatalogger, 
+    // fetchAlarmsByChannel 
   } = useAlarmsStore();
 
   // Stores auxiliares para obtener nombres (Breadcrumbs)
@@ -34,22 +37,22 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
     switch (strategy) {
       case 'CHANNEL':
         return { 
-          title: `Alarmas del Canal: ${currentChannel?.name || '...'}`,
+          title: `Alarmas del Canal actual`,
           context: 'canal'
         };
       case 'DATALOGGER':
         return { 
-          title: `Alarmas del Datalogger: ${selectedDatalogger?.name || '...'}`,
+          title: `Alarmas del Datalogger actual`,
           context: 'datalogger'
         };
       case 'USER':
         return { 
-          title: 'Alarmas del Usuario',
+          title: 'Alarmas del Usuario actual',
           context: 'usuario'
         };
       case 'LOCATION':
         return { 
-          title: 'Todas las Alarmas de la Ubicación',
+          title: 'Alarmas de la Ubicación actual',
           context: 'ubicacion'
         };
       default:
@@ -57,25 +60,33 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
     }
   }, [strategy, currentChannel, selectedDatalogger]);
 
+  
+
   // 3. Efecto para cargar los datos según la estrategia
   useEffect(() => {
+    // console.log('businessUuid', businessUuid);
+    //console.log('user', user);
+    
+    
     if (!businessUuid) return;
 
     switch (strategy) {
       case 'CHANNEL':
         //fetchAlarmsByChannel(businessUuid, channelId);
-        fetchAlarms(user, businessUuid);
+        //console.log('fetch alarms by channel');     
+        fetchAlarmsByChannel(businessUuid, channelId);
         break;
       case 'DATALOGGER':
-        //fetchAlarmsByDatalogger(businessUuid, dataloggerId);
-        fetchAlarms(user, businessUuid);
+        //fetchAlarmsByDatalogger(businessUuid, dataloggerId);           
+        fetchAlarmsByDatalogger(businessUuid, dataloggerId); 
         break;
       case 'USER':
-        //fetchAlarmsByUser(user);
-        fetchAlarms(user);
+        fetchAlarmsByUser(user?.uuid, businessUuid);
+        //fetchAlarms(user);
         break;
       case 'LOCATION':
-        fetchAlarms(user, businessUuid);
+        //console.log('case location', businessUuid);        
+        fetchAlarmsByLocation(businessUuid);        
         break;
     }
   }, [strategy, businessUuid, userId, dataloggerId, channelId]);
@@ -84,6 +95,6 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
     alarms, // Las alarmas ya filtradas por el store
     title: viewInfo.title,
     context: viewInfo.context,
-    isLoading: loadingStates.fetchAlarms, // O el loading general que uses
+    isLoading: loadingStates.fetchAlarms || loadingStates.fetchAlarmsByChannel || loadingStates.fetchAlarmsByDatalogger, 
   };
 };

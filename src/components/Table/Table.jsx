@@ -172,11 +172,13 @@ const Table = ({ columns, data, onRowClick, showAddButton, addUrl = '/' }) => {
         )}
         <span>Mostrando {filteredData.length} resultados</span>
         <div className={styles.pagination}>
-          <span>Páginas: </span>
+          <span>{data.length > 0 ? 'Páginas:' : ''} </span>
           {renderPaginationButtons()}
         </div>
       </div>
-      <table className={styles.table}>
+
+      { (data.length > 0)
+      ? <table className={styles.table}>
         <thead>
           <tr>
             {columns.map(column => (
@@ -202,7 +204,8 @@ const Table = ({ columns, data, onRowClick, showAddButton, addUrl = '/' }) => {
           ))}
         </tbody>
       </table>
-      
+      : 'No hay elementos para mostrar'
+      }
     </div>
   );
 };

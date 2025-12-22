@@ -31,7 +31,15 @@ const ShowLocationsCards = ({
     return matchesSearch && matchesStatus;
   });
 
-  //console.log(locations);
+  
+
+   const mappedCurrentRole = {
+    'Owner': 'Propietario',
+    'Admin': 'Administrador',
+    'Technician': 'Operario'
+  }
+
+  //console.log(userCurrentRole);
   
   
 
@@ -78,9 +86,11 @@ const ShowLocationsCards = ({
 
       <div className={styles.cardsContainer}>
         {
-        filteredLocations.map(location => 
-          
-            <CardInfo
+        filteredLocations.map(location => {
+
+          const userCurrentRole = user.businesses_roles.find(ur => ur.uuid === location.uuid)?.role || 'No encontrado';
+
+          return  (<CardInfo
               key={`location_${location.uuid}`}
               iconSrc={`/icons/${getIconFileName('ubicaciones')}`}
               title={location.name}     
@@ -134,12 +144,13 @@ const ShowLocationsCards = ({
                   {`Rol de ${user.first_name} ${user.last_name} : `}
                   <strong>
                     {                      
-                      user.businesses_roles.find(ur => ur.uuid === location.uuid)?.role || 'Owner'
+                      mappedCurrentRole[userCurrentRole]
                     }
                   </strong>
                 </p>
               </div>
-            </CardInfo>
+            </CardInfo>)
+        }
           
         )}
       </div>

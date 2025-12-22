@@ -24,18 +24,18 @@ const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin ide
 
   const preparedAlarms = useMemo(() => 
     alarms.map(alarm => ({
-      nombreAlarma: alarm.name,
-      canal: channelName ,
-      tipo: alarm.type,  
-      condicion_mostrar: `${alarm.condition_show} ` || 'Sin condición',
-      estado: alarm.is_active,
-      url: `/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${alarm.uuid}`,  
+      nombreAlarma: alarm.name,      
+      tipo: alarm.alarm_type,  
+      condicion_mostrar: `${alarm.condition_show} ` || 'Sin condición',      
+      url: `/panel/ubicaciones/${businessUuid}/dataloggers/${alarm?.datalogger?.uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`,  
       id: alarm.uuid
     })), 
     [alarms, dataloggerId, channelId]
   );
 
   //console.log('showAddButton', showAddButton);
+  //console.log('alarm example', alarms[0]);
+  
   return (
 
     <div className={styles.alarmsContainer}>      
@@ -57,7 +57,7 @@ const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin ide
               icon="plus-circle-solid.svg" 
               url={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
             />
-          <p className={styles.noAlarms}>No hay alarmas configuradas para este canal.</p>
+          <p className={styles.noAlarms}>No se encontraron alarmars activas para la entidad solicitada.</p>
         </>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { alarmsService } from '../services/alarmsService';
+import { filter } from 'd3';
 
 export const useAlarmsStore = create((set) => ({
   alarms: [],
@@ -33,18 +34,18 @@ export const useAlarmsStore = create((set) => ({
       }));
     }
   },
-  fetchAlarmsByUser: async (userUuid, businessUuid) => {
+  fetchAlarmsByUser: async (userId, locationId) => {
     // console.log("desde el store alarm, userUuid:", userUuid);
-    // console.log('businessUuid', businessUuid);
+    // console.log('locationId', locationId);
     
-    if (!userUuid) return;
+    if (!userId) return;
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchAlarmsByUser: true },
       error: null
     }));
 
     try {
-      const alarms =  await alarmsService.getAllByUser(userUuid, businessUuid);
+      const alarms =  await alarmsService.getAllByUser(userId, locationId);
         
       set(state => ({
         alarms,
@@ -68,9 +69,37 @@ export const useAlarmsStore = create((set) => ({
     }));
 
     try {
-      const alarms = await alarmsService.getAllByLocation(locationId);
+      const alarms = await alarmsService.getAll(locationId);
+      
       set(state => ({
         alarms: Array.isArray(alarms) ? alarms : [],
+        loadingStates: { ...state.loadingStates, fetchAlarms: false }
+      }));
+      return Array.isArray(alarms) ? alarms : [];
+    } catch (error) {
+      set(state => ({
+        error: 'Error fetching location alarms',
+        loadingStates: { ...state.loadingStates, fetchAlarms: false },
+        alarms: []
+      }));
+      return [];
+    }
+  },
+
+  fetchAlarmsByDatalogger: async (locationId, dataloggerId) => {
+    if (!locationId) return [];
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchAlarms: true },
+      error: null
+    }));  
+
+    try {
+      const alarms = await alarmsService.getAll(locationId);
+      const filteredAlarms = alarms?.filter(alarm => alarm.datalogger.uuid == dataloggerId);   
+      
+      set(state => ({
+        alarms: Array.isArray(filteredAlarms) ? filteredAlarms : [],
         loadingStates: { ...state.loadingStates, fetchAlarms: false }
       }));
       return Array.isArray(alarms) ? alarms : [];
@@ -161,22 +190,26 @@ export const useAlarmsStore = create((set) => ({
     }
   },
   
-  fetchAlarmsByChannel: async (channelId) => {
-    if (!channelId) return;
+  fetchAlarmsByChannel: async (locationId, channelId) => {
+    if (!channelId && !locationId) return [];
+   // console.log('channelId', channelId);
     
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchAlarmsByChannel: true },
       error: null
     }));
-
+    
     try {
-      const alarms = await alarmsService.getAllByChannel(channelId);
-      //console.log('Alarms by channel:', alarms);
-      set(state => ({
-        alarms,
+      const alarms = await alarmsService.getAll(locationId);
+      // console.log('Alarms by channel:', alarms);
+      const filteredAlarms = alarms?.filter(alarm => alarm.channel_uuid == channelId);
+      //console.log('filtered alarms', filteredAlarms);
+      
+      set(state => ({        
+        alarms: Array.isArray(filteredAlarms) ? filteredAlarms : [],
         loadingStates: { ...state.loadingStates, fetchAlarmsByChannel: false }
-      }));
-      return alarms;
+      }));      
+      return Array.isArray(alarms) ? alarms : [];
     } catch (error) {
       set(state => ({
         error: 'Error fetching channel alarms',

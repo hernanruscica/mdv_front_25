@@ -117,6 +117,7 @@ const ViewLocation = () => {
                 <p className={styles.description}>
                   Como propietario, usted tiene acceso completo para administrar todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
                   En esta pagina puede: <strong> Agregar nuevos dataloggers, editar y/o archivar la ubicacion</strong> actual. <br/><br/>
+                  Tambien puede <strong>ver los usuarios</strong> asociados a esta ubicacion y <strong>las alarmas activas.</strong> <br/><br/>
                   Una ubicacion puede tener varios dataloggers y cada datalogger, varios canales y alarmas asociados.<br/><br/>
                   Puede buscar un datalogger, ver u ocultar los archivados segun sea necesario.
                 </p>          
@@ -171,6 +172,12 @@ const ViewLocation = () => {
               />
             )          
             }
+          </p> 
+          <p><strong>Usuarios asociados:</strong>{" "}
+            <CardBtnSmall 
+              title={`Ver usuarios de ${selectedLocation?.name}`}
+              url={`/panel/ubicaciones/${selectedLocation?.uuid}/usuarios`}
+            />            
           </p>           
         </div>
       </CardImage>

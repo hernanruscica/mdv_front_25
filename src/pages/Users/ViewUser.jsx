@@ -16,6 +16,7 @@ import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
+import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 
 const ViewUser = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,6 +79,13 @@ const ViewUser = () => {
       selectedUser?.businesses_roles.some(br => br.role === 'Owner')
         ? 'Owner'
         : selectedUser?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+
+     const mappedCurrentRole = {
+    'Owner': 'Propietario',
+    'Admin': 'Administrador',
+    'Technician': 'Operario'
+  }
+
 // console.log(userCurrentRole);
 
   return (
@@ -99,9 +107,25 @@ const ViewUser = () => {
             text={selectedUser ? `Perfil de ${selectedUser.first_name} ${selectedUser.last_name}` : 'Cargando perfil...'}
             type="usuarios"
           />
+          {
+            userCurrentRole == 'Owner'
+            ? <>
+              <p className={styles.description}>
+                Usted se encuentra en la pagina para ver mas detalles del usuario seleccionado.<br/><br/>
+                Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
+                En esta pagina puede: <strong> Editar y/o archivar al usuario</strong> actual. <br/><br/>
+                Un usuario puede estar asociado a una o varias ubicaciones. Dentro de cada ubicacion, podra ver los dataloggers, canales y/o alarmas (si tiene asociadas)<br/><br/>
+                Puede ver las ubicaciones donde pertenece, buscar, ver u ocultar las archivadas segun sea necesario.
+              </p>          
+            </>
+            : <p className={styles.description}>
+                Usted se encuentra en la pagina para ver mas detalles del usuario seleccionado.<br/><br/>
+                Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
+              </p>
+          }
           <Breadcrumb 
             usuario={selectedUser ? `${selectedUser.first_name} ${selectedUser.last_name}` : '' }
-            ubicacion={selectedUser?.businesses_roles.find(br => br.uuid === businessUuid).name}
+            ubicacion={selectedUser?.businesses_roles.find(br => br.uuid === businessUuid)?.name}
           />
       
           <CardImage
@@ -118,8 +142,13 @@ const ViewUser = () => {
               <p><strong>Email:</strong> {selectedUser?.email}</p>
               <p><strong>Teléfono:</strong> {selectedUser?.phone}</p>
               <p><strong>Estado:</strong> {selectedUser.is_active ? 'Activo' : 'Inactivo'}</p>
-              <p><strong>Rol:</strong> {userCurrentRole} </p>
+              <p><strong>Rol:</strong> {mappedCurrentRole[userCurrentRole]} </p>
               <p><strong>Fecha de creación:</strong> {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : 'No disponible'}</p>
+              <CardBtnSmall
+                key={selectedUser.uuid}
+                title="Ver Alarmas del Usuario"
+                url={`/panel/ubicaciones/${businessUuid}/usuarios/${selectedUser.uuid}/alarmas`}
+              />
               {/*
               <p><strong>Alarmas Asignadas:</strong>{" "}
                 {isLoadingAlarms ? (

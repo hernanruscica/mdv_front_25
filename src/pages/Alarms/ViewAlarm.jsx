@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
@@ -20,6 +20,7 @@ import AnalogData from '../../components/Graphics/AnalogData/AnalogData';
 import TimeSeriesChart from '../../components/Graphics/TimeSeriesChart/TimeSeriesChart';
 import { useAlarmLogs } from '../../hooks/useAlarmLogs';
 import { useAuthStore } from '../../store/authStore';
+import { useDataloggersStore } from '../../store/dataloggersStore';
 
 // Definimos los rangos de tiempo personalizados para los gráficos
 const customTimeRanges = [
@@ -38,6 +39,11 @@ const ViewAlarm = () => {
   const [modalLogOpen, setModalLogOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
   const { user } = useAuthStore();  
+  const { 
+    selectedDatalogger, 
+    fetchDataloggerById,
+    loadingStates : { fetchDatalogger: isLoadingDatalogger }
+   } = useDataloggersStore();
 
   // Hook para datos de la alarma
   const {
@@ -58,14 +64,26 @@ const ViewAlarm = () => {
 
   const { alarmLogs, status: {isLoading : isLoadingAlarmLogs, isError: errorAlarmLogs}, actions } = useAlarmLogs(businessUuid, alarmId);
 
+  useEffect(() => {
+    if (dataloggerId && businessUuid) {
+      console.log('fetch datalogger', businessUuid, dataloggerId);
+      
+        fetchDataloggerById(dataloggerId, businessUuid);
+      }
+    }, [dataloggerId, businessUuid, fetchDataloggerById]);
 
-  if (isLoading || isLoadingPrimaryChannel || isLoadingAlarmLogs) {
-    return <LoadingSpinner message="Cargando detalles de la alarma..." />;
+
+  if (isLoading || isLoadingPrimaryChannel || isLoadingAlarmLogs || isLoadingDatalogger) {
+    return <LoadingSpinner message="Cargando los datos..." />;
   }  
 
   if (errorAlarm || errorPrimaryChannel || errorAlarmLogs) {
     return <div className={styles.error}>Error cargando los datos</div>;
   }
+
+
+  //console.log('selectedDatalogger', selectedDatalogger);
+  
 
   // Preparar los datos para el gráfico digital
   const prepareDigitalData = (data, channelName) => {
@@ -107,12 +125,12 @@ const ViewAlarm = () => {
             dataSets={[primaryData, secondaryData]}
             series={[
               {
-                name: currentChannel?.nombre,
+                name: currentChannel?.name,
                 field: 'porcentaje_encendido',
                 color: '#2196F3'
               },
               {
-                name: secondaryChannel?.nombre,
+                name: secondaryChannel?.name,
                 field: 'porcentaje_encendido',
                 color: '#FF9800'
               }
@@ -164,7 +182,7 @@ const ViewAlarm = () => {
         return (
           <AnalogData
             data={primaryChannelData}
-            mult={currentChannel?.multiplicador}
+            mult={currentChannel?.factor}
           />
         );
       }
@@ -255,7 +273,9 @@ const ViewAlarm = () => {
          : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role
 
 
+//  console.log('datalogger_id', currentChannel.datalogger_id);
   //console.log('currentAlarm', currentAlarm);
+  
   
 
   return (
@@ -322,7 +342,7 @@ const ViewAlarm = () => {
       <Breadcrumb
         // usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
         ubicacion={currentAlarm?.business?.name}
-        datalogger={`${currentAlarm?.datalogger?.name}`}
+        datalogger={selectedDatalogger?.name}
         canal={currentChannel?.name }
         alarma={currentAlarm?.name}
       />
