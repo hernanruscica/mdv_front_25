@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCards';
 import { useDataStore } from '../../store/dataStore';
 import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
+import styles from './ViewChannel.module.css';
 
 const Channels = () => {
   const { businessUuid, dataloggerId } = useParams();
@@ -40,6 +41,22 @@ const Channels = () => {
         type="canales"
         text={`Canales del datalogger "${datalogger?.name || ''}""`}
       />
+      {
+        userCurrentRole == 'Owner'
+        ? <>
+          <p className={styles.description}>
+            Usted se encuentra en la pagina para ver todos los canales del datalogger seleccionado.<br/><br/>
+            Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
+            En esta pagina puede: <strong> Agregar nuevos canales al datalogger</strong> actual. <br/><br/>
+            Un datalogger puede tener varios canales, y cada canal puede terner varias alarmas asociadas.<br/><br/>
+            Puede buscar un canal, ver u ocultar los archivados segun sea necesario.
+          </p>          
+        </>
+        : <p className={styles.description}>
+          Usted se encuentra en la pagina de detalles del datalogger seleccionado.<br/><br/>
+            Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
+          </p>
+      }
       <Breadcrumb 
         datalogger={datalogger?.name || 'datalogger generico'}
         ubicacion={datalogger?.business.name}

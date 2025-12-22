@@ -11,7 +11,7 @@ export const useAlarmsStore = create((set) => ({
   },
   error: null,
 
-  fetchAlarms: async (currentUser) => {
+  fetchAlarms: async (currentUser, businessUuid) => {
     if (!currentUser) return;
     
     set(state => ({
@@ -20,7 +20,7 @@ export const useAlarmsStore = create((set) => ({
     }));
 
     try {
-      const alarms =  await alarmsService.getAllById(currentUser.id);
+      const alarms =  await alarmsService.getAll(currentUser?.uuid, businessUuid);
      // console.log('alarmas del usuario', alarms)  
       set(state => ({
         alarms,

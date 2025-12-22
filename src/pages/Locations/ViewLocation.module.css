@@ -1,3 +1,5 @@
+@import '../../index.css';
+
 .error {
   color: #dc3545;
   padding: 1rem;

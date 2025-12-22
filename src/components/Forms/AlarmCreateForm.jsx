@@ -143,9 +143,9 @@ export const AlarmCreateForm = ({ alarmData, isEditing, dataloggerData , channel
         );
     }
 
-    console.log('comparsionVariable',comparsionVariable);
-    console.log('comparsionOperator', comparsionOperator);
-    console.log('comparsionValue', comparsionValue);
+    // console.log('comparsionVariable',comparsionVariable);
+    // console.log('comparsionOperator', comparsionOperator);
+    // console.log('comparsionValue', comparsionValue);
     
     
     

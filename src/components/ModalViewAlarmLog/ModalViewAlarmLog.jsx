@@ -60,7 +60,7 @@ const ModalViewAlarmLog = ({ isOpen, onRequestClose, evento, businessUuid }) => 
     }
   };
 
-  console.log('user en modalViewAlarmLog', user);
+  //console.log('user en modalViewAlarmLog', user);
   
 
   return (

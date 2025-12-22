@@ -19,6 +19,7 @@ import DigitalPorcentageOn from '../../components/Graphics/DigitalPorcentageOn/D
 import AnalogData from '../../components/Graphics/AnalogData/AnalogData';
 import TimeSeriesChart from '../../components/Graphics/TimeSeriesChart/TimeSeriesChart';
 import { useAlarmLogs } from '../../hooks/useAlarmLogs';
+import { useAuthStore } from '../../store/authStore';
 
 // Definimos los rangos de tiempo personalizados para los gráficos
 const customTimeRanges = [
@@ -36,6 +37,7 @@ const ViewAlarm = () => {
   const [modalArchiveOpen, setModalArchiveOpen] = useState(false);
   const [modalLogOpen, setModalLogOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
+  const { user } = useAuthStore();  
 
   // Hook para datos de la alarma
   const {
@@ -96,8 +98,8 @@ const ViewAlarm = () => {
 
     if (isDigital) {
       const primaryData = prepareDigitalData(primaryChannelData, currentChannel?.nombre);
-      const secondaryData = secondaryChannel && secondaryChannelData ? 
-        prepareDigitalData(secondaryChannelData, secondaryChannel?.nombre) : [];
+       const secondaryData = secondaryChannel && secondaryChannelData ? 
+         prepareDigitalData(secondaryChannelData, secondaryChannel?.nombre) : [];
 
       if (currentAlarm.tipo_alarma === 'FUNCIONAMIENTO_SIMULTANEO' && secondaryData.length > 0) {
         return (
@@ -248,7 +250,12 @@ const ViewAlarm = () => {
 /**/
   const preparedLogs = Array.from(eventosMap.values()); 
 
-  //console.log('alarmLogs', alarmLogs);
+   const userCurrentRole = user?.businesses_roles.some(br => br.role === 'Owner')
+         ? 'Owner'
+         : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role
+
+
+  //console.log('currentAlarm', currentAlarm);
   
 
   return (
@@ -264,12 +271,12 @@ const ViewAlarm = () => {
         nombre={`${currentAlarm?.name}`}
       />
      
-        <ModalViewAlarmLog          
-          isOpen={modalLogOpen}
-          onRequestClose={handleCloseLogModal}
-          evento={selectedLog}
-          businessUuid={businessUuid}
-        />
+      <ModalViewAlarmLog          
+        isOpen={modalLogOpen}
+        onRequestClose={handleCloseLogModal}
+        evento={selectedLog}
+        businessUuid={businessUuid}
+      />
       
 
 
@@ -277,6 +284,41 @@ const ViewAlarm = () => {
         type="alarmas"
         text={`Alarma: ${currentAlarm?.name}`}
       />
+       {
+          userCurrentRole == 'Owner'
+          ? <>
+            
+              <p className={styles.description}>
+              Usted se encuentra en la pagina para ver mas detalles de la alarma seleccionada.<br/><br/>
+              Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
+              En esta pagina puede: 
+              </p>
+              <ul  className={styles.list}>
+                <li><strong>Editar y/o archivar la alarma</strong> actual.</li>
+                <li><strong>Ver el gráfico</strong> del canal asociado a la alarma.</li>
+                <li><strong>Ver el historial de disparos</strong> de la misma.</li>
+                <li><strong>Agregar una solución</strong> para un disparo de alarma</li>
+              </ul>              <br/><br/>
+            <p   className={styles.description}>
+              Un datalogger puede tener varios canales, y un canal puede tener varias alarmas asociadas.<br/><br/>
+              Puede buscar un disparo en el historial. Cuando lo encuentra, puede hacer click en el mismo para ver más detalles. 
+              Quienes recivieron la notificación del disparo estarán listados allí. y si vieron o no la notificación.
+            </p>          
+          </>
+          : <p className={styles.description}>
+            Usted se encuentra en la pagina de detalles de la alarma seleccionada.<br/><br/>
+              Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.<br/><br/>
+               En esta pagina puede: 
+              <ul>                
+                <li><strong>Ver el gráfico</strong> del canal asociado a la alarma.</li>
+                <li><strong>Ver el historial de disparos</strong> de la misma.</li>
+                <li><strong>Agregar una solución</strong> para un disparo de alarma</li>
+              </ul>              <br/><br/>
+              Un datalogger puede tener varios canales, y un canal puede tener varias alarmas asociadas.<br/><br/>
+              Puede buscar un disparo en el historial. Cuando lo encuentra, puede hacer click en el mismo para ver más detalles. 
+              Quienes recivieron la notificación del disparo estarán listados allí. y si vieron o no la notificación.
+            </p>
+        }
       <Breadcrumb
         // usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
         ubicacion={currentAlarm?.business?.name}
@@ -297,7 +339,7 @@ const ViewAlarm = () => {
           <p><strong>Tipo de Alarma:</strong> {currentAlarm?.alarm_type}</p>
           <p><strong>Descripción:</strong> {currentAlarm?.description}</p>
           <div className={styles.gaugePlaceholder}>              
-{/*                 
+               
                 {currentAlarm?.alarm_type == "upper_threshold" && (() => {
                   const conditionOperator = currentAlarm.condition_logic.split(" ")[1];
                   const conditionValue = currentAlarm.var01;  
@@ -314,7 +356,7 @@ const ViewAlarm = () => {
                     />
                   );
                 })()}
-                 */}
+             {/*      */}
               </div>
 
           <p><strong>Canales monitoreados:</strong> <br/>

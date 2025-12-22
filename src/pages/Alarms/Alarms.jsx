@@ -1,84 +1,74 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { Title1 } from '../../components/Title1/Title1';
-
-import ChannelAlarms from '../../components/ChannelAlarms/ChannelAlarms';
-import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
+import ChannelAlarms from '../../components/ChannelAlarms/ChannelAlarms'; // Quizás renombrar a AlarmsListTable
+import { useAlarmsStrategy } from '../../hooks/useAlarmsStrategy'; // Importamos el hook nuevo
+import { useDataloggersStore } from '../../store/dataloggersStore';
 import { useChannelsStore } from '../../store/channelsStore';
-import { useChannelDetails } from '../../hooks/useChannelDetails';
 
-// Definimos los rangos de tiempo personalizados para los gráficos
-const customTimeRanges = [
-  { hours: 1, label: '1 Hr' },
-  { hours: 6, label: '6 Hrs' },
-  { hours: 12, label: '12 Hrs' },
-  { hours: 24, label: '1 Día' },
-  { hours: 72, label: '3 Días' },
-  { hours: 168, label: '1 Semana' },
-  { hours: 720, label: '1 Mes' },
-  { hours: 4368, label: '6 meses' },
-  { hours: 8760, label: '1 Anio' },
-];
-const ViewChannel = () => {
-  const { dataloggerId, channelId, businessUuid } = useParams();
+const ViewAlarms = () => {
+  const params = useParams(); // businessUuid, alarmId, userId, dataloggerId, channelId
   const navigate = useNavigate();
   const user = useAuthStore(state => state.user);
- 
-  const hoursBackView = 8760; // un año 
-
-  const { datalogger, isLoadingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
-  const {fetchChannelById, loadingStates: { fetchChannelById : isLoadingChannels, updateChannel: isUpdatingChannel }} = useChannelsStore();
-  const { currentChannel: selectedChannel, dataChannel, isLoading } = useChannelDetails(channelId, datalogger, hoursBackView, false);
-
-  if (isLoadingDatalogger || isLoading || isUpdatingChannel) {
-    return <LoadingSpinner message="Cargando datos..." />;
-    }
-    
-  if (errorDatalogger) {
-    return <div className={styles.error}>{errorDatalogger}</div>;
-    }
-
-
   
+  // Stores para datos extra de breadcrumbs (opcional si ya los tienes en caché)
+  const { selectedDatalogger, fetchDataloggerById, loadingStates } = useDataloggersStore();
+  const isLoadingDatalogger = loadingStates.fetchDatalogger;
+  const { currentChannel } = useChannelsStore();  
 
-const handleAlarmClick = (row) => {
-  navigate(`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/alarmas/${row.id}`);
-}; 
+  // USAMOS EL HOOK NUEVO
+  const { alarms, title, isLoading } = useAlarmsStrategy(params);
 
-const userCurrentRole = 
-    user?.businesses_roles.some(br => br.role === 'Owner')
+  useEffect(() => {
+    if (params.dataloggerId && params.businessUuid) {
+      fetchDataloggerById(params.dataloggerId, params.businessUuid);
+    }
+  }, [params.dataloggerId, params.businessUuid, fetchDataloggerById]);
+
+  // Manejo de roles
+  const userCurrentRole = user?.businesses_roles.some(br => br.role === 'Owner')
       ? 'Owner'
-      : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+      : user?.businesses_roles.find(br => br.uuid === params.businessUuid)?.role;
 
-const seletedChannelAlarms = datalogger?.alarms.filter(al => al.channel_uuid === selectedChannel?.uuid); 
+  const handleAlarmClick = (row) => {
+    // Nota: Ajusté la URL para que sea dinámica según dónde estés, o absoluta si prefieres
+    navigate(`/panel/ubicaciones/${params.businessUuid}/dataloggers/${row.datalogger_id}/canales/${row.channel_id}/alarmas/${row.uuid}`);
+  };
+
+  if (isLoading || isLoadingDatalogger) {
+    return <LoadingSpinner message="Cargando alarmas..." />;
+  }
+
+  //console.log('Alarms to display:', alarms);
+  console.log('selectedDatalogger:', selectedDatalogger);
   
+
   return (
     <>    
-      <Title1 type="alarmas" text={`Alarmas del canal "${selectedChannel?.name}"`}/>
+      <Title1 type="alarmas" text={title} />
+      
       <Breadcrumb 
-        ubicacion={datalogger?.business.name}
-        datalogger={datalogger?.name}
-        canal={selectedChannel?.name}
+        // Pasamos los nombres reales si existen en los stores
+        ubicacion={selectedDatalogger?.business?.name || 'Desconocida'} 
+        datalogger={selectedDatalogger?.name || 'Desconocido'}
+        canal={selectedDatalogger?.channels?.find(ch => ch.uuid === params.channelId)?.name  || 'Desconocido'}
       />   
 
-      {datalogger &&
-        <ChannelAlarms 
-        businessUuid={businessUuid}
-        alarms={seletedChannelAlarms}
-        channelId={channelId}
-        channelName={selectedChannel?.name}
-        dataloggerId={dataloggerId}
+      {/* Renderizamos la lista de alarmas */}
+      {/* Nota: He renombrado props para que sean más genéricos, adapta ChannelAlarms si es necesario */}
+      <ChannelAlarms 
+        businessUuid={params.businessUuid}
+        alarms={alarms} 
+        channelId={params.channelId}
+        dataloggerId={params.dataloggerId}
         onAlarmClick={handleAlarmClick}
         showAddButton={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator'}
-      />}      
-      
+      />      
     </>
-    );
-   
-  
+  );
 };
 
-export default ViewChannel;
+export default ViewAlarms;

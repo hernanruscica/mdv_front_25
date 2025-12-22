@@ -2,7 +2,7 @@ import axiosClient from '../utils/axiosClient';
 
 export const alarmsService = {
   getAll: async (userUuid, businessUuid) => {
-    console.log('desde alarmService, userUuid: ', userUuid);
+    //console.log('desde alarmService, userUuid: ', userUuid);
     try {
       const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/alarms`);
       return data.items;

@@ -60,3 +60,21 @@ h1, h2{
   gap: 2em;  
   margin: 0 auto;
 }
+
+.description {
+  font-size: 1.2em;
+  color: #555;
+  text-align: left;
+  width: 100%;  
+  margin-bottom: 1em;
+  padding: 0 1em;
+  
+}
+.list, .list li {
+    list-style: inside;   
+    font-size: 1.1em;
+    color: #555;
+    text-align: left;
+    width: 100%; 
+    padding: 0 1em;
+  }

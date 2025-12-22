@@ -1,3 +1,5 @@
+@import '../../index.css';
+
 .controlsContainer {
   display: flex;
   justify-content: space-between;

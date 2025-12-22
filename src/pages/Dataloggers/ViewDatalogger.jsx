@@ -24,7 +24,17 @@ const ViewDatalogger = () => {
   const { businessUuid, dataloggerId } = useParams();
   
   const user = useAuthStore(state => state.user);    
-  const { datalogger, isLoadingDatalogger, isCreatingDatalogger, isUpdattingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
+
+
+  //const { datalogger, isLoadingDatalogger, isCreatingDatalogger, isUpdattingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
+
+  const { 
+    datalogger, 
+    isLoadingDatalogger,
+    isCreatingDatalogger, 
+    isUpdattingDatalogger, 
+    refreshDatalogger 
+  } = useFetchDatalogger(dataloggerId, businessUuid);
   
 
   if (isLoadingDatalogger || isCreatingDatalogger || isUpdattingDatalogger) {
@@ -104,7 +114,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
     <>
      <ModalSetArchive
       isOpen={modalOpen}
-      onRequestClose={() => setModalOpen(false)}
+      onRequestClose={async () => {setModalOpen(false); await refreshDatalogger();}}
       entidad="datalogger"
       entidadId={datalogger?.uuid}
       nuevoEstado={datalogger?.is_active == '1' ? 0 : 1}
@@ -116,6 +126,22 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
         type="dataloggers"
         text={datalogger?.name}
       />
+      {
+        userCurrentRole == 'Owner'
+        ? <>
+          <p className={styles.description}>
+            Usted se encuentra en la pagina para ver mas detalles del datalogger seleccionado.<br/><br/>
+            Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
+            En esta pagina puede: <strong> Agregar nuevos canales, editar y/o archivar el datalogger</strong> actual. <br/><br/>
+            Un datalogger puede tener varios canales y alarmas asociadas.<br/><br/>
+            Puede buscar un canal, ver u ocultar los archivados segun sea necesario.
+          </p>          
+        </>
+        : <p className={styles.description}>
+          Usted se encuentra en la pagina de detalles del datalogger seleccionado.<br/><br/>
+            Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
+          </p>
+      }
       <Breadcrumb datalogger={datalogger?.name} ubicacion={datalogger?.business.name}/>     
      
       

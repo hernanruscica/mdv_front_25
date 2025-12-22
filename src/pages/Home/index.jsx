@@ -12,9 +12,13 @@ const Home = () => {
       <>
       <Title1 text={`Bienvenido ${user.first_name} ${user.last_name}`}
           type="usuarios"/>
+        <p className={styles.description}>
+          Usted se encuentra en la pagina de inicio de <strong>MDV Sensores</strong>, su sistema de monitoreo y administración de dataloggers.<br/><br/>
+          Desde aquí, puede acceder rápidamente a las secciones principales del panel de control para gestionar sus dataloggers, ubicaciones, usuarios y alarmas.<br/><br/>
+          Utilice los botones de acción rápida a continuación para navegar por las diferentes áreas del sistema y comenzar a supervisar sus equipos críticos de manera eficiente.
+        </p>
         <Breadcrumb />
       <main className={styles.pageMaincontent}>
-        <p className={styles.pageMaincontentParagraph}>Ahora podes:</p>
         <div className={styles.actionButtons}>
           <BtnCallToAction
             text="Ir al panel de control"

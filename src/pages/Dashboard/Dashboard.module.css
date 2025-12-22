@@ -1,4 +1,6 @@
 
+@import '../../index.css';
+
 .cardsContainer {
   display: flex;
   flex-wrap: wrap;
@@ -44,3 +46,4 @@
   transform: translateY(-2px);
   cursor: pointer;
 }
+

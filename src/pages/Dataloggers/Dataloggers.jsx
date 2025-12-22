@@ -44,6 +44,22 @@ const Dataloggers = () => {
         type="dataloggers"
         text="Dataloggers" 
       />
+      {
+        userCurrentRole == 'Owner'
+        ? <>
+          <p className={styles.description}>
+            Usted se encuentra en la pagina para ver todos los datalogger de una ubicacion.<br/><br/>
+            Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
+            En esta pagina puede: <strong> Agregar nuevos datalogger</strong> a la ubicacion actual. <br/><br/>
+            Una ubicacion puede tener varios dataloggers, y cada datalogger puede tener varios canales y alarmas asociados.<br/><br/>
+            Puede buscar un datalogger, ver u ocultar los archivados segun sea necesario.
+          </p>          
+        </>
+        : <p className={styles.description}>
+          Usted se encuentra en la pagina de detalles del datalogger seleccionado.<br/><br/>
+            Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
+          </p>
+      }
       <Breadcrumb ubicacion={dataloggers.find(dl => dl.business.uuid === businessUuid)?.business.name}/>
       
       <ShowDataloggersCards

@@ -124,6 +124,22 @@ const seletedChannelAlarms = datalogger?.alarms.filter(al => al.channel_uuid ===
         businessUuid={businessUuid}
       />     
       <Title1 type="canales" text={`Canal ${selectedChannel?.name}`}/>
+      {
+        userCurrentRole == 'Owner'
+        ? <>
+          <p className={styles.description}>
+            Usted se encuentra en la pagina para ver mas detalles del canal seleccionado.<br/><br/>
+            Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
+            En esta pagina puede: <strong> Agregar nuevas alarmas, editar y/o archivar el canal</strong> actual. <br/><br/>
+            Un canal puede tener varias alarmas, de distintos tipos asociadas.<br/><br/>
+            Puede buscar una alarma, ver u ocultar las archivadas segun sea necesario. Tambien puede ver el grafico de datos del canal seleccionado.
+          </p>          
+        </>
+        : <p className={styles.description}>
+          Usted se encuentra en la pagina de detalles del datalogger seleccionado.<br/><br/>
+            Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
+          </p>
+      }
       <Breadcrumb 
         ubicacion={datalogger?.business.name}
         datalogger={datalogger?.name}

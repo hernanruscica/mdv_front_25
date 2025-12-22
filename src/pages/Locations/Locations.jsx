@@ -5,6 +5,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
+import styles from '../Dashboard/Dashboard.module.css';
 
 
 const Locations = () => {
@@ -42,11 +43,25 @@ const Locations = () => {
 
   return (
     <>
-      <Breadcrumb />
+      
       <Title1 
         type="ubicaciones"
         text="Ubicaciones" 
-      />
+      />      
+      {
+        userCurrentRole == 'Owner'
+        ? <>
+          <p className={styles.description}>
+            Como propietario, usted tiene acceso completo para administrar todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
+            Puede agregar nuevas ubicaciones y gestionar las existentes. Una ubicacion puede tener varios dataloggers.<br/><br/>
+            Puede buscar una ubicacion, ver u ocultar las archivadas segun sea necesario.
+          </p>          
+        </>
+        : <p className={styles.description}>
+            Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
+          </p>
+      }
+      <Breadcrumb />
       <ShowLocationsCards
         user={user}
         locations={locations}                

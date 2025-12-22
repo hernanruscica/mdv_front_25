@@ -32,8 +32,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const loadData = async () => {      
-      const currentResponseLocations = await fetchLocations(user);
-      //console.log('currentResponseLocations', currentResponseLocations);
+      const currentResponseLocations = await fetchLocations(user);      
       
       setCurrentDataloggers(currentResponseLocations.flatMap(location => location.dataloggers));      
     };
@@ -48,9 +47,18 @@ const Dashboard = () => {
 
   if (locationsError) {
     return <div className={styles.error}>{locationsError}</div>;
+  }  
+//console.log('user', user);
+
+ const userCurrentRole = 
+      user?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : '';
+  const mappedCurrentRole = {
+    'Owner': 'Propietario',
+    'Admin': 'Administrador',
+    'Technician': 'Operario'
   }
-  
-  //console.log('dataloggers', dataloggers)
 
   return (
     <>      
@@ -81,6 +89,15 @@ const Dashboard = () => {
       </div>
       */}
       <Title2 text="Administracion" type='panel'/>
+      
+      <p className={styles.description}>
+        {
+          userCurrentRole == 'Owner'
+          ? 'Como propietario, usted tiene acceso completo para administrar todas las ubicaciones, usuarios y dataloggers en el sistema.'
+          : 'Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.'
+        }
+      </p>
+
       <div className={styles.cardsContainer}>
 
         {/* BUSINESSES */}        
@@ -103,7 +120,7 @@ const Dashboard = () => {
                 return(
                 <CardBtnSmall 
                   key={loc.uuid} 
-                  title={`${loc.name} - Role: ${currentRole}`} 
+                  title={`${loc.name} - Rol: ${mappedCurrentRole[currentRole]}`} 
                   url={`/panel/ubicaciones/${loc.uuid}`}/>                
               )}
             )

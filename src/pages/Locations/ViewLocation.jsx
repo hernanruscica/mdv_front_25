@@ -111,6 +111,20 @@ const ViewLocation = () => {
         text={`Ubicación: ${selectedLocation?.name}`}
         type="ubicaciones"
       />
+       {
+              userCurrentRole == 'Owner'
+              ? <>
+                <p className={styles.description}>
+                  Como propietario, usted tiene acceso completo para administrar todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
+                  En esta pagina puede: <strong> Agregar nuevos dataloggers, editar y/o archivar la ubicacion</strong> actual. <br/><br/>
+                  Una ubicacion puede tener varios dataloggers y cada datalogger, varios canales y alarmas asociados.<br/><br/>
+                  Puede buscar un datalogger, ver u ocultar los archivados segun sea necesario.
+                </p>          
+              </>
+              : <p className={styles.description}>
+                  Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
+                </p>
+            }
       <Breadcrumb ubicacion={selectedLocation?.name}/>
       <CardImage
         image={selectedLocation?.logo_url !== null ? `${selectedLocation?.logo_url}` : '/images/default_location.png'}
