@@ -3,7 +3,7 @@ import { useChannelsStore } from '../store/channelsStore';
 import { useAlarmsStore } from '../store/alarmsStore';
 import { useDataStore } from '../store/dataStore';
 
-export const useChannelDetails = (channelId, datalogger, hoursBackView = 120, isSecondary = false) => {
+export const useChannelDetails = (channelId, dataloggerId, isSecondary = false) => {
   const [currentChannel, setCurrentChannel] = useState(null);
   const [channelAlarms, setChannelAlarms] = useState([]);
   const [channelMainAlarm, setChannelMainAlarm] = useState(null);
@@ -86,16 +86,7 @@ export const useChannelDetails = (channelId, datalogger, hoursBackView = 120, is
     };
     loadData();
   }, [currentChannel, datalogger, hoursBackView, isSecondary]);
-
-  // Actualizar estado de carga
-  useEffect(() => {
-    setIsLoading(isLoadingChannel || isLoadingAlarmsByChannel || isLoadingData);
-  }, [isLoadingChannel, isUpdatingChannel, isLoadingAlarmsByChannel, isLoadingData]);
-
-  // Actualizar estado de error
-  useEffect(() => {
-    setError(errorChannel || errorAlarms || null);
-  }, [errorChannel, errorAlarms]);
+ 
 
   return {
     currentChannel,

@@ -9,7 +9,7 @@ const ChannelInfo = ({ channel, alarms, datalogger = null }) => {
         Pertenece al datalogger:{' '}
         <CardBtnSmall 
           title={datalogger?.name || 'default'}
-          url={`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${datalogger?.uuid}`}
+          url={`/panel/ubicaciones/${channel?.business_uuid}/dataloggers/${datalogger?.uuid}`}
         />
       </p>
       <p><strong>Descripción:</strong> {channel?.description}</p>
@@ -26,7 +26,7 @@ const ChannelInfo = ({ channel, alarms, datalogger = null }) => {
         {alarms && alarms.length > 0 ? (
           <CardBtnSmall 
             title={`Ver ${alarms.length} alarma/s`} 
-            url={`/panel/ubicaciones/${datalogger.business.uuid}/dataloggers/${channel.datalogger_id}/canales/${channel.uuid}/alarmas`}
+            url={`/panel/ubicaciones/${channel?.business_uuid}/dataloggers/${channel.datalogger_id}/canales/${channel.uuid}/alarmas`}
           />
         ) : (
           <span className={styles.noAlarms}>No hay alarmas configuradas</span>

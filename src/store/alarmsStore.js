@@ -8,7 +8,8 @@ export const useAlarmsStore = create((set) => ({
   loadingStates: {
     fetchAlarms: false,
     fetchAlarm: false,
-    fetchAlarmsByUser: false
+    fetchAlarmsByUser: false,
+    fetchAlarmsByChannel: false
   },
   error: null,
 
