@@ -12,7 +12,7 @@ export const RANGE_KEYS = {
 
 export const PRESETS = {
   [RANGE_KEYS.LAST_HOUR]: {
-    label: 'Última Hora',
+    label: '1 Hora',
     getValue: () => {
       const end = new Date();
       const start = new Date(end); // Creamos una copia
@@ -21,7 +21,7 @@ export const PRESETS = {
     },
   },
   [RANGE_KEYS.LAST_12H]: {
-    label: 'Últimas 12 Horas',
+    label: '12 Horas',
     getValue: () => {
       const end = new Date();
       const start = new Date(end);
@@ -30,7 +30,7 @@ export const PRESETS = {
     },
   },
   [RANGE_KEYS.LAST_24H]: {
-    label: 'Últimas 24 Horas',
+    label: '24 Horas',
     getValue: () => {
       const end = new Date();
       const start = new Date(end);
@@ -39,7 +39,7 @@ export const PRESETS = {
     },
   },
   [RANGE_KEYS.LAST_WEEK]: {
-    label: 'Última Semana',
+    label: '1 Semana',
     getValue: () => {
       const end = new Date();
       const start = new Date(end);
@@ -48,7 +48,7 @@ export const PRESETS = {
     },
   },
   [RANGE_KEYS.LAST_MONTH]: {
-    label: 'Último Mes',
+    label: '1 Mes',
     getValue: () => {
       const end = new Date();
       const start = new Date(end);
@@ -57,7 +57,7 @@ export const PRESETS = {
     },
   },
   [RANGE_KEYS.LAST_6_MONTHS]: {
-    label: 'Últimos 6 Meses',
+    label: '6 Meses',
     getValue: () => {
       const end = new Date();
       const start = new Date(end);
@@ -66,7 +66,7 @@ export const PRESETS = {
     },
   },
   [RANGE_KEYS.LAST_YEAR]: {
-    label: 'Último Año',
+    label: '1 Año',
     getValue: () => {
       const end = new Date();
       const start = new Date(end);

@@ -1,8 +1,8 @@
-import React from 'react';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import styles from './ChannelInfo.module.css';
+import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 
-const ChannelInfo = ({ channel, alarms, datalogger = null }) => {
+const ChannelInfo = ({ channel, alarms, datalogger = null, totalTime = 0, firstDate, lastDate, totalAverageTime }) => {
   return (
     <div className={styles.channelInfo}>
       <p>
@@ -13,14 +13,26 @@ const ChannelInfo = ({ channel, alarms, datalogger = null }) => {
         />
       </p>
       <p><strong>Descripción:</strong> {channel?.description}</p>
+      <hr/>
       <p>
-        <strong>Total de Hs de Uso:</strong> ### Hs. <br/>
+        <strong>Tiempo de Uso:</strong>{` ${totalTime || '####'} Hs.`}<br/>
+        <strong>Porcentaje de uso total</strong>{` ${totalAverageTime || '####'} %. `}<br/>
         con datos desde <strong>
-          {channel?.created_at ? 
-            new Date(channel?.created_at).toLocaleDateString() : 
-            'No disponible'}
+          {firstDate ? 
+            FormatearFechaCompleta(firstDate) : 
+            ' Sin datos '}
         </strong>
+        <p>
+        Ultimos datos recibidos: <strong> 
+            {lastDate ? 
+            FormatearFechaCompleta(lastDate) : 
+            ' Sin datos '}
+        </strong>
+        </p>
       </p>
+      
+      
+      <hr/>     
       <p>
         <strong>Alarmas programadas:</strong>{' '}
         {alarms && alarms.length > 0 ? (

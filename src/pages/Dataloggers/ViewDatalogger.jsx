@@ -15,6 +15,7 @@ import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCa
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
+import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 
 
 const ViewDatalogger = () => {
@@ -166,7 +167,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
               ) : 'No especificada'
             }
           </p>
-          <p><strong>Creado el:</strong> {new Date(datalogger?.created_at).toLocaleDateString()}</p>
+          <p><strong>Creado el:</strong> {FormatearFechaCompleta(datalogger?.created_at)}</p>
           <p>
             <strong>Canales conectados:</strong>{" "}
             {datalogger?.channels.filter(ch=>ch.column_name[0] == 'a').length} analógicos 

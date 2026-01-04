@@ -13,6 +13,7 @@ import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import ShowDataloggersCards from '../../components/ShowDataloggersCards/ShowDataloggersCards';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
+import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 
 const ViewLocation = () => {
   const { businessUuid } = useParams();
@@ -142,7 +143,7 @@ const ViewLocation = () => {
           <p><strong>Teléfono:</strong> {selectedLocation?.phone}</p>
           <p><strong>Email:</strong> {selectedLocation?.email}</p>
           <p><strong>Estado:</strong> {selectedLocation?.is_active ? 'Activo' : 'Inactivo'}</p>
-          <p><strong>Fecha de creación:</strong> {selectedLocation?.created_at ? new Date(selectedLocation?.created_at).toLocaleDateString() : 'No disponible'}</p>
+          <p><strong>Fecha de creación:</strong> {selectedLocation?.created_at ? FormatearFechaCompleta(selectedLocation?.created_at) : 'No disponible'}</p>
 
          
           <p><strong>Dataloggers Asociados: {`${selectedLocation?.dataloggers.length}`}</strong></p>

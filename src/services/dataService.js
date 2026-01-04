@@ -1,10 +1,12 @@
 import axiosClient from '../utils/axiosClient';
 
 export const dataService = {
-  getPorcentages: async (nombreTabla, nombreColumna, minutosAtras, tiempoPromedio) => {
+
+  //data/getLastPorcentageUsageByChannel/:dataloggerUuid/:channelUuid
+  getChannelUsage: async (dataloggerUuid, channelUuid) => {
     try {
       const response = await axiosClient.get(
-        `/api/data/getporcentages/${nombreTabla}/${nombreColumna}/${minutosAtras}/${tiempoPromedio}`
+        `/api/data/getLastPorcentageUsageByChannel/${dataloggerUuid}/${channelUuid}`
       );      
       
       return response.data.data;
@@ -13,10 +15,11 @@ export const dataService = {
       return null;
     }
   },
-  getAnalogData: async (nombreTabla, nombreColumna, minutosAtras) => {
+  // /data/getDataloggerLastData/:dataloggerUuid
+  getDataloggerUsage: async (dataloggerUuid) => {
     try {      
       const response = await axiosClient.get(
-        `/api/data/getanalog/${nombreTabla}/${nombreColumna}/${minutosAtras}`
+        `/api/data/getDataloggerLastData/${dataloggerUuid}`
       );
       return response.data.data;
     } catch (error) {
@@ -24,15 +27,40 @@ export const dataService = {
       return null;
     }
   },
-  getLastData: async (tableName) => {
+  // /data/allregisters/:channeluuid?start='2025-12-11'&end='2025-12-12'
+  getChannelAllRegisters: async (channelUuid, start, end) => {
     try {
       const response = await axiosClient.get(
-        `/api/data/getLastData/${tableName}`        
+        `/api/data/allregisters/${channelUuid}?start='${start}'&end='${end}'`        
       );
       return response.data.data;
     } catch (error) {
       console.error('Error al obtener el último dato:', error);
       return null;
     }
-  }
+  },
+  // /data/alldaily/:channeluuid?start='2025-12-01'&end='2025-12-31
+  getChannelDaily: async (channelUuid, start, end) => {
+    try {
+      const response = await axiosClient.get(
+        `/api/data/alldaily/${channelUuid}?start='${start}'&end='${end}'`        
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error('Error al obtener el último dato:', error);
+      return null;
+    }
+  },
+  // /data/allweekly/:channeluuid?start='2025-12-01'&end='2025-12-31
+  getChannelWeekly: async (channelUuid, start, end) => {
+    try {
+      const response = await axiosClient.get(
+        `/api/data/allweekly/${channelUuid}?start='${start}'&end='${end}'`        
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error('Error al obtener el último dato:', error);
+      return null;
+    }
+  },
 };

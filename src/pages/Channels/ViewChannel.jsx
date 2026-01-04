@@ -14,8 +14,10 @@ import ChannelInfo from '../../components/ChannelInfo/ChannelInfo';
 import ChannelAlarms from '../../components/ChannelAlarms/ChannelAlarms';
 import { useChannelsStore } from '../../store/channelsStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
+import { useDataStore } from '../../store/dataStore';
 import ViewChart from '../../components/ViewChart/ViewChart';
 import { RANGE_KEYS } from '../../components/ViewChart/constants/chartRanges';
+import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 
 const ViewChannel = () => {
   const { businessUuid, dataloggerId, channelId } = useParams();
@@ -29,6 +31,7 @@ const ViewChannel = () => {
           loadingStates: { fetchChannel: isLoadingChannel, updateChannel: isUpdatingChannel },
           error: erroChannel
         } = useChannelsStore();
+
   const { alarms,
           fetchAlarmsByChannel,
           loadingStates : {
@@ -37,20 +40,40 @@ const ViewChannel = () => {
           error : errorLoadindAlarms
         } = useAlarmsStore();
 
+  const { fetchAllRegistersChannelData, fetchDailyChannelData, fetchWeeklyChannelData,
+          fetchChannelUsage, fetchDataloggerUsage,
+          channelAllRegistersData, channelDailyData, channelWeeklyData,
+          channelUsage, dataloggerUsage,
+          loadingStates: { 
+            fetchAllRegistersChannelData: isLoadingAllRegisters,
+            fetchDailyChannelData: isLoadingDailyData,
+            fetchWeeklyChannelData: isLoadingWeeklyData,
+            fetchChannelUsage: isLoadingChannelUsage, fetchDataloggerUsage: isLoadingDataloggerUsage,
+          },
+          error: errorLoadingAllRegisters
+        } = useDataStore();
+
 
   useEffect(() => {
 
     const loadData = async () => {
       if (businessUuid, channelId){
-        await fetchChannelById(channelId, businessUuid);
+        const currentChannel = await fetchChannelById(channelId, businessUuid);
         await fetchAlarmsByChannel(businessUuid, channelId);
+        await fetchAllRegistersChannelData(channelId, '2025-12-12', '2025-12-13');
+        await fetchDailyChannelData(channelId, '2025-12-12', '2025-12-24');
+        await fetchWeeklyChannelData(channelId, '2025-12-12', '2026-01-03');
+        await fetchChannelUsage(currentChannel?.datalogger.uuid, channelId);
+        await fetchDataloggerUsage(currentChannel?.datalogger.uuid);
       }
     }
     loadData();
   }, [businessUuid, channelId]);
 
 
-  if (isLoadingChannel || isUpdatingChannel || isLoadingAlarmsByChannel) {
+  if (isLoadingChannel || isUpdatingChannel || isLoadingAlarmsByChannel 
+      || isLoadingAllRegisters || isLoadingDailyData || isLoadingWeeklyData
+      || isLoadingChannelUsage || isLoadingDataloggerUsage) {
     return <LoadingSpinner message="Cargando datos..." />;
     }
     
@@ -101,7 +124,9 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
   );
     
   //console.log('selectedChannel', selectedChannel);
-  //console.log('alarms by channel', seletedChannelAlarms);  
+  //console.log('alarms by channel', seletedChannelAlarms);  channelDailyData, channelWeeklyData
+  //console.log('channelUsage :', channelUsage?.totalData.total_time_on_hours);
+  
   
   return (
     <>
@@ -151,14 +176,18 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
               channel={selectedChannel} 
               alarms={seletedChannelAlarms.filter(alarm => alarm.is_active == '1')} 
               datalogger={selectedChannel?.datalogger}
+              totalTime={channelUsage?.totalData.total_time_on_hours}
+              firstDate={channelUsage?.totalData.first_date}
+              lastDate={channelUsage?.totalData.last_date}
+              totalAverageTime={channelUsage?.totalData.average_usage_percentage}
             />
           </CardImage>
       </div>
 
 
       <ViewChart 
-        title={`Datos del canal '${selectedChannel.name}'`}
-        subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${selectedChannel.averaging_period } minutos.`}
+        title={`Datos del canal '${selectedChannel?.name}'`}
+        subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${selectedChannel?.averaging_period } minutos.`}
         availablePresets={[
           RANGE_KEYS.LAST_HOUR,
           RANGE_KEYS.LAST_12H,
