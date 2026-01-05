@@ -17,7 +17,7 @@ import { useAlarmsStore } from '../../store/alarmsStore';
 import { useDataStore } from '../../store/dataStore';
 import ViewChart from '../../components/ViewChart/ViewChart';
 import { RANGE_KEYS } from '../../components/ViewChart/constants/chartRanges';
-import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
+//import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 
 const ViewChannel = () => {
   const { businessUuid, dataloggerId, channelId } = useParams();
@@ -29,7 +29,7 @@ const ViewChannel = () => {
   const { fetchChannelById, 
           selectedChannel, 
           loadingStates: { fetchChannel: isLoadingChannel, updateChannel: isUpdatingChannel },
-          error: erroChannel
+          error: errorChannel
         } = useChannelsStore();
 
   const { alarms,
@@ -39,18 +39,13 @@ const ViewChannel = () => {
           },
           error : errorLoadindAlarms
         } = useAlarmsStore();
-
-  const { fetchAllRegistersChannelData, fetchDailyChannelData, fetchWeeklyChannelData,
-          fetchChannelUsage, fetchDataloggerUsage,
-          channelAllRegistersData, channelDailyData, channelWeeklyData,
-          channelUsage, dataloggerUsage,
-          loadingStates: { 
-            fetchAllRegistersChannelData: isLoadingAllRegisters,
-            fetchDailyChannelData: isLoadingDailyData,
-            fetchWeeklyChannelData: isLoadingWeeklyData,
-            fetchChannelUsage: isLoadingChannelUsage, fetchDataloggerUsage: isLoadingDataloggerUsage,
+  
+   const { fetchChannelUsage,          
+          channelUsage,
+          loadingStates: {             
+            fetchChannelUsage: isLoadingChannelUsage,
           },
-          error: errorLoadingAllRegisters
+          error: errorLoadingChannelUsage
         } = useDataStore();
 
 
@@ -59,26 +54,22 @@ const ViewChannel = () => {
     const loadData = async () => {
       if (businessUuid, channelId){
         const currentChannel = await fetchChannelById(channelId, businessUuid);
-        await fetchAlarmsByChannel(businessUuid, channelId);
-        await fetchAllRegistersChannelData(channelId, '2025-12-12', '2025-12-13');
-        await fetchDailyChannelData(channelId, '2025-12-12', '2025-12-24');
-        await fetchWeeklyChannelData(channelId, '2025-12-12', '2026-01-03');
+        await fetchAlarmsByChannel(businessUuid, channelId);        
         await fetchChannelUsage(currentChannel?.datalogger.uuid, channelId);
-        await fetchDataloggerUsage(currentChannel?.datalogger.uuid);
+        //await fetchDataloggerUsage(currentChannel?.datalogger.uuid);
       }
     }
     loadData();
   }, [businessUuid, channelId]);
 
 
-  if (isLoadingChannel || isUpdatingChannel || isLoadingAlarmsByChannel 
-      || isLoadingAllRegisters || isLoadingDailyData || isLoadingWeeklyData
-      || isLoadingChannelUsage || isLoadingDataloggerUsage) {
+  if (isLoadingChannel || isUpdatingChannel || isLoadingAlarmsByChannel      
+      || isLoadingChannelUsage ) {
     return <LoadingSpinner message="Cargando datos..." />;
     }
     
-  if (erroChannel) {
-    return <div className={styles.error}>{erroChannel}</div>;
+  if (errorChannel || errorLoadingChannelUsage || errorLoadindAlarms) {
+    return <div className={styles.error}>Error Cargando los datos</div>;
     }
   
 
@@ -125,7 +116,8 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
     
   //console.log('selectedChannel', selectedChannel);
   //console.log('alarms by channel', seletedChannelAlarms);  channelDailyData, channelWeeklyData
-  //console.log('channelUsage :', channelUsage?.totalData.total_time_on_hours);
+  //console.log('channelAllRegistersData :', channelAllRegistersData);
+  console.log('channelUsage', channelUsage);
   
   
   return (
@@ -178,14 +170,16 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
               datalogger={selectedChannel?.datalogger}
               totalTime={channelUsage?.totalData.total_time_on_hours}
               firstDate={channelUsage?.totalData.first_date}
-              lastDate={channelUsage?.totalData.last_date}
+              lastDate={channelUsage?.lastData.last_record_date}
               totalAverageTime={channelUsage?.totalData.average_usage_percentage}
             />
           </CardImage>
       </div>
 
+      <div className={styles.chartContainer}>
 
       <ViewChart 
+        channelUuid = {channelId}
         title={`Datos del canal '${selectedChannel?.name}'`}
         subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${selectedChannel?.averaging_period } minutos.`}
         availablePresets={[
@@ -198,10 +192,9 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
           RANGE_KEYS.LAST_YEAR
         ]}
         onRangeChange={null} //(range) => fetchCpuData(range.start, range.end)}
-      >
-        <h2>Grafico</h2>
-
-      </ViewChart>
+      />
+      </div>
+       
 
 
       <Title2 text="Alarmas Configuradas" type="alarmas"/>

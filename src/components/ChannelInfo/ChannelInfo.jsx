@@ -22,13 +22,13 @@ const ChannelInfo = ({ channel, alarms, datalogger = null, totalTime = 0, firstD
             FormatearFechaCompleta(firstDate) : 
             ' Sin datos '}
         </strong>
-        <p>
+        <br/>
         Ultimos datos recibidos: <strong> 
             {lastDate ? 
             FormatearFechaCompleta(lastDate) : 
             ' Sin datos '}
         </strong>
-        </p>
+        
       </p>
       
       

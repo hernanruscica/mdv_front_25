@@ -87,6 +87,10 @@
     flex-direction: column;
   }
 
+  .chartContainer{
+    width: 94%;
+  }
+
   .alarmsTable {
     font-size: 0.9rem;
   }
