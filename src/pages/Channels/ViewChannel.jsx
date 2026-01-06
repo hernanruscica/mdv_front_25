@@ -117,7 +117,7 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
   //console.log('selectedChannel', selectedChannel);
   //console.log('alarms by channel', seletedChannelAlarms);  channelDailyData, channelWeeklyData
   //console.log('channelAllRegistersData :', channelAllRegistersData);
-  console.log('channelUsage', channelUsage);
+  //console.log('channelUsage', channelUsage);
   
   
   return (
@@ -182,6 +182,7 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
         channelUuid = {channelId}
         title={`Datos del canal '${selectedChannel?.name}'`}
         subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${selectedChannel?.averaging_period } minutos.`}
+        average_period={selectedChannel?.averaging_period}
         availablePresets={[
           RANGE_KEYS.LAST_HOUR,
           RANGE_KEYS.LAST_12H,
