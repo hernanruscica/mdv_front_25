@@ -11,26 +11,26 @@ export const routes = [
   { path: "/panel", element: <Dashboard />, private: true },
   
   // Locations routes
-  { path: "/panel/ubicaciones", element: <Locations />, private: true },//Done
-  { path: "/panel/ubicaciones/:businessUuid", element: <ViewLocation />, private: true },//Done
-  { path: "/panel/ubicaciones/agregar", element: <CreatePage />, private: true },  //Done
-  { path: "/panel/ubicaciones/:businessUuid/editar", element: <CreatePage />, private: true }, //Done
-  { path: "/panel/ubicaciones/:businessUuid/eliminar", element: <UnderConstruction />, private: true }, //Done (put is_active === 0)
+  { path: "/panel/ubicaciones", element: <Locations />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid", element: <ViewLocation />, private: true },
+  { path: "/panel/ubicaciones/agregar", element: <CreatePage />, private: true },  
+  { path: "/panel/ubicaciones/:businessUuid/editar", element: <CreatePage />, private: true }, 
+  { path: "/panel/ubicaciones/:businessUuid/eliminar", element: <UnderConstruction />, private: true },  
   
   // Users routes
-  { path: "/panel/ubicaciones/:businessUuid/usuarios", element: <Users />, private: true },//Done
-  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId", element: <ViewUser />, private: true },//Done
+  { path: "/panel/ubicaciones/:businessUuid/usuarios", element: <Users />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId", element: <ViewUser />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/usuarios/activar/:token", element: <ActivateUser /> },
-  { path: "/panel/ubicaciones/:businessUuid/usuarios/agregar", element: <CreatePage />, private: true }, //Done
-  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/editar", element: <CreatePage />, private: true },  //Done
-  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/eliminar", element: <UnderConstruction />, private: true },//Done (put is_active === 0)
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/agregar", element: <CreatePage />, private: true }, 
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/editar", element: <CreatePage />, private: true },  
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/eliminar", element: <UnderConstruction />, private: true }, 
 
   // Dataloggers routes 
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers", element: <Dataloggers />, private: true },//Done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId", element: <ViewDatalogger />, private: true },//Done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/agregar", element: <CreatePage />, private: true },//done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/editar", element: <CreatePage />, private: true }, //done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/eliminar", element: <UnderConstruction />, private: true },//Done (put is_active === 0)
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers", element: <Dataloggers />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId", element: <ViewDatalogger />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/agregar", element: <CreatePage />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/editar", element: <CreatePage />, private: true }, 
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/eliminar", element: <UnderConstruction />, private: true }, 
 
   // Channels routes
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales", element: <Channels />, private: true },//done

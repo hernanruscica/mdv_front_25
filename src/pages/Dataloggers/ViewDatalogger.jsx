@@ -148,7 +148,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
                 if (alarm.is_active !== 1) return null;
                 if (alarm.alarm_type !== 'porcentage_on') return null;
                 
-                const currentValue =  dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid).lastData.porcentageUsagePeriod;                
+                const currentValue =  dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid)?.lastData.porcentageUsagePeriod || '--';                
                 console.log('currentChannel data: ', currentValue);
                 
                 return (
@@ -161,7 +161,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
                     <p className={styles.description}>
                       {alarm.condition_show}
                     </p>       
-                    <GaugeLinear currentValue={currentValue} alarmMin={0} alarmMax={alarm?.var01} />
+                    <GaugeLinear currentValue={currentValue || '--'} alarmMin={0} alarmMax={alarm?.var01} />
                   </Link>
                 );
               })

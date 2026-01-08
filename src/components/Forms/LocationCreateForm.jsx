@@ -107,7 +107,7 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
         }
     };    
 
-    console.log('locationData.uuid', locationData?.uuid)
+    //console.log('locationData.uuid', locationData?.uuid)
     
     return (        
         <form onSubmit={handleSubmit} className={stylesForms.form}>

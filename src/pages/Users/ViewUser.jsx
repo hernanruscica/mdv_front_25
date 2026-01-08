@@ -49,7 +49,7 @@ const ViewUser = () => {
     return <div className={styles.error}>Usuario no encontrado.</div>;
   }
 
-  console.log('user', user);
+  //console.log('user', user);
   
   
 
