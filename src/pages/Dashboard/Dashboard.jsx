@@ -2,22 +2,14 @@ import { useEffect, useState } from "react";
 import { Title1 } from "../../components/Title1/Title1";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import { useAuthStore } from "../../store/authStore";
-import { useUsersStore } from "../../store/usersStore";
-import { useDataloggersStore } from "../../store/dataloggersStore";
 import { useLocationsStore } from "../../store/locationsStore";
-import { useAlarmsStore } from "../../store/alarmsStore";
 import { LoadingSpinner } from "../../components/LoadingSpinner/LoadingSpinner";
 import styles from "./Dashboard.module.css";
 import CardInfo from '../../components/CardInfo/CardInfo';
 import cardInfoStyles from "../../components/CardInfo/CardInfo.module.css";
 import CardBtnSmall from "../../components/CardBtnSmall/CardBtnSmall";
 import { getIconFileName } from "../../utils/iconsDictionary";
-
-import GaugeLinear from '../../components/GaugeLinear/GaugeLinear';
 import { Title2 } from "../../components/Title2/Title2";
-import { Link } from "react-router-dom";
-
-import { useAlarmsGaugesData } from '../../hooks/useAlarmsGaugesData';
 
 const Dashboard = () => {
   const user = useAuthStore(state => state.user);
@@ -28,27 +20,26 @@ const Dashboard = () => {
     error: locationsError,
     fetchLocations
   } = useLocationsStore();
+
   
 
   useEffect(() => {
     const loadData = async () => {      
-      const currentResponseLocations = await fetchLocations(user);      
-      
-      setCurrentDataloggers(currentResponseLocations.flatMap(location => location.dataloggers));      
+      const currentResponseLocations = await fetchLocations(user);            
+      setCurrentDataloggers(currentResponseLocations.flatMap(location => location.dataloggers));            
     };
     loadData();   
   }, []);
 
   
 
-  if (isLoadingLocations) {
+  if (isLoadingLocations ) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
   if (locationsError) {
-    return <div className={styles.error}>{locationsError}</div>;
+    return <div className={styles.error}>Error cargando datos...</div>;
   }  
-//console.log('user', user);
 
  const userCurrentRole = 
       user?.businesses_roles.some(br => br.role === 'Owner')
@@ -56,7 +47,7 @@ const Dashboard = () => {
         : '';
   const mappedCurrentRole = {
     'Owner': 'Propietario',
-    'Admin': 'Administrador',
+    'Administrator': 'Administrador',
     'Technician': 'Operario'
   }
 
@@ -64,30 +55,10 @@ const Dashboard = () => {
     <>      
       <Title1 type="panel" text="Panel de Control" />
       <Breadcrumb />     
-      {/* 
-      <Title2 text="Datos en tiempo real" type='alarmas'/>
-      <div className={styles.cardsContainer}>
-        {alarms && alarms.length > 0 && (
-          alarms.map((alarm, index) => { 
-            if (alarm.estado !== 1) return null;
-            if (alarm.tipo_alarma !== 'PORCENTAJE_ENCENDIDO') return null;
-            const key = `${alarm.tabla}_${alarm.columna}`;
-            const currentValue = lastDataByChannel[key] || 0;
-            //console.log('[Dashboard] key:', key, 'currentValue:', currentValue);
-            return (
-              <Link 
-                to={`/panel/dataloggers/${alarm.datalogger_id}/canales/${alarm.canal_id}`} 
-                title="Ver canal"
-                key={index} 
-                className={styles.cardGauge}>
-                <h3>{alarm.nombre} %</h3>             
-                <GaugeLinear currentValue={currentValue} alarmMin={0} alarmMax={alarm.variable01} />
-              </Link>
-            );
-          })
-        )}
-      </div>
-      */}
+      <p className={styles.description}>
+        Bienvenido al panel de control de <strong>MDV Sensores</strong>, su sistema integral para la gestión y monitoreo de dataloggers, ubicaciones, usuarios y alarmas. Desde este panel, usted puede supervisar el estado de sus equipos, administrar usuarios y configurar alarmas críticas para garantizar el funcionamiento óptimo de sus operaciones.
+      </p>     
+     
       <Title2 text="Administracion" type='panel'/>
       
       <p className={styles.description}>

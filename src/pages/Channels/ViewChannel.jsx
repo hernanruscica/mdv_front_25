@@ -55,7 +55,7 @@ const ViewChannel = () => {
       if (businessUuid, channelId){
         const currentChannel = await fetchChannelById(channelId, businessUuid);
         await fetchAlarmsByChannel(businessUuid, channelId);        
-        await fetchChannelUsage(currentChannel?.datalogger.uuid, channelId);
+        await fetchChannelUsage(businessUuid, currentChannel?.datalogger.uuid, channelId);
         //await fetchDataloggerUsage(currentChannel?.datalogger.uuid);
       }
     }
@@ -120,6 +120,7 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
   //console.log('channelUsage', channelUsage);
   
   
+  
   return (
     <>
     <ModalSetArchive
@@ -179,6 +180,7 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
       <div className={styles.chartContainer}>
 
       <ViewChart 
+        businessUuid = {businessUuid}
         channelUuid = {channelId}
         title={`Datos del canal '${selectedChannel?.name}'`}
         subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${selectedChannel?.averaging_period } minutos.`}

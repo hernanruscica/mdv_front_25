@@ -7,6 +7,7 @@ import GenericBarChart from './GenericBarChart';
 import viewChartStyles from './viewChartStyles.module.css';
 
 const ViewChart = ({ 
+  businessUuid,
   channelUuid,
   title = "Gráfico de Datos", 
   subtitle = 'Evolución del porcentaje de uso',   
@@ -177,23 +178,23 @@ const ViewChart = ({
 
     try {
       if (rangeKey === 'CUSTOM_DAY_ZOOM') {
-        await fetchAllRegistersChannelData(channelUuid, s, e);
+        await fetchAllRegistersChannelData(businessUuid, channelUuid, s, e);
       } 
       else if (rangeKey === 'CUSTOM_WEEK_ZOOM') {
-        await fetchDailyChannelData(channelUuid, s, e); 
+        await fetchDailyChannelData(businessUuid, channelUuid, s, e); 
       }
       else {
         switch (rangeKey) {
           case RANGE_KEYS.LAST_HOUR:
           case RANGE_KEYS.LAST_12H:
           case RANGE_KEYS.LAST_24H:
-            await fetchAllRegistersChannelData(channelUuid, s, e); break;
+            await fetchAllRegistersChannelData(businessUuid, channelUuid, s, e); break;
           case RANGE_KEYS.LAST_WEEK:
           case RANGE_KEYS.LAST_MONTH:
-            await fetchDailyChannelData(channelUuid, s, e); break;
+            await fetchDailyChannelData(businessUuid, channelUuid, s, e); break;
           case RANGE_KEYS.LAST_6_MONTHS:
           case RANGE_KEYS.LAST_YEAR:
-            await fetchWeeklyChannelData(channelUuid, s, e); break;
+            await fetchWeeklyChannelData(businessUuid, channelUuid, s, e); break;
           default: break;
         }
       }

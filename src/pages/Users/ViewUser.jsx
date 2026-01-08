@@ -34,6 +34,8 @@ const ViewUser = () => {
     loadUser();
   }, [userId, fetchUserById]);
 
+  const { user } = useAuthStore();
+
   
   if (loadingStates.fetchUser ) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -47,6 +49,8 @@ const ViewUser = () => {
     return <div className={styles.error}>Usuario no encontrado.</div>;
   }
 
+  console.log('user', user);
+  
   
 
   const userButtons = (
@@ -76,17 +80,24 @@ const ViewUser = () => {
   );
 
     const userCurrentRole = 
+      user?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+
+    const selectedUserCurrentRole = 
       selectedUser?.businesses_roles.some(br => br.role === 'Owner')
         ? 'Owner'
         : selectedUser?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-
      const mappedCurrentRole = {
     'Owner': 'Propietario',
     'Admin': 'Administrador',
     'Technician': 'Operario'
   }
 
-// console.log(userCurrentRole);
+ console.log('user', user);
+ console.log('selecteduser', selectedUser);
+ console.log(userCurrentRole == 'Technician' && user.uuid == selectedUser.uuid )
+ 
 
   return (
     <>
@@ -131,7 +142,18 @@ const ViewUser = () => {
           <CardImage
             image={selectedUser?.avatar_url ? `${selectedUser?.avatar_url}` : '/images/default_avatar.png'}
             title={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
-            buttons={userButtons}
+            buttons={ (userCurrentRole == 'Owner' || userCurrentRole == 'Administrator')               
+              ? userButtons
+              : (userCurrentRole == 'Technician' && user.uuid == selectedUser.uuid )
+              ?
+              <BtnCallToAction
+                  text="Editar"
+                  icon="edit-regular.svg"
+                  type="warning"
+                  url={`/panel/ubicaciones/${businessUuid}/usuarios/${selectedUser?.uuid}/editar`}
+                />
+               : ''
+              }
           >
             <div className={styles.userInfo}>
                {
@@ -142,28 +164,13 @@ const ViewUser = () => {
               <p><strong>Email:</strong> {selectedUser?.email}</p>
               <p><strong>Teléfono:</strong> {selectedUser?.phone}</p>
               <p><strong>Estado:</strong> {selectedUser.is_active ? 'Activo' : 'Inactivo'}</p>
-              <p><strong>Rol:</strong> {mappedCurrentRole[userCurrentRole]} </p>
+              <p><strong>Rol:</strong> {mappedCurrentRole[selectedUserCurrentRole]} </p>
               <p><strong>Fecha de creación:</strong> {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : 'No disponible'}</p>
               <CardBtnSmall
                 key={selectedUser.uuid}
                 title="Ver Alarmas del Usuario"
                 url={`/panel/ubicaciones/${businessUuid}/usuarios/${selectedUser.uuid}/alarmas`}
-              />
-              {/*
-              <p><strong>Alarmas Asignadas:</strong>{" "}
-                {isLoadingAlarms ? (
-                  <LoadingSpinner message="Cargando alarmas..." />
-                ) : alarms?.length === 0 ? (
-                  'No hay alarmas asignadas'
-                ) : (
-                  <CardBtnSmall
-                    title={`Ver ${alarms?.length} alarmas`}
-                    url={`/panel/usuarios/${selectedUser.id}/alarmas`}
-                  />
-                )}
-                { errorAlarms && <p className={styles.error}>{errorAlarms}</p> }
-              </p>
-                */}
+              />              
             </div>
         </CardImage>
 

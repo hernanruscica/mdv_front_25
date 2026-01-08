@@ -1,13 +1,13 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import CardInfo from '../CardInfo/CardInfo';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import ButtonsBar from '../ButtonsBar/ButtonsBar';
 import { getIconFileName } from "../../utils/iconsDictionary";
 import styles from './ShowChannelsCards.module.css';
 import cardInfoStyles from "../CardInfo/CardInfo.module.css";
-import DigitalPorcentageOn from '../Graphics/DigitalPorcentageOn/DigitalPorcentageOn';
-import AnalogData from '../Graphics/AnalogData/AnalogData';
 import CustomTag from '../CustomTag/CustomTag';
+import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
+
 
 const ShowChannelsCards = ({ 
   channels, 
@@ -17,7 +17,7 @@ const ShowChannelsCards = ({
   showAddButton = false 
 }) => {
 
-  const [showArchived, setShowArchived] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);  
 
   // Determine the base list of channels (active only, or all)
   const sourceChannels = showArchived ? channels : channels.filter(channel => channel.is_active == 1);
@@ -31,31 +31,11 @@ const ShowChannelsCards = ({
     );
   });
 
-  const timeRangesCards = [
-    { hours: 1, label: '1 Hr' },
-    { hours: 12, label: '12 Hrs' },
-    { hours: 24, label: '24 Hrs' },
-    { hours: 48, label: '2 Días' },
-    { hours: 72, label: '3 Días' },    
-  ];
-
-  //console.log('Channels desde showchannelscards', channels);
-
-  // Preparar los datos para el gráfico digital
-  const prepareDigitalData = (data) => {
-    if (!data || !data.length) return [];
-    return data.map(point => ({
-      timestamp: point.fecha,
-      porcentaje_encendido: point.porcentaje_encendido,
-      failure: point.tiempo_total >= 900 // 15 minutos en segundos
-    }));
-  };
+  
   const oneChannel = channels[0];
   const dataloggerId = oneChannel ? oneChannel?.datalogger_id : null;
-  const businessUuid = oneChannel ? oneChannel?.business.uuid : null;
- // console.log('channels', channels);
-  //console.log('oneChannel', oneChannel);
-  //console.log('showArchived', showArchived);
+  const businessUuid = oneChannel ? oneChannel?.business.uuid : null;  
+  
 
   return (
     <>
@@ -79,6 +59,9 @@ const ShowChannelsCards = ({
             alarm => alarm.channel_id == channel.uuid
           );
 
+          //console.log('channel 0', channels[0]);
+          
+
           return (
             <CardInfo
               key={channel.uuid}
@@ -90,7 +73,7 @@ const ShowChannelsCards = ({
             <div className={cardInfoStyles.cardContent}>
               <div className={cardInfoStyles.cardImage}>
                 <img
-                  src={channel?.img ? `${channel.img}` : '/images/default-channel.webp'}
+                  src={channel?.img  ? `${channel.img}` : '/images/default-channel.webp'}
                   alt={`Foto del canal ${channel?.name}`}
                   title={`Este es el canal ${channel?.name}`}
                   className={cardInfoStyles.image}
@@ -130,8 +113,8 @@ const ShowChannelsCards = ({
                   )}
                 </div>
                 <p className={cardInfoStyles.paragraph}>
-                  <strong>Total horas de uso:</strong>{" "} {Math.floor(channel.horas_uso)} Hs. <br/> 
-                  Con datos desde <strong>{new Date(channel.fecha_creacion).toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'})}</strong>:
+                  <strong>Total horas de uso:</strong>{" "} {channel?.totalData.total_time_on_hours} Hs. <br/> 
+                  Con datos desde <strong>{FormatearFechaCompleta(channel?.totalData.first_date)}</strong>:
                 </p>
               </div>
             </div>
@@ -171,3 +154,5 @@ const ShowChannelsCards = ({
 };
 
 export default ShowChannelsCards;
+
+

@@ -16,7 +16,7 @@ export const useDataStore = create((set) => ({
   },
   error: null,
   
-  fetchChannelUsage: async (dataloggerUuid, channelUuid) => {       
+  fetchChannelUsage: async (businessUuid, dataloggerUuid, channelUuid) => {       
     
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchChannelUsage: true },
@@ -24,7 +24,7 @@ export const useDataStore = create((set) => ({
     }));
     
     try {    
-        const data = await dataService.getChannelUsage(dataloggerUuid, channelUuid);          
+        const data = await dataService.getChannelUsage(businessUuid, dataloggerUuid, channelUuid);          
       set(state => ({
         channelUsage: data,
         loadingStates: { ...state.loadingStates, fetchChannelUsage: false }
@@ -41,7 +41,8 @@ export const useDataStore = create((set) => ({
     }
   },
 
-  fetchDataloggerUsage: async (dataloggerUuid) => {       
+  fetchDataloggerUsage: async (businessUuid, dataloggerUuid) => {       
+    //console.log('desde el store, dataloggerUuid', dataloggerUuid);
     
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchDataloggerUsage: true },
@@ -49,7 +50,7 @@ export const useDataStore = create((set) => ({
     }));
     
     try {    
-        const data = await dataService.getDataloggerUsage(dataloggerUuid);          
+        const data = await dataService.getDataloggerUsage(businessUuid, dataloggerUuid);          
       set(state => ({
         dataloggerUsage: data,
         loadingStates: { ...state.loadingStates, fetchDataloggerUsage: false }
@@ -66,7 +67,7 @@ export const useDataStore = create((set) => ({
     }
   },
 
-  fetchAllRegistersChannelData: async (channelUuid, start, end) => {       
+  fetchAllRegistersChannelData: async (businessUuid, channelUuid, start, end) => {       
     
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchAllRegistersChannelData: true },
@@ -74,7 +75,7 @@ export const useDataStore = create((set) => ({
     }));
     
     try {    
-        const data = await dataService.getChannelAllRegisters(channelUuid, start, end);          
+        const data = await dataService.getChannelAllRegisters(businessUuid, channelUuid, start, end);          
       set(state => ({
         channelAllRegistersData: data,
         loadingStates: { ...state.loadingStates, fetchAllRegistersChannelData: false }
@@ -91,7 +92,7 @@ export const useDataStore = create((set) => ({
     }
   },
 
-  fetchDailyChannelData: async (channelUuid, start, end) => {       
+  fetchDailyChannelData: async (businessUuid, channelUuid, start, end) => {       
     
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchDailyChannelData: true },
@@ -99,7 +100,7 @@ export const useDataStore = create((set) => ({
     }));
     
     try {    
-        const data = await dataService.getChannelDaily(channelUuid, start, end);          
+        const data = await dataService.getChannelDaily(businessUuid, channelUuid, start, end);          
       set(state => ({
         channelDailyData: data,
         loadingStates: { ...state.loadingStates, fetchDailyChannelData: false }
@@ -116,7 +117,7 @@ export const useDataStore = create((set) => ({
     }
   },
   
-  fetchWeeklyChannelData: async (channelUuid, start, end) => {       
+  fetchWeeklyChannelData: async (businessUuid, channelUuid, start, end) => {       
     
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchWeeklyChannelData: true },
@@ -124,7 +125,7 @@ export const useDataStore = create((set) => ({
     }));
     
     try {    
-        const data = await dataService.getChannelWeekly(channelUuid, start, end);          
+        const data = await dataService.getChannelWeekly(businessUuid, channelUuid, start, end);          
       set(state => ({
         channelWeeklyData: data,
         loadingStates: { ...state.loadingStates, fetchWeeklyChannelData: false }

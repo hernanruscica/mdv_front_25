@@ -3,10 +3,10 @@ import axiosClient from '../utils/axiosClient';
 export const dataService = {
 
   //data/getLastPorcentageUsageByChannel/:dataloggerUuid/:channelUuid
-  getChannelUsage: async (dataloggerUuid, channelUuid) => {
+  getChannelUsage: async (businessUuid, dataloggerUuid, channelUuid) => {
     try {
       const response = await axiosClient.get(
-        `/api/data/getLastPorcentageUsageByChannel/${dataloggerUuid}/${channelUuid}`
+        `/api/data/getLastPorcentageUsageByChannel/businesses/${businessUuid}/${dataloggerUuid}/${channelUuid}`
       );      
       
       return response.data.data;
@@ -16,10 +16,10 @@ export const dataService = {
     }
   },
   // /data/getDataloggerLastData/:dataloggerUuid
-  getDataloggerUsage: async (dataloggerUuid) => {
+  getDataloggerUsage: async (businessUuid, dataloggerUuid) => {
     try {      
       const response = await axiosClient.get(
-        `/api/data/getDataloggerLastData/${dataloggerUuid}`
+        `/api/data/getDataloggerLastData/businesses/${businessUuid}/${dataloggerUuid}`
       );
       return response.data.data;
     } catch (error) {
@@ -28,10 +28,10 @@ export const dataService = {
     }
   },
   // /data/allregisters/:channeluuid?start='2025-12-11'&end='2025-12-12'
-  getChannelAllRegisters: async (channelUuid, start, end) => {
+  getChannelAllRegisters: async (businessUuid, channelUuid, start, end) => {
     try {
       const response = await axiosClient.get(
-        `/api/data/allregisters/${channelUuid}?start='${start}'&end='${end}'`        
+        `/api/data/allregisters/businesses/${businessUuid}/${channelUuid}?start='${start}'&end='${end}'`        
       );
       return response.data.data;
     } catch (error) {
@@ -40,10 +40,10 @@ export const dataService = {
     }
   },
   // /data/alldaily/:channeluuid?start='2025-12-01'&end='2025-12-31
-  getChannelDaily: async (channelUuid, start, end) => {
+  getChannelDaily: async (businessUuid, channelUuid, start, end) => {
     try {
       const response = await axiosClient.get(
-        `/api/data/alldaily/${channelUuid}?start='${start}'&end='${end}'`        
+        `/api/data/alldaily/businesses/${businessUuid}/${channelUuid}?start='${start}'&end='${end}'`        
       );
       return response.data.data;
     } catch (error) {
@@ -52,10 +52,10 @@ export const dataService = {
     }
   },
   // /data/allweekly/:channeluuid?start='2025-12-01'&end='2025-12-31
-  getChannelWeekly: async (channelUuid, start, end) => {
+  getChannelWeekly: async (businessUuid, channelUuid, start, end) => {
     try {
       const response = await axiosClient.get(
-        `/api/data/allweekly/${channelUuid}?start='${start}'&end='${end}'`        
+        `/api/data/allweekly/businesses/${businessUuid}/${channelUuid}?start='${start}'&end='${end}'`        
       );
       return response.data.data;
     } catch (error) {

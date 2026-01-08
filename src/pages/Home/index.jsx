@@ -29,17 +29,17 @@ const Home = () => {
             text="Ver tus alarmas"
             icon="clock-regular.svg"
             type="normal"
-            url={`panel/usuarios/${user.uuid}/alarmas`} />
-          <BtnCallToAction
+            url={`/panel/ubicaciones/${user?.businesses_roles[0]?.uuid}/usuarios/${user.uuid}/alarmas`} />
+          {/* <BtnCallToAction
             text="Ver tus dataloggers"
             icon="microchip-solid.svg"
             type="normal"
-            url={`panel/dataloggers/`} />
+            url={`panel/dataloggers/`} /> */}
           <BtnCallToAction
             text="Ver tu perfil"
             icon="user-regular.svg"
             type="normal"
-            url={`panel/usuarios/${user.uuid}`} />
+            url={`/panel/ubicaciones/${user?.businesses_roles[0]?.uuid}/usuarios/${user.uuid}`} />
           <BtnCallToAction
             text="Enviarnos un mensaje"
             icon="envelope-regular.svg"

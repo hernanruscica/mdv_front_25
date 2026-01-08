@@ -22,7 +22,7 @@ export const useAlarmsStore = create((set) => ({
     }));
 
     try {
-      const alarms =  await alarmsService.getAll(currentUser?.uuid, businessUuid);
+      const alarms =  await alarmsService.getAll(businessUuid);
      // console.log('alarmas del usuario', alarms)  
       set(state => ({
         alarms,

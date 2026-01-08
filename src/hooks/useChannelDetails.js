@@ -72,7 +72,7 @@ export const useChannelDetails = (channelId, dataloggerId, isSecondary = false) 
   // Cargar datos del canal
   useEffect(() => {
     const loadData = async () => {
-      if (currentChannel && datalogger) {
+      if (currentChannel ) {
         try {
           const nombreTabla = datalogger.table_name;
           const nombreColumna = currentChannel.column_name;
@@ -85,7 +85,7 @@ export const useChannelDetails = (channelId, dataloggerId, isSecondary = false) 
       }
     };
     loadData();
-  }, [currentChannel, datalogger, hoursBackView, isSecondary]);
+  }, [currentChannel, hoursBackView, isSecondary]);
  
 
   return {

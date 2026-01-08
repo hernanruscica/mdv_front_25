@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
@@ -14,8 +14,11 @@ import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCa
 
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
-import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
 import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
+import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
+import { useDataStore } from '../../store/dataStore';
+import { Link } from 'react-router-dom';
+import GaugeLinear from '../../components/GaugeLinear/GaugeLinear';
 
 
 const ViewDatalogger = () => {
@@ -25,9 +28,13 @@ const ViewDatalogger = () => {
   const { businessUuid, dataloggerId } = useParams();
   
   const user = useAuthStore(state => state.user);    
-
-
-  //const { datalogger, isLoadingDatalogger, isCreatingDatalogger, isUpdattingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
+  const {
+      dataloggerUsage,
+      fetchDataloggerUsage,
+      loadingStates: { fetchDataloggerUsage: isLoadingDataloggerUsage},
+      error: errorLoadingDataloggerUsage
+      } = useDataStore();
+ 
 
   const { 
     datalogger, 
@@ -36,40 +43,31 @@ const ViewDatalogger = () => {
     isUpdattingDatalogger, 
     refreshDatalogger 
   } = useFetchDatalogger(dataloggerId, businessUuid);
+
+
+      useEffect(() => {
+      const loadDataloggerUsage = async () => {       
+        
+        if (dataloggerId && businessUuid) {
+          await fetchDataloggerUsage(businessUuid, dataloggerId);
+        }
+      };
+      
+      loadDataloggerUsage();
+    }, [dataloggerId, businessUuid]);  
+
   
 
-  if (isLoadingDatalogger || isCreatingDatalogger || isUpdattingDatalogger) {
+  if (isLoadingDatalogger || isCreatingDatalogger || isUpdattingDatalogger || isLoadingDataloggerUsage) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
+  //console.log('dataloggerUsage', dataloggerUsage);
 
   const userCurrentRole = 
     user?.businesses_roles.some(br => br.role === 'Owner')
       ? 'Owner'
       : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-
- 
-
-  const columns = [
-    { label: 'NOMBRE DE LA ALARMA', accessor: 'nombreAlarma' },
-    //{ label: 'NOMBRE DEL CANAL', accessor: 'nombreCanal' },
-    { label: 'CONDICIÓN', accessor: 'condicion_mostrar' },
-    { label: 'ESTADO', accessor: 'estado' },
-  ];
-
-  const handleAlarmClick = (row) => {
-    navigate(`/panel/dataloggers/${currentDatalogger.id}/canales/${row.canalId}/alarmas/${row.id}`);
-  };
-/*
-  const preparedAlarms = dataloggerAlarms.map(alarm => ({
-    nombreAlarma: alarm.nombre,
-    //nombreCanal: alarm.canal_nombre,
-    condicion_mostrar: alarm.condicion_mostrar || 'Sin condición',
-    canalId: alarm.canal_id,
-    estado: alarm.estado,
-    id: alarm.id
-  }));
-*/
 
 
 
@@ -106,11 +104,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
     </>
   );
   // console.log('datalogger id',datalogger?.uuid);
-  // console.log('business id',datalogger?.business_uuid);
-//console.log('datalogger?.channels',datalogger?.channels);
-
-  
-
+ 
   return (
     <>
      <ModalSetArchive
@@ -145,47 +139,77 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       }
       <Breadcrumb datalogger={datalogger?.name} ubicacion={datalogger?.business.name}/>     
      
-      
-      <CardImage
-        image={datalogger?.img ? `${datalogger?.img}` : '/images/default_datalogger.webp'}
-        title={datalogger?.name}
-        buttons={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator' ? dataloggerButtons : null}
-      >
-        <div className={styles.dataloggerInfo}>
-          {datalogger?.is_active == '0' && (
-            <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
-          )}
-          <p className={styles.description}>{datalogger?.description}</p>
-          <p><strong>MAC:</strong> {datalogger?.mac_address}</p>
-          <p>
-            <strong>Ubicación:</strong> {
-              location ? (
-                <CardBtnSmall
-                  title={datalogger?.business.name}
-                  url={`/panel/ubicaciones/${datalogger?.business.uuid}`}
-                />
-              ) : 'No especificada'
-            }
-          </p>
-          <p><strong>Creado el:</strong> {FormatearFechaCompleta(datalogger?.created_at)}</p>
-          <p>
-            <strong>Canales conectados:</strong>{" "}
-            {datalogger?.channels.filter(ch=>ch.column_name[0] == 'a').length} analógicos 
-            y {datalogger?.channels.filter(ch=>ch.column_name[0] == 'd').length} digitales
-          </p>
-          <p>
-            <strong>Alarmas programadas:</strong>{" "}
-            {datalogger?.alarms.length > 0 ? (
-              <CardBtnSmall
-                title={`Ver ${datalogger?.alarms.filter(alarm => alarm.is_active == '1').length} alarmas activas`}
-                url={`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${datalogger?.uuid}/alarmas`}
-              />
-            ) : 'No hay alarmas programadas'
-            }
-          </p>
+      <div className={styles.sectionRow}>
+        <div className={styles.gaugeContainer}>
+          <Title2 text="Datos en tiempo real" type='alarmas'/>
+          <div className={styles.cardsContainer}>
+            {datalogger?.alarms && datalogger?.alarms.length > 0 && (
+              datalogger?.alarms.map((alarm, index) => { 
+                if (alarm.is_active !== 1) return null;
+                if (alarm.alarm_type !== 'porcentage_on') return null;
+                
+                const currentValue =  dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid).lastData.porcentageUsagePeriod;                
+                console.log('currentChannel data: ', currentValue);
+                
+                return (
+                  <Link 
+                    to={`/panel/ubicaciones/${alarm.business_uuid}/dataloggers/${alarm.datalogger_uuid}/canales/${alarm.channel_uuid}`} 
+                    title="Ver canal"
+                    key={index} 
+                    className={styles.cardGauge}>
+                    <h3>{alarm.name} %</h3>      
+                    <p className={styles.description}>
+                      {alarm.condition_show}
+                    </p>       
+                    <GaugeLinear currentValue={currentValue} alarmMin={0} alarmMax={alarm?.var01} />
+                  </Link>
+                );
+              })
+            )}
+          </div>
         </div>
-      </CardImage>
-      
+        <CardImage
+          image={datalogger?.img ? `${datalogger?.img}` : '/images/default_datalogger.webp'}
+          title={datalogger?.name}
+          buttons={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator' ? dataloggerButtons : null}
+        >
+          <div className={styles.dataloggerInfo}>
+            {datalogger?.is_active == '0' && (
+              <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
+            )}
+            <p className={styles.description}>{datalogger?.description}</p>
+            <p className={styles.highLightText}><strong>Ultimos datos recibidos:</strong> {FormatearFechaCompleta(dataloggerUsage?.lastConection)}</p>
+            <p><strong>MAC:</strong> {datalogger?.mac_address}</p>
+            <p>
+              <strong>Ubicación:</strong> {
+                location ? (
+                  <CardBtnSmall
+                    title={datalogger?.business.name}
+                    url={`/panel/ubicaciones/${datalogger?.business.uuid}`}
+                  />
+                ) : 'No especificada'
+              }
+            </p>
+            <p><strong>Creado el:</strong> {FormatearFechaCompleta(datalogger?.created_at)}</p>
+            <p>
+              <strong>Canales conectados:</strong>{" "}
+              {datalogger?.channels.filter(ch=>ch.column_name[0] == 'a').length} analógicos 
+              y {datalogger?.channels.filter(ch=>ch.column_name[0] == 'd').length} digitales
+            </p>
+            <p>
+              <strong>Alarmas programadas:</strong>{" "}
+              {datalogger?.alarms.length > 0 ? (
+                <CardBtnSmall
+                  title={`Ver ${datalogger?.alarms.filter(alarm => alarm.is_active == '1').length} alarmas activas`}
+                  url={`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${datalogger?.uuid}/alarmas`}
+                />
+              ) : 'No hay alarmas programadas'
+              }
+            </p>
+          </div>
+        </CardImage>
+        
+      </div>
  
       <Title2 
         text={`Canales del datalogger ${datalogger?.name}`}
@@ -195,7 +219,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       {datalogger?.channels.length > 0 ? (
         
         <ShowChannelsCards
-          channels={datalogger?.channels}
+          channels={dataloggerUsage?.channels}
           alarms={datalogger?.alarms}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
@@ -211,40 +235,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
         />
         <p>No hay canales todavía</p>
         </>)}
-
-     {/* 
-      
-      {preparedAlarms.length > 0 ? (
-        <>
-        <Title2 
-          text={`Alarmas programadas en ${selectedDatalogger.nombre}`}
-          type="alarmas"
-        />
-        {(user.espropietario == 1 || user.esadministrador) && (
-        <BtnCallToAction
-          text="Agregar alarma"
-          icon="plus-circle-solid.svg"
-          type="normal"
-          url={`/panel/dataloggers/${selectedDatalogger.id}/alarmas/agregar`}
-        />
-      )}
-        <div className={styles.tableContainer}>
-          <Table 
-            columns={columns}
-            data={preparedAlarms}
-            onRowClick={handleAlarmClick}
-            showAddButton={user.espropietario == 1 || user.esadministrador == true}
-          />
-        </div>
-        </>
-      ) : (
-        <p className={styles.description}>
-          Este datalogger todavía no tiene alarmas, para agregar una primero tiene que elegir un canal.
-        </p>
-      )}
-    </>
-  );
-  */}
+    
   </>)
 };
 

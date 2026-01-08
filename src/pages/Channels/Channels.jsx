@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import {Title1} from '../../components/Title1/Title1';
@@ -16,6 +16,24 @@ const Channels = () => {
   const { datalogger, isLoadingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
   
   const hoursBackView = 120;  
+
+    const {
+      dataloggerUsage,
+      fetchDataloggerUsage,
+      loadingStates: { fetchDataloggerUsage: isLoadingDataloggerUsage},
+      error: errorLoadingDataloggerUsage
+      } = useDataStore();
+
+    useEffect(() => {
+    const loadDataloggerUsage = async () => {       
+      
+      if (dataloggerId && businessUuid) {
+        await fetchDataloggerUsage(businessUuid, dataloggerId);
+      }
+    };
+    
+    loadDataloggerUsage();
+  }, [dataloggerId, businessUuid]);  
  
   if (isLoadingDatalogger) {
     return <LoadingSpinner message='Cargando datos' />
@@ -64,7 +82,7 @@ const Channels = () => {
 
       { datalogger?.channels.length > 0 &&
         <ShowChannelsCards
-        channels={datalogger?.channels}
+        channels={dataloggerUsage?.channels}
         alarms={datalogger?.alarms}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
