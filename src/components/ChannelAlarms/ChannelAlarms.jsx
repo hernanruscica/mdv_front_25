@@ -27,14 +27,14 @@ const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin ide
       nombreAlarma: alarm.name,      
       tipo: alarm.alarm_type,  
       condicion_mostrar: `${alarm.condition_show} ` || 'Sin condición',      
-      url: `/panel/ubicaciones/${businessUuid}/dataloggers/${alarm?.datalogger?.uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`,  
+      url: `/panel/ubicaciones/${businessUuid}/dataloggers/${alarm?.datalogger_uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`,  
       id: alarm.uuid
     })), 
     [alarms, dataloggerId, channelId]
   );
 
   //console.log('showAddButton', showAddButton);
-  //console.log('alarm example', alarms[0]);
+  console.log('alarm example', alarms[0]);
   
   return (
 

@@ -17,8 +17,10 @@ const ViewAlarms = () => {
   const user = useAuthStore(state => state.user);
   
   // Stores para datos extra de breadcrumbs (opcional si ya los tienes en caché)
-  const { selectedDatalogger, fetchDataloggerById, loadingStates } = useDataloggersStore();
-  const isLoadingDatalogger = loadingStates.fetchDatalogger;
+  const { selectedDatalogger, 
+          fetchDataloggerById, 
+          loadingStates: { fetchDatalogger: isLoadingDatalogger } 
+        } = useDataloggersStore();
   
    const { 
       selectedLocation,
@@ -62,7 +64,7 @@ const ViewAlarms = () => {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-  //console.log('Alarms to display:', alarms);
+  console.log('Alarms to display:', alarms);
   //console.log('selectedDatalogger:', selectedDatalogger);
   //console.log('selectedLocation', selectedLocation);
   //console.log('selected User', selectedUser);
@@ -102,7 +104,7 @@ const ViewAlarms = () => {
         businessUuid={params.businessUuid}
         alarms={alarms} 
         channelId={params.channelId}
-        dataloggerId={params.dataloggerId}
+        dataloggerId={params.dataloggerId || selectedDatalogger?.uuid}
         onAlarmClick={handleAlarmClick}
         showAddButton={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator'}
       />      

@@ -11,10 +11,12 @@ import styles from './ViewAlarm.module.css';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import ModalViewAlarmLog from '../../components/ModalViewAlarmLog/ModalViewAlarmLog';
-import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import Gauge from '../../components/Gauge/Gauge';
+import ViewChart from '../../components/ViewChart/ViewChart';
+import { RANGE_KEYS } from '../../components/ViewChart/constants/chartRanges';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useAlarmLogsStore } from '../../store/alarmLogsStore';
+import { useDataStore } from '../../store/dataStore';
 
 const ViewAlarm = () => {
   const { businessUuid, dataloggerId, channelId, alarmId, userId,  } = useParams();
@@ -38,22 +40,34 @@ const ViewAlarm = () => {
     error
   } = useAlarmLogsStore();
 
+  const { channelUsage,
+          fetchChannelUsage,
+          loadingStates: { fetchChannelUsage: isLoadingChannelUsage },
+    error: errorChannelUsage, 
+  } = useDataStore();
+
 useEffect(() => {
-  console.log(businessUuid);
+  //console.log(businessUuid);
   const loadData = async () => {
-    if (businessUuid && alarmId) {
-      
-      await fetchAlarmById(businessUuid, alarmId);
+    if (businessUuid && alarmId) {      
+      const alarmData = await fetchAlarmById(businessUuid, alarmId);
+      if (alarmData){
+        await fetchChannelUsage(businessUuid, alarmData.datalogger_uuid, alarmData.channel_uuid);
+      };
       await fetchAlarmLogsByAlarmId(businessUuid, alarmId);
     }}
   loadData();
-}, [businessUuid, alarmId]);
+}, [businessUuid, alarmId, modalLogOpen]);
 
-if (isLoadingAlarm && isLoadingAlarmLogs) {
+if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage) {
   return <LoadingSpinner message="Cargando datos..." />;
 }
 
-  console.log('selectedAlarm', selectedAlarm);
+  //console.log('selectedAlarm', selectedAlarm);
+  //console.log('channelUsage', channelUsage);
+  //console.log('alarmLogs', alarmLogs);
+  
+  
  
   const handleOpenLogModal = (log) => {
     setSelectedLog(log);
@@ -97,36 +111,18 @@ if (isLoadingAlarm && isLoadingAlarmLogs) {
     { label: 'USUARIOS NOTIFICADOS', accessor: 'usuarios', icon: '/icons/user-regular.svg' }
   ];
 
-  const eventosMap = new Map();
+  
 
-  alarmLogs.forEach(log => {
-    if (!eventosMap.has(log.id)) {
-      eventosMap.set(log.id, {
-        fecha: new Date(log.fecha_disparo).toLocaleString(),
-        fecha_vista: new Date(log.fecha_vista).toLocaleString(),
-        evento: log.disparada == 0 ? 'Reset' : 'Disparo',
-        id: log.id,
-        mensaje: log.mensaje,
-        usuarios: 1,
-        usuarios_afectados: [{
-          nombre: log.nombre_1,
-          apellido: log.apellido_1,
-          email: log.email
-        }]
-      });
-    } else {
-      const evento = eventosMap.get(log.id);
-      evento.usuarios += 1;
-      evento.usuarios_afectados.push({
-        nombre: log.nombre_1,
-        apellido: log.apellido_1,
-        email: log.email,
-        vista: (log.fecha_vista == '2024-01-01T03:00:00.000Z') ? false : true,
-      });
-    }
-  });
-
-  const preparedLogs = Array.from(eventosMap.values());
+  
+  const preparedLogs = alarmLogs.length > 0 ? alarmLogs.map(al => {
+    return {
+      ...al,
+      fecha: new Date(al.triggered_at).toLocaleString(),
+      evento: (al.triggered == 1) ? 'Disparada' : 'Reseteada',
+      mensaje: al.message,
+      usuarios: al.notified_users.map(u => `${u.first_name} ${u.last_name}`).join(', ')
+    };
+  }) : [];
 
 
 
@@ -134,7 +130,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs) {
     <>
       <ModalSetArchive
         isOpen={modalArchiveOpen}
-        onRequestClose={() => setModalArchiveOpen(false)}
+        onRequestClose={() => setModalArchiveOpen(false)}            
         entidad="alarma"
         entidadId={selectedAlarm?.uuid}
         nuevoEstado={selectedAlarm?.is_active == '1' ? '0' : '1'}
@@ -147,6 +143,8 @@ if (isLoadingAlarm && isLoadingAlarmLogs) {
           isOpen={modalLogOpen}
           onRequestClose={handleCloseLogModal}
           evento={selectedLog}
+          solutions={selectedLog?.solutions}
+          businessUuid={businessUuid}          
         />
       )}
 
@@ -156,9 +154,9 @@ if (isLoadingAlarm && isLoadingAlarmLogs) {
       />
       <Breadcrumb
         // usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
-        ubicacion={'currentLocation?.name'}
-        datalogger={'datalogger?.name'}
-        canal={'currentChannel?.name' }
+        ubicacion={channelUsage?.business.name}
+        datalogger={channelUsage?.datalogger.name}
+        canal={channelUsage?.name}
         alarma={selectedAlarm?.name}
       />
       <CardImage
@@ -166,52 +164,59 @@ if (isLoadingAlarm && isLoadingAlarmLogs) {
         title={selectedAlarm?.name}
         buttons={alarmButtons}
       >
+        
         <div className={styles.alarmInfo}>
           {selectedAlarm?.is_active == '0' && (
             <CustomTag text="Archivada" type="archive" icon="/icons/archive-solid.svg" />
           )}
-          <p><strong>Condición:</strong> {selectedAlarm.condition_show}</p>
-          <p><strong>Tipo de Alarma:</strong> {selectedAlarm.alarm_type}</p>
-          <p><strong>Descripción:</strong> {selectedAlarm.description}</p>
+          <p><strong>Condición:</strong> {selectedAlarm?.condition_show}</p><br/>
+          <p><strong>Tipo de Alarma:</strong> {selectedAlarm?.alarm_type}</p><br/>
+          <p><strong>Descripción:</strong> {selectedAlarm?.description}</p><br/>
+          <p><strong>Integra los valores de los ultimos:</strong> {selectedAlarm?.time_range} minutos.</p><br/>
+          <p><strong>Ultimo registro:</strong> {channelUsage?.lastData.last_record_date} </p>
+          
+          
           <div className={styles.gaugePlaceholder}>              
-                {selectedAlarm?.alarm_type == "PORCENTAJE_ENCENDIDO" && (() => {
-                  const conditionOperator = selectedAlarm.condition_logic.split(" ")[1];
-                  const conditionValue = selectedAlarm.var01;  
-                  const max = (conditionOperator.includes(">")) ? conditionValue : 100;
-                  const min = (conditionOperator.includes("<")) ? conditionValue : 0;
-                  const preparedData = prepareDigitalData(primaryChannelData);
-                  const lastData = parseFloat(preparedData[preparedData.length - 1]?.porcentaje_encendido, 2);
-                  //console.log(lastData)
+                {selectedAlarm?.alarm_type == "porcentage_on" && (() => {                 
                   return (
                     <Gauge 
-                      currentValue={lastData}
-                      alarmMin={min}
-                      alarmMax={max}                              
+                      currentValue={channelUsage?.lastData.porcentageUsagePeriod}
+                      alarmMin={0}
+                      alarmMax={selectedAlarm?.var01}                              
                     />
                   );
                 })()}
-              </div>
-
-          <p><strong>Canales monitoreados:</strong> <br/>
-            <CardBtnSmall 
-              title={currentChannel?.name || 'Canal principal'} 
-              url={`/panel/ubicaciones/${businessUuid}/dataloggers/${currentChannel?.datalogger_id}/canales/${currentChannel?.uuid}`} 
-            />
-            {selectedAlarm.alarm_type === 'FUNCIONAMIENTO_SIMULTANEO' && secondaryChannel && (
-              <CardBtnSmall 
-                title={secondaryChannel?.name || 'Canal secundario'} 
-                url={`/panel/dataloggers/${currentDatalogger?.uuid}/canales/${secondaryChannel.uuid}`} 
-              />
-            )}
-          </p>
+              </div>         
 
           <p><strong>Fecha de creación:</strong> {new Date(selectedAlarm?.created_at).toLocaleDateString()}</p>
         </div>
+
+       {/* */}
       </CardImage>      
 
-      <Title2 type="historial" text={`Historial de disparos para alarma ${selectedAlarm.name}`} />
+      <div className={styles.chartContainer}>
+        <ViewChart 
+          businessUuid = {businessUuid}
+          channelUuid = {channelId}
+          title={`Datos del canal '${channelUsage?.name}'`}
+          subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${channelUsage?.averaging_period } minutos.`}
+          average_period={channelUsage?.averaging_period}
+          availablePresets={[
+            RANGE_KEYS.LAST_HOUR,
+            RANGE_KEYS.LAST_12H,
+            RANGE_KEYS.LAST_24H,
+            RANGE_KEYS.LAST_WEEK,
+            RANGE_KEYS.LAST_MONTH,
+            RANGE_KEYS.LAST_6_MONTHS,
+            RANGE_KEYS.LAST_YEAR
+          ]}
+          onRangeChange={null} //(range) => fetchCpuData(range.start, range.end)}
+        />
+      </div>
+
+      <Title2 type="historial" text={`Historial de disparos para alarma ${selectedAlarm?.name}`} />
       
-      {isLoading ? (
+      {isLoadingAlarm ? (
         <LoadingSpinner message="Cargando historial de alarmas..." />
       ) : error ? (
         <div className={styles.error}>{error}</div>

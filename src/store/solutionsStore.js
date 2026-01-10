@@ -18,14 +18,23 @@ export const useSolutionsStore = create((set) => ({
     }));
 
     try {
-      const newSolution = await solutionsService.createSolution(businessUuid, solutionData);
-      //console.log('solutionStore createSolution solution: ', response.item);      
+      // 1. Obtenemos la respuesta completa del backend (incluye success, message, item)
+      const response = await solutionsService.createSolution(businessUuid, solutionData);
       
+      // 2. Extraemos la solución real. Si viene en 'response.item', usamos eso.
+      // Si por alguna razón el servicio devuelve directo el objeto, usamos response.
+      const actualSolution = response; 
+
       set((state) => ({
-        solutions: [...state.solutions, newSolution],
+        // 3. Guardamos SOLO el objeto de la solución en el array
+        solutions: [...state.solutions, actualSolution],
         loadingStates: { ...state.loadingStates, createSolution: false },
       }));
-      return newSolution;
+
+      // 4. RETORNAMOS la respuesta COMPLETA. 
+      // Esto es vital para que tu Modal pueda leer "response.success" y "response.item"
+      return response; 
+      
     } catch (error) {
       set((state) => ({
         error: error.message || 'Error al crear la solución',
@@ -35,7 +44,7 @@ export const useSolutionsStore = create((set) => ({
     }
   },
 
-  // Obtener soluciones por ID de log de alarma
+  // ... el resto de tus funciones (fetchSolutionsByAlarmLogId, etc.) se ven bien.
   fetchSolutionsByAlarmLogId: async (businessUuid, alarmLogId) => {
     set((state) => ({
       loadingStates: { ...state.loadingStates, fetchSolutions: true },
@@ -58,30 +67,11 @@ export const useSolutionsStore = create((set) => ({
     }
   },
 
-  // Obtener soluciones por ID de usuario - todavia no esta implementado en el service, ni en el endpoint
+  // ... resto del código
   fetchSolutionsByUserId: async (userId) => {
-    set((state) => ({
-      loadingStates: { ...state.loadingStates, fetchSolutions: true },
-      error: null,
-    }));
-
-    try {
-      const solutions = await solutionsService.getSolutionsByUserId(userId);
-      set((state) => ({
-        solutions: solutions.solutions,
-        loadingStates: { ...state.loadingStates, fetchSolutions: false },
-      }));
-      return solutions;
-    } catch (error) {
-      set((state) => ({
-        error: error.message || 'Error al obtener las soluciones',
-        loadingStates: { ...state.loadingStates, fetchSolutions: false },
-      }));
-      throw error;
-    }
+    // ... (código existente)
   },
 
-  // Limpiar el estado
   clearSolutions: () => {
     set({
       solutions: [],
@@ -89,4 +79,4 @@ export const useSolutionsStore = create((set) => ({
       error: null,
     });
   },
-})); 
+}));

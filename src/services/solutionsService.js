@@ -7,7 +7,7 @@ export const solutionsService = {
       const response = await axiosClient.post(`/api/businesses/${businessUuid}/solutions`, solutionData);
       //console.log('response.data de solutionservice create', response.data.item);
       
-      return response.data.item;
+      return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
     }
