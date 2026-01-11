@@ -140,6 +140,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       <Breadcrumb datalogger={datalogger?.name} ubicacion={datalogger?.business.name}/>     
      
       <div className={styles.sectionRow}>
+        {(dataloggerUsage) ? (
         <div className={styles.gaugeContainer}>
           <Title2 text="Datos en tiempo real" type='alarmas'/>
           <div className={styles.cardsContainer}>
@@ -168,6 +169,9 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
             )}
           </div>
         </div>
+        ):
+        (<p>No hay datos de uso del datalogger. Actualice en unos minutos.</p>)
+        }
         <CardImage
           image={datalogger?.img ? `${datalogger?.img}` : '/images/default_datalogger.webp'}
           title={datalogger?.name}
@@ -219,7 +223,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       {datalogger?.channels.length > 0 ? (
         
         <ShowChannelsCards
-          channels={dataloggerUsage?.channels}
+          channels={dataloggerUsage ? dataloggerUsage?.channels : []}
           alarms={datalogger?.alarms}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}

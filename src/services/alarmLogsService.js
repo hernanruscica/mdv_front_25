@@ -4,7 +4,8 @@ export const alarmLogsService = {
   getByAlarmId: async (businessUuid, alarmId) => {
     try {
       // /businesses/{{business_uuid}}/alarmlogs/alarm/b1c2d3e4-0003-4a7b-8c9d-0e1f2a3b4c5d
-      const response = await axiosClient.get(`/api/businesses/${businessUuid}/alarmlogs/alarm/${alarmId}`);
+      const response = await axiosClient.get(`/api/businesses/${businessUuid}/alarmlogs/alarm/${alarmId}`);     
+      
       return response?.data?.items || [];
     } catch (error) {
       console.error('Error fetching alarm logs:', error);

@@ -1,12 +1,11 @@
-import React from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 
 // Definición de Colores para Eventos
-const COLOR_POWER_OFF = "#FACC15"; // Amarillo (Corte Energía)
-const COLOR_CONN_FAIL = "#F97316"; // Naranja (Fallo Conexión)
-const COLOR_NORMAL = "#0052cc";    // Azul (Normal)
+const COLOR_PHASE = "#DC2626";   // ROJO (Corte de Fase)
+const COLOR_WARNING = "#FACC15"; // AMARILLO (Reset / Fallo Transmisión)
+const COLOR_NORMAL = "#0052cc";  // AZUL (Normal)
 
 const GenericLineChart = ({ 
   data = [], 
@@ -14,49 +13,51 @@ const GenericLineChart = ({
   lineColor = COLOR_NORMAL, 
   xAxisFormatter,
   onPointClick,
-  isClickable = false 
+  isClickable = false,
+  xDomain = null, 
+  ticks = null    
 }) => {
-  
-  if (!data || data.length === 0) {
+    
+  if ((!data || data.length === 0) && !xDomain) {
     return (
       <div style={{ width: '100%', height: `${height}px`, display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#999', border: '1px dashed #ccc', borderRadius: '4px' }}>
         Sin datos para visualizar
       </div>
     );
-  }
+  }  
 
-  // --- 1. TOOLTIP PERSONALIZADO (Actualizado) ---
+  // --- TOOLTIP PERSONALIZADO ---
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
+
       const dataPoint = payload[0].payload;
       const dateLabel = new Date(dataPoint.date);
-      const formattedDate = isNaN(dateLabel.getTime()) ? dataPoint.date : dateLabel.toLocaleString();
+      let formattedDate;
 
-      // A. DETECCIÓN DE DATOS (Raw vs Resumen)
+      if (isNaN(dateLabel.getTime())) {
+        formattedDate = dataPoint.date;
+      } else {
+        if (isClickable) {
+            formattedDate = `Día: ${dateLabel.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+        } else {
+            formattedDate = dateLabel.toLocaleString('es-AR', { hour12: false });
+        }
+      }  
+
+      // Contadores y Estados
+      const countPhase = parseInt(dataPoint.phase_failures || 0);
+      const countReset = parseInt(dataPoint.energy_failures || 0); // "Reset Datalogger"
+      const countTransm = parseInt(dataPoint.conection_failures || 0); // "Fallo Transmision"
       
-      // Contadores (Vienen como string del backend, convertimos a int)
-      const countEnergy = parseInt(dataPoint.energy_failures || 0);
-      const countConn = parseInt(dataPoint.conection_failures || 0);
-      
-      // Texto específico (Vista detallada)
       const rawText = dataPoint.texto;
+      const isPhaseEvent = dataPoint.energia === 1;
 
-      // B. DETERMINAR COLOR DEL BORDE (Prioridad: Energía > Conexión > Normal)
+      // Color del borde del tooltip
       let eventColor = null;
+      if (isPhaseEvent || countPhase > 0) eventColor = COLOR_PHASE;
+      else if (countReset > 0 || countTransm > 0) eventColor = COLOR_WARNING;
+      else if (rawText === 'Iniciando equipo' || rawText === 'Fallo en transmision de trama') eventColor = COLOR_WARNING;
 
-      // Hay evento si: (Es texto de inicio) O (El contador de energía > 0)
-      const isEnergyEvent = rawText === 'Iniciando equipo' || countEnergy > 0;
-      
-      // Hay evento si: (Es texto de fallo) O (El contador de conexión > 0)
-      const isConnEvent = (rawText === 'Fallo en transmision de trama' || rawText === 'Fallo de conexion con el router') || countConn > 0;
-
-      if (isEnergyEvent) {
-        eventColor = COLOR_POWER_OFF;
-      } else if (isConnEvent) {
-        eventColor = COLOR_CONN_FAIL;
-      }
-
-      // C. ESTILOS
       const containerStyle = {
         backgroundColor: '#fff',
         padding: '10px',
@@ -73,30 +74,36 @@ const GenericLineChart = ({
           <p style={{ fontWeight: 'bold', margin: '0 0 5px' }}>{formattedDate}</p>
           <p style={{ color: lineColor, margin: 0 }}>{`Uso: ${dataPoint.value}%`}</p>
           
-          {/* CASO 1: VISTA RESUMEN (Mostrar contadores si hay errores) */}
-          {(countEnergy > 0 || countConn > 0) && (
+          {/* ALERTA DE FASE (Registro Individual o Acumulado) */}
+          {(isPhaseEvent || countPhase > 0) && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
-                {countEnergy > 0 && (
+                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: COLOR_PHASE }}>
+                   ⚠️ Corte de alguna fase {countPhase > 0 ? `(${countPhase})` : ''}
+                </p>
+             </div>
+          )}
+
+          {/* ALERTAS DE RESET Y TRANSMISIÓN */}
+          {(countReset > 0 || countTransm > 0) && (
+             <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
+                {countReset > 0 && (
                   <p style={{ margin: '2px 0', fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>
-                    ⚡ Cortes de Energía: {countEnergy}
+                    <span style={{color: COLOR_WARNING}}>⚡</span> Reset datalogger: {countReset}
                   </p>
                 )}
-                {countConn > 0 && (
+                {countTransm > 0 && (
                   <p style={{ margin: '2px 0', fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>
-                    📡 Fallos Conexión: {countConn}
+                    <span style={{color: COLOR_WARNING}}>📡</span> Fallo de transmisión: {countTransm}
                   </p>
                 )}
              </div>
           )}
 
-          {/* CASO 2: VISTA DETALLADA (Mostrar texto específico del evento) */}
+          {/* TEXTO RAW (Si coincide con eventos puntuales) */}
           {(rawText === 'Iniciando equipo' || rawText === 'Fallo en transmision de trama' || rawText === 'Fallo de conexion con el router') && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>
-                   {rawText === 'Iniciando equipo' ? "⚡ Corte de Energía" : "📡 Fallo de Conexión"}
-                </p>
-                <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#666', fontStyle: 'italic' }}>
-                  "{rawText}"
+                   {rawText === 'Iniciando equipo' ? "⚡ Reset datalogger" : "📡 Fallo de transmisión"}
                 </p>
              </div>
           )}
@@ -106,31 +113,25 @@ const GenericLineChart = ({
     return null;
   };
 
-  // --- 2. PUNTO PERSONALIZADO (DOT) ---
-  // (Esto se mantiene igual, colorea puntos individuales en la vista detallada)
+  // --- PUNTO PERSONALIZADO (DOT) ---
   const CustomDot = (props) => {
     const { cx, cy, payload } = props;
     const texto = payload.texto || '';
 
-    // CASO 1: Corte de Energía
-    if (texto === 'Iniciando equipo') {
-      return (
-        <circle cx={cx} cy={cy} r={6} fill={COLOR_POWER_OFF} stroke="#fff" strokeWidth={2} />
-      );
+    // Prioridad 1: Corte de Fase (Rojo)
+    if (payload.energia === 1) {
+      return <circle cx={cx} cy={cy} r={6} fill={COLOR_PHASE} stroke="#fff" strokeWidth={2} />;
+    }
+    
+    // Prioridad 2: Reset o Fallos (Amarillo)
+    if (texto === 'Iniciando equipo' || texto === 'Fallo en transmision de trama' || texto === 'Fallo de conexion con el router') {
+      return <circle cx={cx} cy={cy} r={6} fill={COLOR_WARNING} stroke="#fff" strokeWidth={2} />;
     }
 
-    // CASO 2: Fallo de Conexión
-    if (texto === 'Fallo en transmision de trama' || texto === 'Fallo de conexion con el router') {
-      return (
-        <circle cx={cx} cy={cy} r={6} fill={COLOR_CONN_FAIL} stroke="#fff" strokeWidth={2} />
-      );
-    }
-
-    // CASO 3: Punto Normal
+    // Puntos normales interactivos
     if (isClickable) {
        return <circle cx={cx} cy={cy} r={4} fill={lineColor} stroke="none" />;
     }
-
     return null;
   };
 
@@ -146,6 +147,11 @@ const GenericLineChart = ({
             stroke="#666"
             tick={{ fontSize: 12 }}
             minTickGap={35}
+            type={xDomain ? "number" : "category"}
+            domain={xDomain || ['auto', 'auto']}
+            ticks={ticks} 
+            allowDataOverflow={true} 
+            scale={xDomain ? "time" : "auto"} 
           />
           
           <YAxis 
@@ -162,8 +168,8 @@ const GenericLineChart = ({
             height={36}
             payload={[
               { value: 'Porcentaje de Uso', type: 'line', color: lineColor },
-              { value: 'Corte de Energía', type: 'circle', color: COLOR_POWER_OFF },
-              { value: 'Fallo de Conexión', type: 'circle', color: COLOR_CONN_FAIL }
+              { value: 'Corte de alguna fase', type: 'circle', color: COLOR_PHASE },
+              { value: 'Reset / Fallo Transmisión', type: 'circle', color: COLOR_WARNING }
             ]}
           />
           
@@ -181,6 +187,7 @@ const GenericLineChart = ({
                 if (isClickable && onPointClick) onPointClick(payload.payload); 
               }
             }} 
+            connectNulls={false} 
           />
         </LineChart>
       </ResponsiveContainer>

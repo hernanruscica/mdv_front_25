@@ -7,6 +7,7 @@ import styles from './ShowChannelsCards.module.css';
 import cardInfoStyles from "../CardInfo/CardInfo.module.css";
 import CustomTag from '../CustomTag/CustomTag';
 import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
+import { LoadingSpinner } from '../LoadingSpinner/LoadingSpinner';
 
 
 const ShowChannelsCards = ({ 
@@ -19,20 +20,25 @@ const ShowChannelsCards = ({
 
   const [showArchived, setShowArchived] = useState(false);  
 
+ if (!channels) {
+  return <LoadingSpinner message="Cargando datos..." />;
+}
+
   // Determine the base list of channels (active only, or all)
-  const sourceChannels = showArchived ? channels : channels.filter(channel => channel.is_active == 1);
+  const sourceChannels = showArchived && channels ? channels : channels.filter(channel => channel.is_active == 1);
 
   // Filter the base list by the search term
-  const channelsToShow = sourceChannels.filter(channel => {
+  const channelsToShow = (sourceChannels) ? sourceChannels.filter(channel => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
       channel?.name.toLowerCase().includes(searchTermLower) ||
       channel?.description.toLowerCase().includes(searchTermLower)
     );
-  });
+  })
+  : [];
 
-  
-  const oneChannel = channels[0];
+
+  const oneChannel = channels ? channels[0] : undefined;
   const dataloggerId = oneChannel ? oneChannel?.datalogger_id : null;
   const businessUuid = oneChannel ? oneChannel?.business.uuid : null;  
   

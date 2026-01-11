@@ -34,7 +34,7 @@ const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin ide
   );
 
   //console.log('showAddButton', showAddButton);
-  console.log('alarm example', alarms[0]);
+  //console.log('alarm example', alarms[0]);
   
   return (
 

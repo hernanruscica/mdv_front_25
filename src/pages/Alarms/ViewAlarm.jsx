@@ -65,7 +65,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage) {
 
   //console.log('selectedAlarm', selectedAlarm);
   //console.log('channelUsage', channelUsage);
-  //console.log('alarmLogs', alarmLogs);
+  console.log('alarmLogs', alarmLogs);
   
   
  

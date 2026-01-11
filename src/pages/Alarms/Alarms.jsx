@@ -64,7 +64,7 @@ const ViewAlarms = () => {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-  console.log('Alarms to display:', alarms);
+ // console.log('Alarms to display:', alarms);
   //console.log('selectedDatalogger:', selectedDatalogger);
   //console.log('selectedLocation', selectedLocation);
   //console.log('selected User', selectedUser);

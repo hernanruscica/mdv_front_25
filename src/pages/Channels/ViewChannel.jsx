@@ -15,6 +15,7 @@ import ChannelAlarms from '../../components/ChannelAlarms/ChannelAlarms';
 import { useChannelsStore } from '../../store/channelsStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useDataStore } from '../../store/dataStore';
+import { useAlarmLogsStore } from '../../store/alarmLogsStore';
 import ViewChart from '../../components/ViewChart/ViewChart';
 import { RANGE_KEYS } from '../../components/ViewChart/constants/chartRanges';
 //import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
@@ -24,6 +25,7 @@ const ViewChannel = () => {
   const navigate = useNavigate();
   const user = useAuthStore(state => state.user);
   const [modalOpen, setModalOpen] = useState(false);  
+  const [alarmsLogs, setAlarmsLogs] = useState([]);
 
    
   const { fetchChannelById, 
@@ -47,24 +49,57 @@ const ViewChannel = () => {
           },
           error: errorLoadingChannelUsage
         } = useDataStore();
+  
+    const {
+      alarmLogs,
+      fetchAlarmLogsByAlarmId,
+      loadingStates: { fetchAlarmLogs: isLoadingAlarmLogs },
+      error
+    } = useAlarmLogsStore();
 
 
   useEffect(() => {
-
-    const loadData = async () => {
-      if (businessUuid, channelId){
+  const loadData = async () => {
+    // 1. Corrección: Usar && para verificar que ambos existan
+    if (businessUuid && channelId) {
+      try {
         const currentChannel = await fetchChannelById(channelId, businessUuid);
-        await fetchAlarmsByChannel(businessUuid, channelId);        
+        const currentAlarms = await fetchAlarmsByChannel(businessUuid, channelId);
+        
         await fetchChannelUsage(businessUuid, currentChannel?.datalogger.uuid, channelId);
-        //await fetchDataloggerUsage(currentChannel?.datalogger.uuid);
+
+        // 2. Creamos el array de promesas mapeando las alarmas
+        const promises = currentAlarms.map(async (alarm) => {
+          // Hacemos el fetch individual
+          const logs = await fetchAlarmLogsByAlarmId(businessUuid, alarm.id);
+          
+          // 3. Retornamos el objeto con la estructura que pediste
+          return { 
+            uuid: alarm.uuid, 
+            logs: logs 
+          };
+        });
+
+        // 4. Esperamos a que todas se resuelvan y GUARDAMOS el resultado en una variable
+        const alarmsWithLogs = await Promise.all(promises);
+
+        //console.log('Array final:', alarmsWithLogs);
+        
+        // Aquí seguramente quieras guardar esto en un estado:
+        setAlarmsLogs(alarmsWithLogs);
+
+      } catch (error) {
+        console.error("Error cargando datos:", error);
       }
     }
-    loadData();
-  }, [businessUuid, channelId]);
+  };
+
+  loadData();
+}, [businessUuid, channelId]);
 
 
   if (isLoadingChannel || isUpdatingChannel || isLoadingAlarmsByChannel      
-      || isLoadingChannelUsage ) {
+      || isLoadingChannelUsage || isLoadingAlarmLogs ) {
     return <LoadingSpinner message="Cargando datos..." />;
     }
     
@@ -115,9 +150,11 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
   );
     
   //console.log('selectedChannel', selectedChannel);
-  //console.log('alarms by channel', seletedChannelAlarms);  channelDailyData, channelWeeklyData
+  //console.log('alarms by channel', seletedChannelAlarms);  
   //console.log('channelAllRegistersData :', channelAllRegistersData);
   //console.log('channelUsage', channelUsage);
+  //console.log('alarmLogs', alarmLogs);
+  
   
   
   
