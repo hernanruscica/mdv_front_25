@@ -21,13 +21,60 @@ const ViewChart = ({
     RANGE_KEYS.LAST_MONTH,
     RANGE_KEYS.LAST_6_MONTHS,
     RANGE_KEYS.LAST_YEAR
-  ]
+  ],
+  alarmLogs = [], 
+  alarmLogsComunicationFailure = [] 
 }) => {
   const [activeRange, setActiveRange] = useState(availablePresets[0]);
   const [zoomedWeek, setZoomedWeek] = useState(null); 
   const [zoomedDay, setZoomedDay] = useState(null); 
   
   const nowRef = useRef(new Date());
+
+  // --- 1. PROCESAMIENTO UNIFICADO DE ALARMAS ---
+  const processedAlarms = useMemo(() => {
+    const combinedAlarms = [];
+
+    const formatAlarm = (log) => {
+        let ts = new Date(log.triggered_at).getTime();
+        // Ajuste de Zona Horaria a los datos de alarma (UTC -> Local)
+        if (timezoneOffset !== 0) {
+           ts += (timezoneOffset * 60 * 60 * 1000);
+        }
+        const dateStr = new Date(ts).toLocaleDateString('en-CA'); 
+
+        return {
+          timestamp: ts,
+          // Guardamos el valor original, pero luego decidiremos si usarlo o no
+          originalValue: log.triggered_value !== null ? Number(log.triggered_value) : null,
+          message: log.message,
+          alarmType: log.alarm_type, 
+          dateStr: dateStr 
+        };
+    };
+
+    // A. Procesar alarmLogs (Anidado)
+    if (alarmLogs && Array.isArray(alarmLogs)) {
+        const flatLogs = alarmLogs.flatMap(item => item.logs || []);
+        flatLogs.forEach(log => {
+            if (log.triggered === 1 && log.alarm_type === 'porcentage_on') {
+                combinedAlarms.push(formatAlarm(log));
+            }
+        });
+    }
+
+    // B. Procesar alarmLogsComunicationFailure (Plano)
+    if (alarmLogsComunicationFailure && Array.isArray(alarmLogsComunicationFailure)) {
+        alarmLogsComunicationFailure.forEach(log => {
+            if (log.triggered === 1) { 
+                combinedAlarms.push(formatAlarm(log));
+            }
+        });
+    }
+
+    return combinedAlarms;
+
+  }, [alarmLogs, alarmLogsComunicationFailure, timezoneOffset]);
 
   const { 
     fetchAllRegistersChannelData, 
@@ -48,7 +95,7 @@ const ViewChart = ({
     nowRef.current = new Date();
   }, [activeRange, channelAllRegistersData]);
 
-  // --- CLICK EN SEMANA ---
+  // --- HANDLERS ---
   const handleWeekClick = (dataPoint) => {
     if (dataPoint && dataPoint.startDate && dataPoint.endDate) {
       const [sy, sm, sd] = dataPoint.startDate.split('-').map(Number);
@@ -80,51 +127,56 @@ const ViewChart = ({
   const getFixedDomain = () => {
     if (showWeeklyBarChart) return null; 
     
-    // 1. Zoom Día (Prioridad Máxima)
     if (zoomedDay) {
         const start = zoomedDay.getTime();
         const end = start + (24 * 60 * 60 * 1000); 
         return [start, end];
     }
 
-    // 2. Zoom Semana
     if (zoomedWeek) {
         return [zoomedWeek.start.getTime(), zoomedWeek.end.getTime()];
     }
 
-    // 3. Rangos Predefinidos
-    // CORRECCIÓN DESPLAZAMIENTO: Alineamos al inicio del día (00:00:00) para vistas de calendario
     const isDailyRange = activeRange === RANGE_KEYS.LAST_WEEK || activeRange === RANGE_KEYS.LAST_MONTH;
     let start, end;
 
     if (isDailyRange) {
         const now = new Date();
-        now.setHours(23, 59, 59, 999); // Final del día actual
+        now.setHours(23, 59, 59, 999); 
         end = now.getTime();
 
         const startDate = new Date(now);
-        // Restamos días según el rango
         if (activeRange === RANGE_KEYS.LAST_WEEK) startDate.setDate(startDate.getDate() - 7);
         if (activeRange === RANGE_KEYS.LAST_MONTH) startDate.setDate(startDate.getDate() - 30);
         
-        // Forzamos el inicio a las 00:00:00 para alinear con los ticks
         startDate.setHours(0, 0, 0, 0);
         start = startDate.getTime();
 
     } else {
-        // Vistas de "Últimas X Horas" (Ventana deslizante)
-        const nowWithOffset = new Date(nowRef.current.getTime() + ( 60 * 60 ));
-        end = nowWithOffset.getTime();
+        // --- CORRECCIÓN ESCALA 1H/12H/24H ---
+        // 'nowRef.current' es la hora del navegador (Local).
+        // Como ya aplicamos el offset a los DATOS para llevarlos a Local,
+        // el dominio también debe estar en Local.
+        // NO APLICAMOS OFFSET AQUÍ, usamos la hora tal cual es.
+        
+        let nowTs = nowRef.current.getTime();
+        
+        // Sumamos un pequeño buffer visual (1 hora) a la derecha
+        // para que el último punto no quede pegado al borde.
+        let buffer = 60 * 60 * 1000; 
+        
+        end = nowTs;// + buffer; 
+        let endReference = nowTs; // El cálculo hacia atrás parte del "Ahora" real
 
         switch (activeRange) {
           case RANGE_KEYS.LAST_HOUR:
-            start = end - (60 * 60 * 1000); break;
+            start = endReference - (60 * 60 * 1000); break;
           case RANGE_KEYS.LAST_12H:
-            start = end - (12 * 60 * 60 * 1000); break;
+            start = endReference - (12 * 60 * 60 * 1000); break;
           case RANGE_KEYS.LAST_24H:
-            start = end - (24 * 60 * 60 * 1000); break;
+            start = endReference - (24 * 60 * 60 * 1000); break;
           default:
-            start = end;
+            start = endReference;
         }
     }
 
@@ -133,7 +185,6 @@ const ViewChart = ({
 
   const xDomain = getFixedDomain();
 
-  // --- GENERACIÓN DE TICKS (MARCAS) ---
   const generateTicks = (domain) => {
     if (!domain) return null;
     const [start, end] = domain;
@@ -159,23 +210,7 @@ const ViewChart = ({
 
   const customTicks = generateTicks(xDomain);
 
-  const getMonday = (d) => {
-    const date = new Date(d);
-    const day = date.getDay(); 
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1); 
-    const monday = new Date(date.setDate(diff));
-    monday.setHours(0,0,0,0);
-    return monday;
-  };
-
-  const toLocalYYYYMMDD = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  // --- 3. MAPEO Y ORDENAMIENTO DE DATOS ---
+  // --- 2. MAPEO Y ORDENAMIENTO (Integración de Alarmas) ---
   const standardizedData = useMemo(() => {
     let rawData = [];
     let dataType = 'unknown';
@@ -211,27 +246,37 @@ const ViewChart = ({
     }
 
     if (dataType === 'weekly') {
+        // ... (Lógica Semanal sin cambios)
         const weeklyData = Array.isArray(rawData) ? rawData : [];
         const { start: rangeStart } = PRESETS[activeRange].getValue();
+        const getMonday = (d) => {
+            const date = new Date(d);
+            const day = date.getDay(); 
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1); 
+            const monday = new Date(date.setDate(diff));
+            monday.setHours(0,0,0,0);
+            return monday;
+        };
+        const toLocalYYYYMMDD = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
         const endDate = new Date(); 
-        
         let currentWeekStart = getMonday(rangeStart);
         const finalWeekStart = getMonday(endDate);
         const fullWeeks = [];
-
         while (currentWeekStart <= finalWeekStart) {
             const currentWeekEnd = new Date(currentWeekStart);
             currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
-
             const startStr = toLocalYYYYMMDD(currentWeekStart);
             const endStr = toLocalYYYYMMDD(currentWeekEnd);
-
             const foundData = weeklyData.find(d => {
                 if (!d.inicio_semana) return false;
                 const apiDate = d.inicio_semana.includes('T') ? d.inicio_semana.split('T')[0] : d.inicio_semana;
                 return apiDate === startStr; 
             });
-
             const getWeekNumber = (d) => {
                 const date = new Date(d.getTime());
                 date.setHours(0, 0, 0, 0);
@@ -239,9 +284,7 @@ const ViewChart = ({
                 const week1 = new Date(date.getFullYear(), 0, 4);
                 return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
             };
-
             const weekLabel = foundData ? foundData.numero_semana : getWeekNumber(currentWeekStart);
-
             fullWeeks.push({
                 label: weekLabel,
                 value: foundData ? Number(foundData.porcentaje_semanal || 0) : 0,
@@ -252,7 +295,6 @@ const ViewChart = ({
                 startDate: startStr,
                 endDate: endStr      
             });
-
             currentWeekStart.setDate(currentWeekStart.getDate() + 7);
         }
         return fullWeeks;
@@ -260,14 +302,16 @@ const ViewChart = ({
 
     if (!rawData || !Array.isArray(rawData)) return [];
 
-    const mappedData = rawData.map((item) => {
+    // A. Mapeo de datos NORMALES
+    let mappedData = rawData.map((item) => {
       let date = null;
       let value = 0;
       let texto = null; 
       let conection_failures = 0;
       let energy_failures = 0;
-      let phase_failures = 0; // NUEVO
+      let phase_failures = 0; 
       let energia = 0;
+      let alarm_count = 0;
 
       if (dataType === 'registers') {
         date = item.fecha; 
@@ -280,8 +324,6 @@ const ViewChart = ({
         value = item.porcentaje_uso || item.porcentaje_promedio;
         conection_failures = Number(item.conection_failures || 0); 
         energy_failures = Number(item.energy_failures || 0);
-        
-        // Mapeo del nuevo campo del backend
         phase_failures = Number(item.phase_failures || 0);
       } 
 
@@ -290,12 +332,10 @@ const ViewChart = ({
 
       let finalDate = date;
       if (date && typeof date === 'string') {
-          // CORRECCIÓN DESPLAZAMIENTO (Parseo Manual)
           if (date.includes('T')) {
              const d = new Date(date);
              if (!isNaN(d.getTime())) finalDate = d.getTime();
           } else {
-             // Si es YYYY-MM-DD lo forzamos a 00:00 local
              const [y, m, d] = date.split('-').map(Number);
              finalDate = new Date(y, m - 1, d).getTime();
           }
@@ -305,24 +345,71 @@ const ViewChart = ({
           finalDate += (timezoneOffset * 60 * 60 * 1000);
       }
 
+      // --- CÁLCULO DE CONTADOR DE ALARMAS DIARIO ---
+      if (dataType === 'daily') {
+          const pointDateStr = new Date(finalDate).toLocaleDateString('en-CA');
+          alarm_count = processedAlarms.filter(a => a.dateStr === pointDateStr).length;
+      }
+
       return { 
         date: finalDate, 
         value: Number(value), 
         texto: texto,
-        conection_failures: conection_failures,
-        energy_failures: energy_failures,
-        phase_failures: phase_failures, // PASAMOS EL DATO
-        energia: energia
+        conection_failures,
+        energy_failures,
+        phase_failures, 
+        energia,
+        alarm_count,
+        isAlarm: false,
+        alarmType: null
       }; 
     });
 
-    const sortedData = mappedData.sort((a, b) => {
-      const dateA = typeof a.date === 'number' ? a.date : new Date(a.date || a.startDate).getTime();
-      const dateB = typeof b.date === 'number' ? b.date : new Date(b.date || b.startDate).getTime();
-      return dateA - dateB; 
-    });
+    // B. Inyección de ALARMAS (Solo en vista detallada)
+    if (dataType === 'registers' && processedAlarms.length > 0) {
+        
+        const alarmPoints = processedAlarms.map(alarm => {
+            let yValue = alarm.originalValue;
 
-    // CORRECCIÓN HUECOS (GAPS)
+            // --- CORRECCIÓN PUNTOS VERDES (PEGAR A LÍNEA) ---
+            // Si es fallo de comunicación (o si no tiene valor propio),
+            // buscamos el punto de datos del sensor más cercano para "pegarlo" a la línea.
+            // Esto asegura que el punto verde no quede "volando" en 3.08 (minutos) cuando el eje Y es 0-100%.
+            if (alarm.alarmType === 'comunication_failure' || yValue === null) {
+                if (mappedData.length > 0) {
+                    const closest = mappedData.reduce((prev, curr) => {
+                        return (Math.abs(curr.date - alarm.timestamp) < Math.abs(prev.date - alarm.timestamp) ? curr : prev);
+                    });
+                    
+                    // Asignamos el valor de la serie si existe
+                    if (closest && closest.value !== null && closest.value !== undefined) {
+                        yValue = closest.value;
+                    }
+                }
+            }
+
+            // Si aún así es null, no lo mostramos
+            if (yValue === null || yValue === undefined) return null;
+
+            return {
+                date: alarm.timestamp, 
+                value: yValue,
+                texto: alarm.message, 
+                isAlarm: true,        
+                alarmType: alarm.alarmType, 
+                conection_failures: 0,
+                energy_failures: 0,
+                phase_failures: 0,
+                energia: 0,
+                alarm_count: 0
+            };
+        }).filter(p => p !== null); 
+
+        mappedData = [...mappedData, ...alarmPoints];
+    }
+
+    const sortedData = mappedData.sort((a, b) => a.date - b.date);
+
     const dataWithGaps = [];
     let gapThreshold = 0;
     if (dataType === 'daily') {
@@ -340,7 +427,6 @@ const ViewChart = ({
             const diff = nextItem.date - currentItem.date;
 
             if (diff > gapThreshold) {
-                // Insertamos el punto nulo en la MITAD del hueco
                 dataWithGaps.push({
                     date: currentItem.date + (diff / 2), 
                     value: null
@@ -351,8 +437,9 @@ const ViewChart = ({
 
     return dataWithGaps;
 
-  }, [activeRange, zoomedDay, zoomedWeek, channelAllRegistersData, channelDailyData, channelWeeklyData, timezoneOffset, average_period]);
+  }, [activeRange, zoomedDay, zoomedWeek, channelAllRegistersData, channelDailyData, channelWeeklyData, timezoneOffset, average_period, processedAlarms]);
 
+  // ... (Resto del código sin cambios) ...
   const isLineChartClickable = !zoomedDay && (
     activeRange === RANGE_KEYS.LAST_WEEK || 
     activeRange === RANGE_KEYS.LAST_MONTH ||

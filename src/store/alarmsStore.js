@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { alarmsService } from '../services/alarmsService';
-import { filter } from 'd3';
 
 export const useAlarmsStore = create((set) => ({
   alarms: [],
@@ -202,7 +201,7 @@ export const useAlarmsStore = create((set) => ({
     
     try {
       const alarms = await alarmsService.getAll(locationId);
-      // console.log('Alarms by channel:', alarms);
+       //console.log('Alarms by channel:', alarms);
       const filteredAlarms = alarms?.filter(alarm => alarm.channel_uuid == channelId);
       //console.log('filtered alarms', filteredAlarms);
       
@@ -210,7 +209,7 @@ export const useAlarmsStore = create((set) => ({
         alarms: Array.isArray(filteredAlarms) ? filteredAlarms : [],
         loadingStates: { ...state.loadingStates, fetchAlarmsByChannel: false }
       }));      
-      return Array.isArray(alarms) ? alarms : [];
+      return Array.isArray(filteredAlarms) ? filteredAlarms : [];
     } catch (error) {
       set(state => ({
         error: 'Error fetching channel alarms',

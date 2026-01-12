@@ -13,6 +13,18 @@ export const alarmLogsService = {
     }
   },
 
+  getByDataloggerId: async (businessUuid, dataloggerId) => {
+    try {
+      // /businesses/{{business_uuid}}/alarmlogs/datalogger/{{datalogger_uuid}}
+      const response = await axiosClient.get(`/api/businesses/${businessUuid}/alarmlogs/datalogger/${dataloggerId}`);     
+      
+      return response?.data?.items || [];
+    } catch (error) {
+      console.error('Error fetching alarm logs by datalogger id:', error);
+      throw error;
+    }
+  },
+
   update: async (id, data) => {
     try {
       // 

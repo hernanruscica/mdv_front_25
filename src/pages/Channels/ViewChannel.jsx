@@ -25,7 +25,8 @@ const ViewChannel = () => {
   const navigate = useNavigate();
   const user = useAuthStore(state => state.user);
   const [modalOpen, setModalOpen] = useState(false);  
-  const [alarmsLogs, setAlarmsLogs] = useState([]);
+  const [currentAlarmsLogs, setCurrentAlarmsLogs] = useState([]);
+  const [alarmLogsComunicationFailure, setAlarmLogsComunicationFailure] = useState([]);
 
    
   const { fetchChannelById, 
@@ -52,9 +53,11 @@ const ViewChannel = () => {
   
     const {
       alarmLogs,
+      alarmLogsDatalogger,
       fetchAlarmLogsByAlarmId,
-      loadingStates: { fetchAlarmLogs: isLoadingAlarmLogs },
-      error
+      fetchAlarmLogsByDataloggerId,
+      loadingStates: { fetchAlarmLogs: isLoadingAlarmLogs, fetchAlarmLogsByDataloggerId: isLoadingAlarmLogsByDataloggerId },
+      error: errorLoadingAlarmLogs
     } = useAlarmLogsStore();
 
 
@@ -66,12 +69,17 @@ const ViewChannel = () => {
         const currentChannel = await fetchChannelById(channelId, businessUuid);
         const currentAlarms = await fetchAlarmsByChannel(businessUuid, channelId);
         
+        //console.log('currentAlarms', currentAlarms);
+        
         await fetchChannelUsage(businessUuid, currentChannel?.datalogger.uuid, channelId);
+
+        const alarmLogsByDatalogger = await fetchAlarmLogsByDataloggerId(businessUuid, currentChannel?.datalogger.uuid);
+        setAlarmLogsComunicationFailure(alarmLogsByDatalogger?.filter(log => log.alarm_type === "comunication_failure"));
 
         // 2. Creamos el array de promesas mapeando las alarmas
         const promises = currentAlarms.map(async (alarm) => {
           // Hacemos el fetch individual
-          const logs = await fetchAlarmLogsByAlarmId(businessUuid, alarm.id);
+          const logs = await fetchAlarmLogsByAlarmId(businessUuid, alarm.uuid);
           
           // 3. Retornamos el objeto con la estructura que pediste
           return { 
@@ -86,7 +94,7 @@ const ViewChannel = () => {
         //console.log('Array final:', alarmsWithLogs);
         
         // Aquí seguramente quieras guardar esto en un estado:
-        setAlarmsLogs(alarmsWithLogs);
+        setCurrentAlarmsLogs(alarmsWithLogs);
 
       } catch (error) {
         console.error("Error cargando datos:", error);
@@ -99,11 +107,11 @@ const ViewChannel = () => {
 
 
   if (isLoadingChannel || isUpdatingChannel || isLoadingAlarmsByChannel      
-      || isLoadingChannelUsage || isLoadingAlarmLogs ) {
+      || isLoadingChannelUsage || isLoadingAlarmLogs || isLoadingAlarmLogsByDataloggerId) {
     return <LoadingSpinner message="Cargando datos..." />;
     }
     
-  if (errorChannel || errorLoadingChannelUsage || errorLoadindAlarms) {
+  if (errorChannel || errorLoadingChannelUsage || errorLoadindAlarms || errorLoadingAlarmLogs) {
     return <div className={styles.error}>Error Cargando los datos</div>;
     }
   
@@ -153,7 +161,9 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
   //console.log('alarms by channel', seletedChannelAlarms);  
   //console.log('channelAllRegistersData :', channelAllRegistersData);
   //console.log('channelUsage', channelUsage);
-  //console.log('alarmLogs', alarmLogs);
+  //console.log('currentAlarmsLogs', currentAlarmsLogs); alarm_type: "comunication_failure"
+  console.log('alarmLogsComunicationFailure', alarmLogsComunicationFailure);
+  
   
   
   
@@ -232,6 +242,8 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
           RANGE_KEYS.LAST_YEAR
         ]}
         onRangeChange={null} //(range) => fetchCpuData(range.start, range.end)}
+        alarmLogs={currentAlarmsLogs}
+        alarmLogsComunicationFailure={alarmLogsComunicationFailure}
       />
       </div>
        

@@ -24,6 +24,7 @@ const ViewAlarm = () => {
   const [modalArchiveOpen, setModalArchiveOpen] = useState(false);
   const [modalLogOpen, setModalLogOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
+   const [currentAlarmsLogs, setCurrentAlarmsLogs] = useState([]);
 
 
   const {
@@ -53,8 +54,18 @@ useEffect(() => {
       const alarmData = await fetchAlarmById(businessUuid, alarmId);
       if (alarmData){
         await fetchChannelUsage(businessUuid, alarmData.datalogger_uuid, alarmData.channel_uuid);
+        
+        const logs = await fetchAlarmLogsByAlarmId(businessUuid, alarmData.uuid);                 
+      
+        const alarmLogs = {
+          uuid: alarmData.uuid,
+          logs: logs
+        }               
+        
+        
+        setCurrentAlarmsLogs([alarmLogs]);
       };
-      await fetchAlarmLogsByAlarmId(businessUuid, alarmId);
+      
     }}
   loadData();
 }, [businessUuid, alarmId, modalLogOpen]);
@@ -65,7 +76,8 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage) {
 
   //console.log('selectedAlarm', selectedAlarm);
   //console.log('channelUsage', channelUsage);
-  console.log('alarmLogs', alarmLogs);
+  //console.log('alarmLogs', alarmLogs);
+  console.log('currentAlarmLoigs', currentAlarmsLogs);
   
   
  
@@ -211,6 +223,8 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage) {
             RANGE_KEYS.LAST_YEAR
           ]}
           onRangeChange={null} //(range) => fetchCpuData(range.start, range.end)}
+          alarmLogs={currentAlarmsLogs}
+          
         />
       </div>
 
