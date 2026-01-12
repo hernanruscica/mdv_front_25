@@ -13,7 +13,7 @@ const ViewChart = ({
   subtitle = 'Evolución del porcentaje de uso',   
   average_period = 10,
   onRangeChange, 
-  timezoneOffset = +3,
+  timezoneOffset = import.meta.env.VITE_APP_DEFAULT_TIMEZONE_OFFSET || 0,
   availablePresets = [ 
     RANGE_KEYS.LAST_HOUR, 
     RANGE_KEYS.LAST_24H, 
