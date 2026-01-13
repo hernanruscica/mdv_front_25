@@ -13,8 +13,7 @@ const ViewChart = ({
   subtitle = 'Evolución del porcentaje de uso',   
   average_period = 10,
   onRangeChange, 
-  // Offset configurado en .env (ej: -3 para Buenos Aires)
-  timezoneOffset = Number(import.meta.env.VITE_APP_TIMEZONE_OFFSET) || 0,
+  timezoneOffset = Number(import.meta.env.VITE_APP_TIMEZONE_OFFSET) || -3,
   availablePresets = [ 
     RANGE_KEYS.LAST_HOUR, 
     RANGE_KEYS.LAST_24H, 
@@ -32,53 +31,52 @@ const ViewChart = ({
   
   const nowRef = useRef(new Date());
 
-  // --- 1. PROCESAMIENTO UNIFICADO DE ALARMAS ---
+  // --- DEBUG ---
+  useEffect(() => {
+    console.log(`%c[ViewChart] Init`, 'color: orange; font-weight: bold;', {
+        offset: timezoneOffset,
+        range: activeRange
+    });
+  }, [timezoneOffset, activeRange]);
+
+  // --- 1. PROCESAMIENTO DE ALARMAS ---
   const processedAlarms = useMemo(() => {
     const combinedAlarms = [];
 
-    const formatAlarm = (log) => {
+    const formatAlarm = (log, typeOverride) => {
         let ts = new Date(log.triggered_at).getTime();
-        
-        // APLICAMOS OFFSET VISUAL (UTC -> Local)
-        // Solo para pintar el punto en el gráfico, no para pedir datos.
-        if (timezoneOffset !== 0) {
-           ts += (timezoneOffset * 60 * 60 * 1000);
-        }
-        
-        // Fecha string para comparaciones (usamos ISO parte fecha para evitar desajustes)
         const dateStr = new Date(ts).toISOString().split('T')[0];
 
         return {
           timestamp: ts,
           originalValue: log.triggered_value !== null ? Number(log.triggered_value) : null,
           message: log.message,
-          alarmType: log.alarm_type, 
-          dateStr: dateStr 
+          alarmType: typeOverride || log.alarm_type, // 'porcentage_on' o 'comunication_failure'
+          dateStr: dateStr
         };
     };
 
-    // A. Procesar alarmLogs (Anidado)
+    // A. Alarmas de Porcentaje (Violeta)
     if (alarmLogs && Array.isArray(alarmLogs)) {
         const flatLogs = alarmLogs.flatMap(item => item.logs || []);
         flatLogs.forEach(log => {
             if (log.triggered === 1 && log.alarm_type === 'porcentage_on') {
-                combinedAlarms.push(formatAlarm(log));
+                combinedAlarms.push(formatAlarm(log, 'porcentage_on'));
             }
         });
     }
 
-    // B. Procesar alarmLogsComunicationFailure (Plano)
+    // B. Alarmas de Comunicación (Verde)
     if (alarmLogsComunicationFailure && Array.isArray(alarmLogsComunicationFailure)) {
         alarmLogsComunicationFailure.forEach(log => {
             if (log.triggered === 1) { 
-                combinedAlarms.push(formatAlarm(log));
+                combinedAlarms.push(formatAlarm(log, 'comunication_failure'));
             }
         });
     }
-
+    
     return combinedAlarms;
-
-  }, [alarmLogs, alarmLogsComunicationFailure, timezoneOffset]);
+  }, [alarmLogs, alarmLogsComunicationFailure]);
 
   const { 
     fetchAllRegistersChannelData, 
@@ -157,22 +155,11 @@ const ViewChart = ({
         start = startDate.getTime();
 
     } else {
-        // --- CORRECCIÓN CRÍTICA DE VISUALIZACIÓN ---
-        // 1. Obtenemos el tiempo "Ahora" real en UTC (epoch)
         let nowTs = nowRef.current.getTime();
-        
-        // 2. DESPLAZAMOS LA VENTANA DEL GRÁFICO
-        // Como hemos movido los DATOS 3 horas hacia atrás (para que parezca hora local),
-        // debemos mover la "cámara" del gráfico 3 horas hacia atrás también.
-        // Si no hacemos esto, el gráfico muestra 00:52 (futuro vacío) y los datos están en 21:52 (fuera de pantalla).
         if (timezoneOffset !== 0) {
             nowTs += (timezoneOffset * 60 * 60 * 1000);
         }
-        
-        // 3. Definimos el final del gráfico (con un pequeño margen de 1 hora a la derecha)
-        end = nowTs + (60 * 60 * 1000); 
-        
-        // 4. Calculamos el inicio restando el rango desde el "Ahora ajustado"
+        end = nowTs; //+ (10 * 60 * 1000); 
         const referenceEnd = nowTs;
 
         switch (activeRange) {
@@ -186,7 +173,6 @@ const ViewChart = ({
             start = referenceEnd;
         }
     }
-
     return [start, end];
   };
 
@@ -217,7 +203,7 @@ const ViewChart = ({
 
   const customTicks = generateTicks(xDomain);
 
-  // --- 2. MAPEO Y ORDENAMIENTO (Datos + Alarmas) ---
+  // --- 2. MAPEO Y ORDENAMIENTO ---
   const standardizedData = useMemo(() => {
     let rawData = [];
     let dataType = 'unknown';
@@ -252,7 +238,6 @@ const ViewChart = ({
       }
     }
 
-    // (Lógica Semanal - se mantiene igual)
     if (dataType === 'weekly') {
         const weeklyData = Array.isArray(rawData) ? rawData : [];
         const { start: rangeStart } = PRESETS[activeRange].getValue();
@@ -347,13 +332,7 @@ const ViewChart = ({
           }
       }
 
-      // APLICAMOS OFFSET A LOS DATOS (Para visualización)
-      if (typeof finalDate === 'number' && timezoneOffset !== 0) {
-          finalDate += (timezoneOffset * 60 * 60 * 1000);
-      }
-
       if (dataType === 'daily') {
-          // Usamos ISO string para comparar solo fecha (YYYY-MM-DD)
           const pointDateStr = new Date(finalDate).toISOString().split('T')[0];
           alarm_count = processedAlarms.filter(a => a.dateStr === pointDateStr).length;
       }
@@ -366,6 +345,7 @@ const ViewChart = ({
         energy_failures,
         phase_failures, 
         energia,
+        isEnergyEvent: energia === 1,
         alarm_count,
         isAlarm: false,
         alarmType: null
@@ -374,16 +354,32 @@ const ViewChart = ({
 
     if (dataType === 'registers' && processedAlarms.length > 0) {
         
-        const alarmPoints = processedAlarms.map(alarm => {
-            let yValue = alarm.originalValue;
+        // --- NUEVA LÓGICA: AGRUPAR ALARMAS POR TIMESTAMP ---
+        const alarmsByTime = {};
+        
+        processedAlarms.forEach(alarm => {
+            if (!alarmsByTime[alarm.timestamp]) {
+                alarmsByTime[alarm.timestamp] = [];
+            }
+            alarmsByTime[alarm.timestamp].push(alarm);
+        });
 
-            // Si es fallo comunicación o null, busca el punto de dato más cercano
-            if (alarm.alarmType === 'comunication_failure' || yValue === null) {
-                if (mappedData.length > 0) {
+        // Generamos puntos basados en los grupos
+        const alarmPoints = Object.keys(alarmsByTime).map(tsKey => {
+            const timestamp = Number(tsKey);
+            const alarmsGroup = alarmsByTime[tsKey];
+            
+            // 1. Determinar el valor Y (interpolación vecina usando la primera alarma como referencia)
+            // Tomamos el primer valor 'originalValue' válido del grupo, o interpolamos.
+            const referenceAlarm = alarmsGroup[0];
+            let yValue = referenceAlarm.originalValue;
+
+            if (referenceAlarm.alarmType === 'comunication_failure' || yValue === null) {
+                 // Si alguna del grupo tiene valor nulo o es fallo de com, buscamos vecino
+                 if (mappedData.length > 0) {
                     const closest = mappedData.reduce((prev, curr) => {
-                        return (Math.abs(curr.date - alarm.timestamp) < Math.abs(prev.date - alarm.timestamp) ? curr : prev);
+                        return (Math.abs(curr.date - timestamp) < Math.abs(prev.date - timestamp) ? curr : prev);
                     });
-                    
                     if (closest && closest.value !== null && closest.value !== undefined) {
                         yValue = closest.value;
                     }
@@ -392,19 +388,29 @@ const ViewChart = ({
 
             if (yValue === null || yValue === undefined) return null;
 
+            // 2. Combinar Mensajes (para mostrar detalle de TODAS)
+            // Ejemplo: "Fallo comunicación | Porcentaje alto..."
+            const combinedMessage = alarmsGroup.map(a => a.message).join(' | ');
+
+            // 3. Determinar el Color (Tipo)
+            // Si hay mezcla, priorizamos 'porcentage_on' (Violeta) sobre 'comunication_failure' (Verde)
+            const hasPorcentageAlarm = alarmsGroup.some(a => a.alarmType === 'porcentage_on');
+            const finalAlarmType = hasPorcentageAlarm ? 'porcentage_on' : referenceAlarm.alarmType;
+
             return {
-                date: alarm.timestamp, 
+                date: timestamp,
                 value: yValue,
-                texto: alarm.message, 
-                isAlarm: true,        
-                alarmType: alarm.alarmType, 
+                texto: combinedMessage, // Aquí va el texto concatenado
+                isAlarm: true,
+                alarmType: finalAlarmType, 
                 conection_failures: 0,
                 energy_failures: 0,
                 phase_failures: 0,
                 energia: 0,
+                isEnergyEvent: false,
                 alarm_count: 0
             };
-        }).filter(p => p !== null); 
+        }).filter(p => p !== null);
 
         mappedData = [...mappedData, ...alarmPoints];
     }
@@ -440,7 +446,8 @@ const ViewChart = ({
 
   }, [activeRange, zoomedDay, zoomedWeek, channelAllRegistersData, channelDailyData, channelWeeklyData, timezoneOffset, average_period, processedAlarms]);
 
-  // ... (Resto de los helpers visuales) ...
+  // ... (Resto del componente sin cambios) ...
+
   const isLineChartClickable = !zoomedDay && (
     activeRange === RANGE_KEYS.LAST_WEEK || 
     activeRange === RANGE_KEYS.LAST_MONTH ||
@@ -454,7 +461,6 @@ const ViewChart = ({
     const date = new Date(tickItem);
     if (isNaN(date.getTime())) return tickItem;
 
-    // USAMOS MÉTODOS UTC (getUTCHours) porque tickItem ya es "Hora Local simulada en timestamp UTC"
     if (zoomedDay || activeRange === RANGE_KEYS.LAST_HOUR || activeRange === RANGE_KEYS.LAST_12H || activeRange === RANGE_KEYS.LAST_24H) {
        const hours = String(date.getUTCHours()).padStart(2, '0');
        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
@@ -469,12 +475,14 @@ const ViewChart = ({
   const fetchDataForRange = async (rangeKey, start, end) => {
     if (!channelUuid) return;
     
-    // --- CORRECCIÓN FETCH: ENVÍO UTC PURO (Z) ---
-    // start y end son objetos Date que vienen de los PRESETS (que usan new Date() = Ahora).
-    // .toISOString() devuelve "2026-01-13T00:52:00.000Z".
-    // Esto es lo que el backend espera y soluciona el 400 Bad Request.
-    const s = start.toISOString(); 
-    const e = end.toISOString();
+    const shift = timezoneOffset * 60 * 60 * 1000;
+    const sTs = start.getTime() + shift;
+    const eTs = end.getTime() + shift;
+
+    const s = new Date(sTs).toISOString();
+    const e = new Date(eTs).toISOString();
+
+    console.log(`🌐 [Fetch] ${rangeKey}: ${s} -> ${e}`);
 
     try {
       if (rangeKey === 'CUSTOM_DAY_ZOOM') {
@@ -538,6 +546,13 @@ const ViewChart = ({
   };
 
   if (errorLoadingData) return <div style={{color:'red'}}>Error: {errorLoadingData}</div>;
+
+  if (!isLoading){
+    console.log('alarmLogs',alarmLogs);
+    console.log('alarmLogsComunicationFailure',alarmLogsComunicationFailure);
+    
+    
+  }
 
   let displayTitle = "";
   if (zoomedDay) {
@@ -607,7 +622,8 @@ const ViewChart = ({
           }}>
             <LoadingSpinner message="Cargando datos..." />
           </div>
-        )}
+        )}       
+        
 
         {showWeeklyBarChart ? (
            <GenericBarChart 

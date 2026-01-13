@@ -84,6 +84,8 @@ const GenericLineChart = ({
         borderRadius: '5px',
         boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
       };
+      //console.log(alarmCount);
+      
 
       return (
         <div style={containerStyle}>
