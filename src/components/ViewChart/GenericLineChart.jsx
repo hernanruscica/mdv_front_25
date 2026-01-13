@@ -93,7 +93,6 @@ const GenericLineChart = ({
              {isAlarmPoint ? `Valor: ${dataPoint.value}%` : `Uso: ${dataPoint.value}%`}
           </p>
           
-          {/* SECCIÓN ALARMAS */}
           {alarmCount > 0 && !isAlarmPoint && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: COLOR_ALARM_VIOLET }}>
@@ -113,7 +112,6 @@ const GenericLineChart = ({
              </div>
           )}
 
-          {/* SECCIÓN FASE */}
           {(isPhaseEvent || countPhase > 0) && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: COLOR_PHASE }}>
@@ -122,7 +120,6 @@ const GenericLineChart = ({
              </div>
           )}
 
-          {/* SECCIÓN ADVERTENCIAS */}
           {(countReset > 0 || countTransm > 0) && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 {countReset > 0 && (
