@@ -2,12 +2,12 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 
-// Definición de Colores para Eventos
-const COLOR_PHASE = "#DC2626";   // ROJO (Corte de Fase)
-const COLOR_WARNING = "#FACC15"; // AMARILLO (Reset / Fallo Transmisión)
-const COLOR_NORMAL = "#0052cc";  // AZUL (Normal)
-const COLOR_ALARM_VIOLET = "#8b5cf6"; // VIOLETA (Alarma Configurada)
-const COLOR_ALARM_COMMS = "#006400"; // VERDE OSCURO (Fallo Transmisión Datos)
+// Definición de Colores
+const COLOR_PHASE = "#DC2626";   
+const COLOR_WARNING = "#FACC15"; 
+const COLOR_NORMAL = "#0052cc";  
+const COLOR_ALARM_VIOLET = "#8b5cf6"; 
+const COLOR_ALARM_COMMS = "#006400"; 
 
 const GenericLineChart = ({ 
   data = [], 
@@ -36,13 +36,21 @@ const GenericLineChart = ({
       const dateLabel = new Date(dataPoint.date);
       let formattedDate;
 
+      // FORMATO: Usamos UTC explícito porque los datos ya tienen el offset aplicado
+      // Si usáramos toLocaleString, el navegador sumaría el offset local otra vez.
       if (isNaN(dateLabel.getTime())) {
         formattedDate = dataPoint.date;
       } else {
+        const day = String(dateLabel.getUTCDate()).padStart(2, '0');
+        const month = String(dateLabel.getUTCMonth() + 1).padStart(2, '0');
+        const year = dateLabel.getUTCFullYear();
+        
         if (isClickable) {
-            formattedDate = `Día: ${dateLabel.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+            formattedDate = `Día: ${day}/${month}/${year}`;
         } else {
-            formattedDate = dateLabel.toLocaleString('es-AR', { hour12: false });
+            const hours = String(dateLabel.getUTCHours()).padStart(2, '0');
+            const minutes = String(dateLabel.getUTCMinutes()).padStart(2, '0');
+            formattedDate = `${day}/${month}/${year}, ${hours}:${minutes}`;
         }
       }  
 
@@ -56,10 +64,8 @@ const GenericLineChart = ({
       const isAlarmPoint = dataPoint.isAlarm === true; 
       const alarmType = dataPoint.alarmType;
 
-      // Lógica de colores para el borde del tooltip
       let eventColor = null;
       if (isAlarmPoint) {
-          // Si es punto de alarma, elegimos color según tipo
           if (alarmType === 'comunication_failure') eventColor = COLOR_ALARM_COMMS;
           else eventColor = COLOR_ALARM_VIOLET;
       }
@@ -87,7 +93,7 @@ const GenericLineChart = ({
              {isAlarmPoint ? `Valor: ${dataPoint.value}%` : `Uso: ${dataPoint.value}%`}
           </p>
           
-          {/* 1. SECCIÓN CONTADOR DE ALARMAS DIARIAS */}
+          {/* SECCIÓN ALARMAS */}
           {alarmCount > 0 && !isAlarmPoint && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: COLOR_ALARM_VIOLET }}>
@@ -96,7 +102,6 @@ const GenericLineChart = ({
              </div>
           )}
 
-          {/* 2. SECCIÓN PUNTO DE ALARMA ESPECÍFICO */}
           {isAlarmPoint && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET }}>
@@ -108,7 +113,7 @@ const GenericLineChart = ({
              </div>
           )}
 
-          {/* 3. SECCIÓN FASE */}
+          {/* SECCIÓN FASE */}
           {(isPhaseEvent || countPhase > 0) && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: COLOR_PHASE }}>
@@ -117,7 +122,7 @@ const GenericLineChart = ({
              </div>
           )}
 
-          {/* 4. SECCIÓN ADVERTENCIAS */}
+          {/* SECCIÓN ADVERTENCIAS */}
           {(countReset > 0 || countTransm > 0) && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 {countReset > 0 && (
@@ -150,23 +155,19 @@ const GenericLineChart = ({
     const { cx, cy, payload } = props;
     const texto = payload.texto || '';
 
-    // Prioridad 1: Alarma Específica
     if (payload.isAlarm) {
         const fill = payload.alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET;
         return <circle cx={cx} cy={cy} r={6} fill={fill} stroke="#fff" strokeWidth={2} />;
     }
 
-    // Prioridad 2: Corte de Fase (Rojo)
     if (payload.energia === 1) {
         return <circle cx={cx} cy={cy} r={6} fill={COLOR_PHASE} stroke="#fff" strokeWidth={2} />;
     }
     
-    // Prioridad 3: Reset o Fallos (Amarillo)
     if (texto === 'Iniciando equipo' || texto === 'Fallo en transmision de trama' || texto === 'Fallo de conexion con el router') {
         return <circle cx={cx} cy={cy} r={6} fill={COLOR_WARNING} stroke="#fff" strokeWidth={2} />;
     }
 
-    // Puntos normales (Clickables)
     if (isClickable) return <circle cx={cx} cy={cy} r={4} fill={lineColor} stroke="none" />;
     
     return null;

@@ -13,7 +13,8 @@ const ViewChart = ({
   subtitle = 'Evolución del porcentaje de uso',   
   average_period = 10,
   onRangeChange, 
-  timezoneOffset = import.meta.env.VITE_APP_DEFAULT_TIMEZONE_OFFSET || 0,
+  // Leemos la variable de entorno. Si no existe, default a 0 (UTC).
+  timezoneOffset = Number(import.meta.env.VITE_APP_TIMEZONE_OFFSET) || 0,
   availablePresets = [ 
     RANGE_KEYS.LAST_HOUR, 
     RANGE_KEYS.LAST_24H, 
@@ -31,21 +32,29 @@ const ViewChart = ({
   
   const nowRef = useRef(new Date());
 
+  // Helper para aplicar el offset consistentemente
+  const applyTimezoneOffset = (timestamp) => {
+    if (timezoneOffset === 0) return timestamp;
+    return timestamp + (timezoneOffset * 60 * 60 * 1000);
+  };
+
   // --- 1. PROCESAMIENTO UNIFICADO DE ALARMAS ---
   const processedAlarms = useMemo(() => {
     const combinedAlarms = [];
 
     const formatAlarm = (log) => {
         let ts = new Date(log.triggered_at).getTime();
-        // Ajuste de Zona Horaria a los datos de alarma (UTC -> Local)
-        if (timezoneOffset !== 0) {
-           ts += (timezoneOffset * 60 * 60 * 1000);
-        }
-        const dateStr = new Date(ts).toLocaleDateString('en-CA'); 
+        
+        // APLICAMOS OFFSET: UTC -> Hora Local Configurada
+        const localTs = applyTimezoneOffset(ts);
+        
+        // Creamos fecha string basada en el tiempo desplazado pero usando métodos UTC
+        // para "congelar" la fecha visualmente (ej: 2023-01-01)
+        const dateObj = new Date(localTs);
+        const dateStr = dateObj.toISOString().split('T')[0];
 
         return {
-          timestamp: ts,
-          // Guardamos el valor original, pero luego decidiremos si usarlo o no
+          timestamp: localTs,
           originalValue: log.triggered_value !== null ? Number(log.triggered_value) : null,
           message: log.message,
           alarmType: log.alarm_type, 
@@ -153,20 +162,21 @@ const ViewChart = ({
         start = startDate.getTime();
 
     } else {
-        // --- CORRECCIÓN ESCALA 1H/12H/24H ---
-        // 'nowRef.current' es la hora del navegador (Local).
-        // Como ya aplicamos el offset a los DATOS para llevarlos a Local,
-        // el dominio también debe estar en Local.
-        // NO APLICAMOS OFFSET AQUÍ, usamos la hora tal cual es.
-        
+        // --- CORRECCIÓN CRÍTICA DE ZONA HORARIA ---
+        // 'nowRef' es el tiempo actual del sistema.
+        // Como desplazamos los DATOS a una "falsa zona horaria" (ej: UTC-3),
+        // debemos desplazar la VENTANA DEL GRÁFICO (Dominio) la misma cantidad.
         let nowTs = nowRef.current.getTime();
         
-        // Sumamos un pequeño buffer visual (1 hora) a la derecha
-        // para que el último punto no quede pegado al borde.
-        let buffer = 60 * 60 * 1000; 
+        // Aplicamos el offset al tiempo actual para sincronizar con los datos desplazados
+        const localNowTs = applyTimezoneOffset(nowTs);
         
-        end = nowTs;// + buffer; 
-        let endReference = nowTs; // El cálculo hacia atrás parte del "Ahora" real
+        // Sumamos un pequeño buffer visual (ej: 1 hora) para que el último dato no quede pegado
+        let buffer = 60 * 60 * 1000; 
+        end = localNowTs + buffer; 
+        
+        // Calculamos el inicio restando el rango desde el "Ahora Local"
+        let endReference = localNowTs; 
 
         switch (activeRange) {
           case RANGE_KEYS.LAST_HOUR:
@@ -210,7 +220,7 @@ const ViewChart = ({
 
   const customTicks = generateTicks(xDomain);
 
-  // --- 2. MAPEO Y ORDENAMIENTO (Integración de Alarmas) ---
+  // --- 2. MAPEO Y ORDENAMIENTO ---
   const standardizedData = useMemo(() => {
     let rawData = [];
     let dataType = 'unknown';
@@ -245,8 +255,8 @@ const ViewChart = ({
       }
     }
 
+    // (Lógica semanal sin cambios)
     if (dataType === 'weekly') {
-        // ... (Lógica Semanal sin cambios)
         const weeklyData = Array.isArray(rawData) ? rawData : [];
         const { start: rangeStart } = PRESETS[activeRange].getValue();
         const getMonday = (d) => {
@@ -341,13 +351,15 @@ const ViewChart = ({
           }
       }
 
-      if (typeof finalDate === 'number' && timezoneOffset !== 0) {
-          finalDate += (timezoneOffset * 60 * 60 * 1000);
+      // APLICAMOS OFFSET A LOS DATOS DEL SENSOR
+      if (typeof finalDate === 'number') {
+          finalDate = applyTimezoneOffset(finalDate);
       }
 
       // --- CÁLCULO DE CONTADOR DE ALARMAS DIARIO ---
       if (dataType === 'daily') {
-          const pointDateStr = new Date(finalDate).toLocaleDateString('en-CA');
+          // Usamos toISOString para comparar solo la parte de fecha, evitando lios de zona horaria local
+          const pointDateStr = new Date(finalDate).toISOString().split('T')[0];
           alarm_count = processedAlarms.filter(a => a.dateStr === pointDateStr).length;
       }
 
@@ -371,24 +383,19 @@ const ViewChart = ({
         const alarmPoints = processedAlarms.map(alarm => {
             let yValue = alarm.originalValue;
 
-            // --- CORRECCIÓN PUNTOS VERDES (PEGAR A LÍNEA) ---
-            // Si es fallo de comunicación (o si no tiene valor propio),
-            // buscamos el punto de datos del sensor más cercano para "pegarlo" a la línea.
-            // Esto asegura que el punto verde no quede "volando" en 3.08 (minutos) cuando el eje Y es 0-100%.
+            // Lógica "imán": Si es fallo de comunicación o null, busca el dato más cercano
             if (alarm.alarmType === 'comunication_failure' || yValue === null) {
                 if (mappedData.length > 0) {
                     const closest = mappedData.reduce((prev, curr) => {
                         return (Math.abs(curr.date - alarm.timestamp) < Math.abs(prev.date - alarm.timestamp) ? curr : prev);
                     });
                     
-                    // Asignamos el valor de la serie si existe
                     if (closest && closest.value !== null && closest.value !== undefined) {
                         yValue = closest.value;
                     }
                 }
             }
 
-            // Si aún así es null, no lo mostramos
             if (yValue === null || yValue === undefined) return null;
 
             return {
@@ -439,7 +446,7 @@ const ViewChart = ({
 
   }, [activeRange, zoomedDay, zoomedWeek, channelAllRegistersData, channelDailyData, channelWeeklyData, timezoneOffset, average_period, processedAlarms]);
 
-  // ... (Resto del código sin cambios) ...
+  // ... (Resto del componente) ...
   const isLineChartClickable = !zoomedDay && (
     activeRange === RANGE_KEYS.LAST_WEEK || 
     activeRange === RANGE_KEYS.LAST_MONTH ||
@@ -453,21 +460,29 @@ const ViewChart = ({
     const date = new Date(tickItem);
     if (isNaN(date.getTime())) return tickItem;
 
+    // IMPORTANTE: Como desplazamos los datos a mano para simular la zona horaria,
+    // usamos métodos UTC para mostrar la hora "real" que calculamos,
+    // evitando que el navegador le aplique SU propia zona horaria local otra vez.
+    
     if (zoomedDay || activeRange === RANGE_KEYS.LAST_HOUR || activeRange === RANGE_KEYS.LAST_12H || activeRange === RANGE_KEYS.LAST_24H) {
-       return date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+       // Usamos getUTCHours porque 'tickItem' ya es un timestamp desplazado manualmente
+       const hours = String(date.getUTCHours()).padStart(2, '0');
+       const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+       return `${hours}:${minutes}`;
     }
     
-    return date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+    // Para días, lo mismo
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    return `${day}/${month}`;
   };
 
   const fetchDataForRange = async (rangeKey, start, end) => {
     if (!channelUuid) return;
-    const toLocalISOString = (date) => {
-      const offset = date.getTimezoneOffset() * 60000;
-      return new Date(date.getTime() - offset).toISOString().slice(0, -1);
-    };
-    const s = toLocalISOString(start);
-    const e = toLocalISOString(end);
+    // Para el fetch, necesitamos enviar al backend fechas en UTC real o ISO.
+    // Aquí usamos el objeto Date nativo que convierte a ISO UTC.
+    const s = start.toISOString().slice(0, -1); // Envía tiempo real (sin offset manual)
+    const e = end.toISOString().slice(0, -1);
 
     try {
       if (rangeKey === 'CUSTOM_DAY_ZOOM') {
