@@ -160,7 +160,7 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
   //console.log('selectedChannel', selectedChannel);
   //console.log('alarms by channel', seletedChannelAlarms);  
   //console.log('channelAllRegistersData :', channelAllRegistersData);
-  //console.log('channelUsage', channelUsage);
+  console.log('channelUsage', channelUsage);
   //console.log('currentAlarmsLogs', currentAlarmsLogs); alarm_type: "comunication_failure"
   //console.log('alarmLogsComunicationFailure', alarmLogsComunicationFailure);
   
@@ -216,10 +216,10 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
               channel={selectedChannel} 
               alarms={seletedChannelAlarms.filter(alarm => alarm.is_active == '1')} 
               datalogger={selectedChannel?.datalogger}
-              totalTime={channelUsage?.totalData.total_time_on_hours}
-              firstDate={channelUsage?.totalData.first_date}
-              lastDate={channelUsage?.lastData.last_record_date}
-              totalAverageTime={channelUsage?.totalData.average_usage_percentage}
+              totalTime={channelUsage?.totalData?.total_time_on_hours}
+              firstDate={channelUsage?.totalData?.first_date}
+              lastDate={channelUsage?.lastData?.last_record_date}
+              totalAverageTime={channelUsage?.totalData?.average_usage_percentage}
             />
           </CardImage>
       </div>

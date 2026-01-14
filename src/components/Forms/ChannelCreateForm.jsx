@@ -55,7 +55,7 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
             if (isEditing) {
                 const response = await updateChannel(channelId, formData);
                 if (response.success) {
-                    toast.success(response.message);
+                    toast.success('Canal actualizado exitosamente!');
                     navigate(`/panel/ubicaciones/${channelData.business_uuid}/dataloggers/${dataloggerId}/canales/${channelId}`);
                 } else {
                     toast.error(response.message || 'Error al actualizar el canal');
@@ -65,7 +65,7 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                 formData.append("column_name", channel.column_name || "");
                 const response = await createChannel(businessUuid, formData);                
                 if (response.success) {
-                    toast.success(response.message);
+                    toast.success('Canal creado exitosamente!');
                     navigate(`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}`);
                 } else {
                     toast.error(response.message || 'Error al crear el canal');

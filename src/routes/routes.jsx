@@ -9,6 +9,7 @@ export const routes = [
   { path: "/resetear", element: <SendActivationEmail /> },
   { path: "/contacto", element: <Contact /> },
   { path: "/panel", element: <Dashboard />, private: true },
+  { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm /> },
   
   // Locations routes
   { path: "/panel/ubicaciones", element: <Locations />, private: true },
@@ -53,7 +54,8 @@ export const routes = [
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId/editar", element: <CreatePage />, private: true },
   // Alarmas routes / channels
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },//done
-  { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm />, private: true },
+  
+  
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId", element: <ViewAlarm />, private: true },//on progress
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/agregar", element: <CreatePage />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/agregar", element: <CreatePage />, private: true },

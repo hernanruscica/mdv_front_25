@@ -41,6 +41,7 @@ const ShowChannelsCards = ({
   const oneChannel = channels ? channels[0] : undefined;
   const dataloggerId = oneChannel ? oneChannel?.datalogger_id : null;
   const businessUuid = oneChannel ? oneChannel?.business.uuid : null;  
+  console.log('channels', channels);
   
 
   return (
@@ -118,10 +119,12 @@ const ShowChannelsCards = ({
                     <p className={styles.noAlarms}>No hay alarmas configuradas</p>
                   )}
                 </div>
+{/*                 
                 <p className={cardInfoStyles.paragraph}>
                   <strong>Total horas de uso:</strong>{" "} {channel?.totalData.total_time_on_hours} Hs. <br/> 
                   Con datos desde <strong>{FormatearFechaCompleta(channel?.totalData.first_date)}</strong>:
                 </p>
+                 */}
               </div>
             </div>
             <div >

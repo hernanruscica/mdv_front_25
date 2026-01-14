@@ -546,14 +546,14 @@ const ViewChart = ({
   };
 
   if (errorLoadingData) return <div style={{color:'red'}}>Error: {errorLoadingData}</div>;
-
+/*
   if (!isLoading){
     console.log('alarmLogs',alarmLogs);
     console.log('alarmLogsComunicationFailure',alarmLogsComunicationFailure);
     
     
   }
-
+*/
   let displayTitle = "";
   if (zoomedDay) {
     displayTitle = `Todos los registros, integración: ${average_period} min. Detalle del día: ${zoomedDay.toLocaleDateString()}`;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { alarmLogsService } from '../../services/alarmLogsService';
@@ -17,16 +17,18 @@ const ViewStateAlarm = () => {
     const processAlarmState = async () => {
       if (token) {
         try {
+          
           const decodedToken = jwtDecode(token);
+          //console.log('decodedToken', decodedToken);
+          
           setAlarmData(decodedToken);
           
           const dataToUpdate = {
-            fecha_vista: new Date().toISOString().replace('T', ' ').substring(0, 19), // YYYY-MM-DD HH:mm:ss
-            usuario_id: decodedToken.userId,
+            seen_at: new Date().toISOString().replace('T', ' ').substring(0, 19), // YYYY-MM-DD HH:mm:ss
+            user_uuid: decodedToken.userId,
           };
-//console.log('Data to update:', dataToUpdate);
-//console.log('Decoded token:', decodedToken);
-          const response = await alarmLogsService.update(decodedToken.alarmLogId, dataToUpdate);
+
+          const response = await alarmLogsService.update(decodedToken.logId, dataToUpdate);
           
           if (response.success) {
             setIsModalOpen(true);
@@ -45,7 +47,7 @@ const ViewStateAlarm = () => {
   const handleCloseModalAndRedirect = () => {
     setIsModalOpen(false);
     if (alarmData) {
-      navigate(`/panel/dataloggers/${alarmData.dataloggerId}/canales/${alarmData.channelId}/alarmas/${alarmData.alarmId}`);
+      navigate(`/panel/`);
     }
   };
 
@@ -58,6 +60,7 @@ const ViewStateAlarm = () => {
   }
 
   return (
+
     <div>
       <ModalTemplate
         isOpen={isModalOpen}
@@ -79,7 +82,9 @@ const ViewStateAlarm = () => {
       <p>Detalles de la alarma:</p>
       <pre>{JSON.stringify(alarmData, null, 2)}</pre> */}
     </div>
+    
   );
+  
 };
 
 export default ViewStateAlarm;

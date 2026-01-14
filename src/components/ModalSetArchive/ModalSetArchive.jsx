@@ -6,6 +6,7 @@ import { useLocationsStore } from '../../store/locationsStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
 import { useChannelsStore } from '../../store/channelsStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
+import toast from 'react-hot-toast';
 
 const ENTITY_MAP = {
   usuario:   { store: useUsersStore,    update: 'updateUser' },
@@ -38,6 +39,7 @@ const ModalSetArchive = ({
       const responseStore = await updateFn(entidadId, { is_active: nuevoEstado, businessUuid: businessUuid });
       //console.log('Response from update:', responseStore);
       onRequestClose();
+      toast.success(`${entidad.charAt(0).toUpperCase() + entidad.slice(1)} ${nuevoEstado == 0 ? 'archivado' : 'desarchivado'} exitosamente.`);
       navigate(redirectTo);
     }
   };

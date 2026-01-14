@@ -13,9 +13,12 @@ const Channels = () => {
   const { businessUuid, dataloggerId } = useParams();
   const { user } = useAuthStore();  
   const [searchTerm, setSearchTerm] = useState('');
-  const { datalogger, isLoadingDatalogger, errorDatalogger } = useFetchDatalogger(dataloggerId, businessUuid);  
-  
-  const hoursBackView = 120;  
+  const { 
+    datalogger, 
+    isLoadingDatalogger,   
+    errorDatalogger,
+    refreshDatalogger 
+  } = useFetchDatalogger(dataloggerId, businessUuid); 
 
     const {
       dataloggerUsage,
@@ -30,17 +33,18 @@ const Channels = () => {
       if (dataloggerId && businessUuid) {
         await fetchDataloggerUsage(businessUuid, dataloggerId);
       }
+      refreshDatalogger();
     };
     
     loadDataloggerUsage();
   }, [dataloggerId, businessUuid]);  
  
-  if (isLoadingDatalogger) {
+  if (isLoadingDatalogger || isLoadingDataloggerUsage) {
     return <LoadingSpinner message='Cargando datos' />
   }
 
-  if (errorDatalogger) {
-    return <div>Error: {errorDatalogger }</div>
+  if (errorLoadingDataloggerUsage || errorDatalogger) {
+    return <div>Error cargando datos ... </div>
   }  
 
   //console.log(user.businesses_roles.find(br => br.uuid === businessUuid).role);
@@ -82,7 +86,7 @@ const Channels = () => {
 
       { datalogger?.channels.length > 0 &&
         <ShowChannelsCards
-        channels={dataloggerUsage?.channels}
+        channels={datalogger?.channels}
         alarms={datalogger?.alarms}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}

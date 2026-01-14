@@ -1,29 +1,29 @@
 /**
- * Formatea una fecha ISO a un formato amigable en español.
- * @param {string} isoString - Fecha en formato 2026-01-03T23:22:25.000Z
- * @returns {string} - "Sábado, 3 de enero de 2026, a las 23:22"
+ * Formatea una fecha ISO preservando la hora exacta que viene en el string.
+ * @param {string} isoString - Fecha en formato 2026-01-14T11:36:16.000Z
+ * @returns {string} - "Miércoles, 14 de enero de 2026, a las 11:36"
  */
 export const FormatearFechaCompleta = (isoString) => {
   if (!isoString) return "";
 
   const fecha = new Date(isoString);
 
-  // Configuramos el formateador de JS
   const opciones = {
-    weekday: 'long', // "sábado"
-    year: 'numeric', // "2026"
-    month: 'long',   // "enero"
-    day: 'numeric',  // "3"
-    hour: '2-digit', // "23"
-    minute: '2-digit', // "22"
-    hour12: false    // Formato 24h
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    // EL TRUCO: Usamos 'UTC' para que NO intente convertir/restar horas.
+    // Muestra la hora "cruda" tal como vino en el JSON.
+    timeZone: 'UTC' 
   };
 
-  const formateador = new Intl.DateTimeFormat('es-ES', opciones);
+  const formateador = new Intl.DateTimeFormat('es-AR', opciones);
   const partes = formateador.formatToParts(fecha);
 
-  // Construimos la cadena manualmente para insertar el "a las" exacto que pides
-  // y capitalizar la primera letra del día.
   const d = partes.reduce((acc, p) => ({ ...acc, [p.type]: p.value }), {});
   
   const diaSemana = d.weekday.charAt(0).toUpperCase() + d.weekday.slice(1);

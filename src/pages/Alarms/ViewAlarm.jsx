@@ -24,7 +24,8 @@ const ViewAlarm = () => {
   const [modalArchiveOpen, setModalArchiveOpen] = useState(false);
   const [modalLogOpen, setModalLogOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
-   const [currentAlarmsLogs, setCurrentAlarmsLogs] = useState([]);
+  const [currentAlarmsLogs, setCurrentAlarmsLogs] = useState([]);
+  const [alarmLogsComunicationFailure, setAlarmLogsComunicationFailure] = useState([]);
 
 
   const {
@@ -37,7 +38,8 @@ const ViewAlarm = () => {
   const {
     alarmLogs,
     fetchAlarmLogsByAlarmId,
-    loadingStates: { fetchAlarmLogs: isLoadingAlarmLogs },
+    fetchAlarmLogsByDataloggerId,
+    loadingStates: { fetchAlarmLogs: isLoadingAlarmLogs, fetchAlarmLogsByDataloggerId: isLoadingAlarmLogsByDataloggerId  },
     error
   } = useAlarmLogsStore();
 
@@ -55,29 +57,30 @@ useEffect(() => {
       if (alarmData){
         await fetchChannelUsage(businessUuid, alarmData.datalogger_uuid, alarmData.channel_uuid);
         
-        const logs = await fetchAlarmLogsByAlarmId(businessUuid, alarmData.uuid);                 
-      
+        const logs = await fetchAlarmLogsByAlarmId(businessUuid, alarmData.uuid);   
         const alarmLogs = {
           uuid: alarmData.uuid,
           logs: logs
         }               
-        
-        
         setCurrentAlarmsLogs([alarmLogs]);
+
+        const alarmLogsByDatalogger = await fetchAlarmLogsByDataloggerId(businessUuid, alarmData.datalogger_uuid);
+        setAlarmLogsComunicationFailure(alarmLogsByDatalogger?.filter(log => log.alarm_type === "comunication_failure"));
+
       };
       
     }}
   loadData();
 }, [businessUuid, alarmId, modalLogOpen]);
 
-if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage) {
+if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAlarmLogsByDataloggerId) {
   return <LoadingSpinner message="Cargando datos..." />;
 }
 
   //console.log('selectedAlarm', selectedAlarm);
   //console.log('channelUsage', channelUsage);
   //console.log('alarmLogs', alarmLogs);
-  console.log('currentAlarmLoigs', currentAlarmsLogs);
+  //console.log('currentAlarmLoigs', currentAlarmsLogs);
   
   
  
@@ -147,7 +150,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage) {
         entidadId={selectedAlarm?.uuid}
         nuevoEstado={selectedAlarm?.is_active == '1' ? '0' : '1'}
         // redirectTo={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/`}
-        redirectTo={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/${selectedAlarm?.uuid}`}
+        redirectTo={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/`}
         nombre={`${selectedAlarm?.name}`}
       />
       {selectedLog && (
@@ -166,7 +169,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage) {
       />
       <Breadcrumb
         // usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
-        ubicacion={channelUsage?.business.name}
+        ubicacion={selectedAlarm?.business.name}
         datalogger={channelUsage?.datalogger.name}
         canal={channelUsage?.name}
         alarma={selectedAlarm?.name}
@@ -224,7 +227,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage) {
           ]}
           onRangeChange={null} //(range) => fetchCpuData(range.start, range.end)}
           alarmLogs={currentAlarmsLogs}
-          
+          alarmLogsComunicationFailure={alarmLogsComunicationFailure}
         />
       </div>
 

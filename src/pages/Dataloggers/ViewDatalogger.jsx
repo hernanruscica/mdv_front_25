@@ -103,7 +103,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       */}
     </>
   );
-  // console.log('datalogger id',datalogger?.uuid);
+  //console.log('dataloggerUsage ',dataloggerUsage);
  
   return (
     <>
@@ -113,7 +113,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       entidad="datalogger"
       entidadId={datalogger?.uuid}
       nuevoEstado={datalogger?.is_active == '1' ? 0 : 1}
-      redirectTo={`/panel/ubicaciones/${datalogger?.business_uuid}/dataloggers/${datalogger?.uuid}`}
+      redirectTo={`/panel/ubicaciones/${datalogger?.business_uuid}/dataloggers/`}
       nombre={`${datalogger?.name}`}
       businessUuid={datalogger?.business_uuid}
     />
@@ -150,7 +150,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
                 if (alarm.alarm_type !== 'porcentage_on') return null;
                 
                 const currentValue =  dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid)?.lastData.porcentageUsagePeriod || '--';                
-                console.log('currentChannel data: ', currentValue);
+                //console.log('currentChannel data: ', currentValue);
                 
                 return (
                   <Link 
@@ -182,7 +182,9 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
               <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
             )}
             <p className={styles.description}>{datalogger?.description}</p>
-            <p className={styles.highLightText}><strong>Ultimos datos recibidos:</strong> {FormatearFechaCompleta(dataloggerUsage?.lastConection)}</p>
+            <p className={styles.highLightText}>
+              <strong>Ultimos datos recibidos:</strong> {dataloggerUsage?.lastConection ? FormatearFechaCompleta(dataloggerUsage?.lastConection) : 'Sin datos aún'}
+            </p>
             <p><strong>MAC:</strong> {datalogger?.mac_address}</p>
             <p>
               <strong>Ubicación:</strong> {
@@ -223,7 +225,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       {datalogger?.channels.length > 0 ? (
         
         <ShowChannelsCards
-          channels={dataloggerUsage ? dataloggerUsage?.channels : []}
+          channels={datalogger ? datalogger?.channels : []}
           alarms={datalogger?.alarms}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
