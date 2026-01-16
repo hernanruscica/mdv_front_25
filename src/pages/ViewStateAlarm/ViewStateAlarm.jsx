@@ -13,22 +13,32 @@ const ViewStateAlarm = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuthStore();
 
+  /* payload and atributes generated on the backend when creating the token, uuid format char(36):
+    const payload = {
+    logId, 
+    userId,
+    alarmId,
+    channelId,
+    dataloggerId,
+    businessUuid,    
+    type: 'ALARM_ACKNOWLEDGE' 
+  };
+
+  */
   useEffect(() => {
     const processAlarmState = async () => {
+      
       if (token) {
-        try {
-          
+       // console.log('tengo token en viewStateAlarm');
+        try {          
           const decodedToken = jwtDecode(token);
-          //console.log('decodedToken', decodedToken);
-          
           setAlarmData(decodedToken);
           
           const dataToUpdate = {
             seen_at: new Date().toISOString().replace('T', ' ').substring(0, 19), // YYYY-MM-DD HH:mm:ss
-            user_uuid: decodedToken.userId,
+            updated_by: decodedToken.userId,
           };
-
-          const response = await alarmLogsService.update(decodedToken.logId, dataToUpdate);
+          const response = await alarmLogsService.update(decodedToken.businessUuid, decodedToken.logId, dataToUpdate);
           
           if (response.success) {
             setIsModalOpen(true);
@@ -47,7 +57,7 @@ const ViewStateAlarm = () => {
   const handleCloseModalAndRedirect = () => {
     setIsModalOpen(false);
     if (alarmData) {
-      navigate(`/panel/`);
+      navigate(`/panel/ubicaciones/${alarmData.businessUuid}/dataloggers/${alarmData.dataloggerId}/canales/${alarmData.channelId}/alarmas/${alarmData.alarmId}`);
     }
   };
 
@@ -57,10 +67,10 @@ const ViewStateAlarm = () => {
 
   if (!alarmData) {
     return <div><h1>Cargando...</h1></div>;
-  }
+  } 
+  
 
   return (
-
     <div>
       <ModalTemplate
         isOpen={isModalOpen}
@@ -75,12 +85,10 @@ const ViewStateAlarm = () => {
         ]}
       >
         <p>El estado del historial de la alarma se actualizó correctamente.</p><br />
-        <p>Se registró que su usuario <strong>{`${user.nombre_1} ${user.apellido_1}`}</strong> vió la alarma!</p>
+        <p>Se registró que su usuario <strong>{`${user.first_name} ${user.last_name}`}</strong> vió el correo de alarma!</p>
+        <p>Click en [ACEPTAR] para ver el detalle.</p>
       </ModalTemplate>
-
-      {/* <h1>Estado de la Alarma</h1>
-      <p>Detalles de la alarma:</p>
-      <pre>{JSON.stringify(alarmData, null, 2)}</pre> */}
+   
     </div>
     
   );

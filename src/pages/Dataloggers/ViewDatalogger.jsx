@@ -151,18 +151,26 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
                 
                 const currentValue =  dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid)?.lastData.porcentageUsagePeriod || '--';                
                 //console.log('currentChannel data: ', currentValue);
-                
+                let currentMin = null;                 
+                let currentMax = null;
+                if (alarm?.condition_logic.includes('>')){
+                  currentMin = 0;
+                  currentMax = alarm?.var01;
+                }else{
+                  currentMin = alarm?.var01;
+                  currentMax = 100
+                }
                 return (
                   <Link 
-                    to={`/panel/ubicaciones/${alarm.business_uuid}/dataloggers/${alarm.datalogger_uuid}/canales/${alarm.channel_uuid}`} 
-                    title="Ver canal"
+                    to={`/panel/ubicaciones/${alarm.business_uuid}/dataloggers/${alarm.datalogger_uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`} 
+                    title="Ver alarma"
                     key={index} 
                     className={styles.cardGauge}>
-                    <h3>{alarm.name} %</h3>      
-                    <p className={styles.description}>
-                      {alarm.condition_show}
+                    <h3>{alarm.name} </h3>      
+                    <p >
+                      condicion: {alarm.condition_show}
                     </p>       
-                    <GaugeLinear currentValue={currentValue || '--'} alarmMin={0} alarmMax={alarm?.var01} />
+                    <GaugeLinear currentValue={currentValue || '--'} alarmMin={currentMin} alarmMax={currentMax} />
                   </Link>
                 );
               })

@@ -9,7 +9,7 @@ export const routes = [
   { path: "/resetear", element: <SendActivationEmail /> },
   { path: "/contacto", element: <Contact /> },
   { path: "/panel", element: <Dashboard />, private: true },
-  { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm /> },
+  { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm />, private: true },
   
   // Locations routes
   { path: "/panel/ubicaciones", element: <Locations />, private: true },

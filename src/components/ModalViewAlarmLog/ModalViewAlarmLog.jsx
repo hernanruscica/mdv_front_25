@@ -5,6 +5,8 @@ import ModalTemplate from '../ModalTemplate/ModalTemplate';
 import styles from './ModalViewAlarmLog.module.css';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner'; 
 import toast from 'react-hot-toast';
+import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
+import { Title2 } from '../Title2/Title2';
 
 const ModalViewAlarmLog = ({ isOpen, onRequestClose, evento, businessUuid, solutions = [] }) => {
   const [solutionText, setSolutionText] = useState('');
@@ -36,7 +38,10 @@ const ModalViewAlarmLog = ({ isOpen, onRequestClose, evento, businessUuid, solut
       });
     }
   }, [solutions, isCreatingSolution]); 
-//console.log('solutions', solutions);
+    //console.log('solutions', solutions);
+    //console.log('user', user);
+    console.log('evento', evento);
+
 
  
 
@@ -89,12 +94,15 @@ const ModalViewAlarmLog = ({ isOpen, onRequestClose, evento, businessUuid, solut
 
   // Verificamos si el texto está vacío o solo tiene espacios
   const isTextEmpty = !solutionText || !solutionText.trim();
+//console.log('evento', evento);
+console.log('user', user);
+
 
   return (
     <ModalTemplate      
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      title={`Detalle del evento`}
+      title={`Detalles del evento`}
       buttons={[
         ...(evento?.triggered == 1 ? [
           { 
@@ -113,19 +121,41 @@ const ModalViewAlarmLog = ({ isOpen, onRequestClose, evento, businessUuid, solut
              <LoadingSpinner />
           </div>
         ) : (
-          <>
-            {/* ... Sección de Info del Evento (igual que antes) ... */}
-            <p><strong>Fecha:</strong> {evento?.fecha}</p>        
-            <p><strong>Mensaje:</strong> {evento?.mensaje}</p>
-            <p><strong>Evento:</strong> {evento?.evento}</p>
-            <p><strong>Usuarios notificados:</strong></p>
-            <ul className={styles.usersList}>
-              {evento?.notified_users?.map((u, i) => (
-                <li key={i}>
-                  {u.user_email || u.email} - {u.seen_at ? 'Vista' : 'No Vista'}
-                </li>
-              ))}
-            </ul>
+          <>            
+            {
+              (evento.triggered == 1) ? (
+                <div className={`${styles.icon_event} ${styles.color_danger}`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                    <path fill="currentColor" d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/>
+                  </svg>
+                  <h3 className={styles.title_event}>Alarma Disparada</h3>
+                </div>
+              ) : (
+                <div className={`${styles.icon_event} ${styles.color_success}`}>                   
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                      <path fill="currentColor" d="M386.3 160L336 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l128 0c17.7 0 32-14.3 32-32l0-128c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 51.2L414.4 97.6c-87.5-87.5-229.3-87.5-316.8 0s-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3s163.8-62.5 226.3 0L386.3 160z"/>
+                    </svg>                 
+                  <h3 className={styles.title_event}>Alarma Reseteada</h3>
+                </div>
+              )
+            }
+
+            <h3 className={styles.subtitle_event}>{evento?.mensaje}</h3>
+            <p><strong>{FormatearFechaCompleta(evento?.triggered_at)}</strong></p>        
+            
+            <div className={styles.users_container}>
+              {/* <h3 className={styles.subtitle_event}><strong>Usuarios notificados:</strong></h3> */}
+              <Title2 text="Usuarios notificados:" type="contacto"/>
+              <ul className={styles.usersList}>
+                {evento?.notified_users?.map((u, i) => (
+                  <li key={i} className={!u.seen_at ? styles.color_danger_light_bg : styles.color_success_light_bg}>
+                    <span className={styles.user_name}>{u.first_name}  {u.last_name}</span>
+                    <span>({u.email})</span>
+                    <span>{u.seen_at ? 'Vista' : 'No Vista'}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             {evento?.triggered == 1 && (
               <>

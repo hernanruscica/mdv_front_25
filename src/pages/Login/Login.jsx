@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+
 import toast from 'react-hot-toast';
 import styles from './Login.module.css';
 import { Title1 } from '../../components/Title1/Title1.jsx';
@@ -12,6 +13,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const login = useAuthStore(state => state.login);
   
+  
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
@@ -20,9 +22,18 @@ const Login = () => {
     setPassword('');
   };
 
+  //si viene un query en la url 'redirect', redirijo a esa ruta
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirect = urlParams.get('redirect') || null;
+
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (user) {    
+      //console.log('redirect en login', redirect);
+      if (redirect !== null) {
+        navigate(redirect);
+      } else {
+        navigate('/panel');
+      }
     }
   }, [user, navigate]);
 
@@ -35,7 +46,13 @@ const Login = () => {
       
       if (success) {
         toast.success('Credenciales correctas');
-        navigate('/');
+        //console.log('redirect en login', redirect);
+        
+        if (redirect !== null) {
+          navigate(redirect);
+        } else {
+          navigate('/panel');
+      }
       } else {
         toast.error('DNI y/o contraseña incorrectos');
         resetForm();
@@ -54,6 +71,9 @@ const Login = () => {
       </main>
     );
   }
+
+ // console.log('redirect');
+  
 
   return (
     <main className={styles.pageMaincontent}>

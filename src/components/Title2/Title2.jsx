@@ -1,4 +1,4 @@
-import React from 'react'
+
 import styles from './Title2.module.css';
 import { getIconFileName } from '../../utils/iconsDictionary';
 

@@ -25,10 +25,10 @@ export const alarmLogsService = {
     }
   },
 
-  update: async (id, data) => {
+  update: async (businessUuid, id, data) => {
     try {
       // 
-      const response = await axiosClient.put(`/api/alarmLogs/${id}`, data);
+      const response = await axiosClient.put(`/api/businesses/${businessUuid}/alarmLogs/${id}`, data);
       return response?.data;
     } catch (error) {
       console.error(`Error updating alarm log with id ${id}:`, error);

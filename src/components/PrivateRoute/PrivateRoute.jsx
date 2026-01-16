@@ -10,12 +10,7 @@ export const PrivateRoute = ({ children }) => {
   const path = location.pathname;
   // const { token: tokenParams } = useLocation().params || {};
   const { token: tokenParams, businessUuid } = useParams();
-  
-  const userCurrentRole = 
-      user?.businesses_roles.some(br => br.role === 'Owner')
-        ? 'Owner'
-        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-
+   
   // Chequeo proactivo de expiración (solo si es JWT)
   if (token) {
     try {
@@ -23,6 +18,12 @@ export const PrivateRoute = ({ children }) => {
       if (Date.now() >= exp * 1000) {
         // Token expirado, llamamos a la acción de logout
         logout();
+        if (path.includes('verestadoalarma')) {
+          //redigir toda la ruta completa que llega en la url
+          const fullPath = location.pathname + location.search;      
+          
+          return <Navigate to={`/ingresar?redirect=${fullPath}`} replace />;
+        }
         return <Navigate to="/ingresar" replace />;
       }
     } catch (e) {
@@ -32,10 +33,24 @@ export const PrivateRoute = ({ children }) => {
     }
   }
 
+ 
+  
+
   // Verificar autenticación básica
   if (!user || !token) {
+    if (path.includes('verestadoalarma')) {
+      //redigir toda la ruta completa que llega en la url
+      const fullPath = location.pathname + location.search;      
+      
+      return <Navigate to={`/ingresar?redirect=${fullPath}`} replace />;
+    }
     return <Navigate to="/ingresar" replace />;
   }
+
+   const userCurrentRole = 
+      user?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
 
   // Verificar permisos de propietario para rutas de agregar
   if (path.endsWith('agregar') && (userCurrentRole === 'Owner' && userCurrentRole === 'Administrator')) {
@@ -51,8 +66,12 @@ export const PrivateRoute = ({ children }) => {
   if (path.includes('verestadoalarma') && tokenParams) {
     try {
       const decodedToken = jwtDecode(tokenParams);
-      console.log(decodedToken.userId, typeof decodedToken.userId, user.id, typeof user.id);
-      if (decodedToken.userId !== user.id) {
+      //console.log(decodedToken.userId, typeof decodedToken.userId, user.id, typeof user.id);
+      //console.log('decodedToken.userId', decodedToken.userId);
+      //console.log('userId', user.uuid);
+      
+      
+      if (decodedToken.userId !== user.uuid) {
         return <Navigate to="/panel" replace />;
       }
     } catch (e) {
