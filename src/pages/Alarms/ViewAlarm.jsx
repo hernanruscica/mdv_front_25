@@ -17,6 +17,7 @@ import { RANGE_KEYS } from '../../components/ViewChart/constants/chartRanges';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useAlarmLogsStore } from '../../store/alarmLogsStore';
 import { useDataStore } from '../../store/dataStore';
+import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 
 const ViewAlarm = () => {
   const { businessUuid, dataloggerId, channelId, alarmId, userId,  } = useParams();
@@ -45,7 +46,9 @@ const ViewAlarm = () => {
 
   const { channelUsage,
           fetchChannelUsage,
-          loadingStates: { fetchChannelUsage: isLoadingChannelUsage },
+          dataloggerUsage,
+          fetchDataloggerUsage,
+          loadingStates: { fetchChannelUsage: isLoadingChannelUsage, fetchDataloggerUsage: isLoadingDataloggerUsage },
     error: errorChannelUsage, 
   } = useDataStore();
 
@@ -54,9 +57,14 @@ useEffect(() => {
   const loadData = async () => {
     if (businessUuid && alarmId) {      
       const alarmData = await fetchAlarmById(businessUuid, alarmId);
-      if (alarmData){
-        await fetchChannelUsage(businessUuid, alarmData.datalogger_uuid, alarmData.channel_uuid);
-        
+      if (alarmData  ){
+        if (alarmData.alarm_type == 'porcentage_on'){
+          await fetchChannelUsage(businessUuid, alarmData.datalogger_uuid, alarmData.channel_uuid);     
+        }
+        if(alarmData.alarm_type == 'comunication_failure'){
+          await fetchDataloggerUsage(businessUuid, dataloggerId);
+        }
+
         const logs = await fetchAlarmLogsByAlarmId(businessUuid, alarmData.uuid);   
         const alarmLogs = {
           uuid: alarmData.uuid,
@@ -69,18 +77,21 @@ useEffect(() => {
 
       };
       
+      
     }}
   loadData();
-}, [businessUuid, alarmId, modalLogOpen]);
+}, [businessUuid, dataloggerId, channelId, alarmId, modalLogOpen]);
 
-if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAlarmLogsByDataloggerId) {
+if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAlarmLogsByDataloggerId || isLoadingDataloggerUsage) {
   return <LoadingSpinner message="Cargando datos..." />;
 }
 
   //console.log('selectedAlarm', selectedAlarm);
   //console.log('channelUsage', channelUsage);
+  console.log('dataloggerUsage', dataloggerUsage)
   //console.log('alarmLogs', alarmLogs);
   //console.log('currentAlarmLoigs', currentAlarmsLogs);
+
   
   
  
@@ -132,7 +143,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
   const preparedLogs = alarmLogs.length > 0 ? alarmLogs.map(al => {
     return {
       ...al,
-      fecha: new Date(al.triggered_at).toLocaleString(),
+      fecha: FormatearFechaCompleta(al.triggered_at),//new Date(al.triggered_at).toLocaleString(),
       evento: (al.triggered == 1) ? 'Disparada' : 'Reseteada',
       mensaje: al.message,
       usuarios: al.notified_users.map(u => `${u.first_name} ${u.last_name}`).join(', ')
@@ -170,7 +181,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
       <Breadcrumb
         // usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
         ubicacion={selectedAlarm?.business.name}
-        datalogger={channelUsage?.datalogger.name}
+        datalogger={channelUsage?.datalogger.name || dataloggerUsage?.name}
         canal={channelUsage?.name}
         alarma={selectedAlarm?.name}
       />
@@ -188,16 +199,25 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
           <p><strong>Tipo de Alarma:</strong> {selectedAlarm?.alarm_type}</p><br/>
           <p><strong>Descripción:</strong> {selectedAlarm?.description}</p><br/>
           <p><strong>Integra los valores de los ultimos:</strong> {selectedAlarm?.time_range} minutos.</p><br/>
-          <p><strong>Ultimo registro:</strong> {channelUsage?.lastData.last_record_date} </p>
+          <p><strong>Ultimo registro:</strong> {FormatearFechaCompleta(channelUsage?.lastData.last_record_date)} </p>
           
           
           <div className={styles.gaugePlaceholder}>              
-                {selectedAlarm?.alarm_type == "porcentage_on" && (() => {                 
+                {selectedAlarm?.alarm_type == "porcentage_on" && (() => {          
+                  let currentMin = null;                 
+                  let currentMax = null;
+                  if (selectedAlarm?.condition_logic.includes('>')){
+                    currentMin = 0;
+                    currentMax = selectedAlarm?.var01;
+                  }else{
+                    currentMin = selectedAlarm?.var01;
+                    currentMax = 100
+                  }       
                   return (
                     <Gauge 
                       currentValue={channelUsage?.lastData.porcentageUsagePeriod}
-                      alarmMin={0}
-                      alarmMax={selectedAlarm?.var01}                              
+                      alarmMin={currentMin}
+                      alarmMax={currentMax}                              
                     />
                   );
                 })()}
@@ -212,8 +232,10 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
       <div className={styles.chartContainer}>
         <ViewChart 
           businessUuid = {businessUuid}
-          channelUuid = {channelId}
-          title={`Datos del canal '${channelUsage?.name}'`}
+          channelUuid = {channelId || selectedAlarm?.channel_uuid}
+          title={selectedAlarm?.alarm_type == 'porcentage_on' 
+                  ? `Datos del canal '${channelUsage?.name}'` 
+                  : `Fallos de transmision de datos del datalogger '${dataloggerUsage?.name}'`}
           subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${channelUsage?.averaging_period } minutos.`}
           average_period={channelUsage?.averaging_period}
           availablePresets={[

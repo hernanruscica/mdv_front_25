@@ -160,7 +160,7 @@ const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedCha
   //console.log('selectedChannel', selectedChannel);
   //console.log('alarms by channel', seletedChannelAlarms);  
   //console.log('channelAllRegistersData :', channelAllRegistersData);
-  console.log('channelUsage', channelUsage);
+  console.log('viewChannel - channelUsage last record', channelUsage?.lastData?.last_record_date);
   //console.log('currentAlarmsLogs', currentAlarmsLogs); alarm_type: "comunication_failure"
   //console.log('alarmLogsComunicationFailure', alarmLogsComunicationFailure);
   

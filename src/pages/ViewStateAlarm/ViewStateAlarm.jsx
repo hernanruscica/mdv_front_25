@@ -57,7 +57,11 @@ const ViewStateAlarm = () => {
   const handleCloseModalAndRedirect = () => {
     setIsModalOpen(false);
     if (alarmData) {
-      navigate(`/panel/ubicaciones/${alarmData.businessUuid}/dataloggers/${alarmData.dataloggerId}/canales/${alarmData.channelId}/alarmas/${alarmData.alarmId}`);
+      if (alarmData?.alarm_type && alarmData?.alarm_type == 'comunication_failure' ) {
+        navigate(`/panel/ubicaciones/${alarmData.businessUuid}/dataloggers/${alarmData.dataloggerId}/alarmas/${alarmData.alarmId}`);
+      }else{
+        navigate(`/panel/ubicaciones/${alarmData.businessUuid}/dataloggers/${alarmData.dataloggerId}/canales/${alarmData.channelId}/alarmas/${alarmData.alarmId}`);
+      }
     }
   };
 

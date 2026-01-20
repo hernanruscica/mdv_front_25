@@ -103,7 +103,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       */}
     </>
   );
-  //console.log('dataloggerUsage ',dataloggerUsage);
+  console.log('dataloggerUsage ',dataloggerUsage);
  
   return (
     <>
@@ -150,7 +150,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
                 if (alarm.alarm_type !== 'porcentage_on') return null;
                 
                 const currentValue =  dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid)?.lastData.porcentageUsagePeriod || '--';                
-                //console.log('currentChannel data: ', currentValue);
+                console.log('ViewDatalooger - currentValue to show on gauge: ', currentValue);
                 let currentMin = null;                 
                 let currentMax = null;
                 if (alarm?.condition_logic.includes('>')){
@@ -170,7 +170,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
                     <p >
                       condicion: {alarm.condition_show}
                     </p>       
-                    <GaugeLinear currentValue={currentValue || '--'} alarmMin={currentMin} alarmMax={currentMax} />
+                    <GaugeLinear currentValue={currentValue} alarmMin={currentMin} alarmMax={currentMax} />
                   </Link>
                 );
               })
@@ -191,7 +191,10 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
             )}
             <p className={styles.description}>{datalogger?.description}</p>
             <p className={styles.highLightText}>
-              <strong>Ultimos datos recibidos:</strong> {dataloggerUsage?.lastConection ? FormatearFechaCompleta(dataloggerUsage?.lastConection) : 'Sin datos aún'}
+              <strong>Ultimos datos recibidos:</strong> 
+              {dataloggerUsage?.lastConection 
+                  ? FormatearFechaCompleta(dataloggerUsage?.lastConection) 
+                  : 'Sin datos aún'}
             </p>
             <p><strong>MAC:</strong> {datalogger?.mac_address}</p>
             <p>

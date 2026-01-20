@@ -27,7 +27,9 @@ const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin ide
       nombreAlarma: alarm.name,      
       tipo: alarm.alarm_type,  
       condicion_mostrar: `${alarm.condition_show} ` || 'Sin condición',      
-      url: `/panel/ubicaciones/${businessUuid}/dataloggers/${alarm?.datalogger_uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`,  
+      url: alarm?.alarm_type == 'porcentage_on' 
+              ? `/panel/ubicaciones/${businessUuid}/dataloggers/${alarm?.datalogger_uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`
+              : `/panel/ubicaciones/${businessUuid}/dataloggers/${alarm?.datalogger_uuid}/alarmas/${alarm.uuid}`,  
       id: alarm.uuid,
       estado: alarm.is_active
     })), 

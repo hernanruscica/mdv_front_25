@@ -3,6 +3,8 @@ import styles from './ChannelInfo.module.css';
 import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 
 const ChannelInfo = ({ channel, alarms, datalogger = null, totalTime = 0, firstDate, lastDate, totalAverageTime }) => {
+  console.log('Channel info lastDate', lastDate);
+  
   return (
     <div className={styles.channelInfo}>
       <p>

@@ -41,7 +41,7 @@ const ShowChannelsCards = ({
   const oneChannel = channels ? channels[0] : undefined;
   const dataloggerId = oneChannel ? oneChannel?.datalogger_id : null;
   const businessUuid = oneChannel ? oneChannel?.business.uuid : null;  
-  console.log('channels', channels);
+  //console.log('channels', channels);
   
 
   return (
