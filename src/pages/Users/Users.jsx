@@ -92,26 +92,28 @@ const Users = () => {
     ? users?.filter(us => us?.businesses_roles.some(br => br.uuid == businessUuid))
     : users;
 
-    console.log('filterUsersByOwner', filterUsersByOwner);  
+    //console.log('filterUsersByOwner', filterUsersByOwner);  
     
     
 
   const preparedData = (filterUsersByOwner.length > 0) 
-    ? filterUsersByOwner.map(user => ({
-        nombreCompleto: user.first_name + ' ' + user.last_name,
-        email: user.email,
-        ubicaciones: Array.isArray(user.businesses_roles) && user.businesses_roles.length > 0
-          ? user.businesses_roles.map(ubi => ubi.name).join(', ')
+    ? filterUsersByOwner.map(us => ({
+        nombreCompleto: us.first_name + ' ' + us.last_name,
+        email: us.email,
+        ubicaciones: Array.isArray(us.businesses_roles) && us.businesses_roles.length > 0
+          ? us.businesses_roles.map(ubi => ubi.name).join(', ')
           : 'N/A',
-        id: user.uuid,
-        businessUuid: (businessUuid !== undefined && businessUuid !== null) ? businessUuid : user?.businesses_roles?.[0]?.uuid || '',
-        estado: user.is_active
+        id: us.uuid,
+        businessUuid: (businessUuid !== undefined && businessUuid !== null) 
+          ? businessUuid : us?.businesses_roles?.[0]?.uuid 
+          || user?.businesses_roles[0]?.uuid,
+        estado: us.is_active
       }))
     : [];  
 
 
 
-        console.log('user', user);
+    //console.log('user businessesUuid', user?.businesses_roles[0]?.uuid);
         
   return (
     <>
