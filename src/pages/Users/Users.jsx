@@ -104,7 +104,7 @@ const Users = () => {
           ? user.businesses_roles.map(ubi => ubi.name).join(', ')
           : 'N/A',
         id: user.uuid,
-        businessUuid: (businessUuid !== undefined && businessUuid !== null) ? businessUuid : user?.businesses_roles[0].uuid,
+        businessUuid: (businessUuid !== undefined && businessUuid !== null) ? businessUuid : user?.businesses_roles?.[0]?.uuid || '',
         estado: user.is_active
       }))
     : [];  
