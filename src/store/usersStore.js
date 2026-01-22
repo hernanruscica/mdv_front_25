@@ -67,25 +67,15 @@ export const useUsersStore = create((set, get) => ({
   updateUser: async (uuid, userData) => {    
     set(state => ({ loadingStates: { ...state.loadingStates, updateUser: true }, error: null }));
     try {
-      console.log('userts Store update');
-      
+      console.log('users Store update');      
       console.log(uuid, userData) ;
       
       const response = await usersService.update(uuid, userData);
       console.log('Response from usersService.update in usersStore:', response); // Added log
-      if (response && response.user) { // More robust check
-        set(state => ({
-          users: state.users.map(user =>
-            user.uuid === uuid ? response.user : user
-          ),
-          selectedUser: state.selectedUser?.uuid === uuid ? response.user : state.selectedUser
-        }));
-        return { success: true, user: response.user, message: response?.message }; // Standardize success response
-      } else {
-        // If no user object or response is null, assume failure or unexpected response
-        set({ error: response?.message || 'Error al actualizar usuario: respuesta inesperada' });
-        return { success: false, message: response?.message || 'Error al actualizar usuario' };
-      }
+      
+      return response;
+      
+
     } catch (error) {
       set({ error: 'Error updating user' });
       return { success: false, message: 'Error al actualizar usuario' };

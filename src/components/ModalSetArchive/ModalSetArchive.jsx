@@ -35,12 +35,19 @@ const ModalSetArchive = ({
 
   const handleAccept = async () => {
     if (updateFn && entidadId) {
-      //console.log('Updating entity:', entidad, 'ID:', entidadId, 'to new state:', nuevoEstado);
-      const responseStore = await updateFn(entidadId, { is_active: nuevoEstado, businessUuid: businessUuid });
-      //console.log('Response from update:', responseStore);
-      onRequestClose();
-      toast.success(`${entidad.charAt(0).toUpperCase() + entidad.slice(1)} ${nuevoEstado == 0 ? 'archivado' : 'desarchivado'} exitosamente.`);
-      navigate(redirectTo);
+      console.log('Updating entity:', entidad, 'ID:', entidadId, 'to new state:', nuevoEstado);
+      const userData = new FormData;
+      userData.append("is_active", nuevoEstado);
+      const responseStore = await updateFn(entidadId, userData);
+      //console.log('update funciont', updateFn);
+      if (responseStore?.success){
+        //console.log('Response from update - ModalSetArchive:', responseStore);
+        onRequestClose();
+        toast.success(`${entidad.charAt(0).toUpperCase() + entidad.slice(1)} ${nuevoEstado == 0 ? 'archivado' : 'desarchivado'} exitosamente.`);
+        navigate(redirectTo);
+      }else{
+        toast.error(`${responseStore?.message}`);
+      }
     }
   };
 /*

@@ -27,12 +27,12 @@ const ViewUser = () => {
 
   useEffect(() => {
     const loadUser = async () => {
-      if (userId) {
+      if (userId || !modalOpen) {
         await fetchUserById(userId, businessUuid);
-      }
+      }      
     };
     loadUser();
-  }, [userId, fetchUserById]);
+  }, [userId, fetchUserById, modalOpen]);
 
   const { user } = useAuthStore();
 
