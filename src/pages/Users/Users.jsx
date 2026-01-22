@@ -42,8 +42,8 @@ const Users = () => {
       fetchLocationById(businessUuid);      
     }else{
       //console.log(`hasn't businessUuid`, user?.businesses_roles[0].uuid);
-      fetchUsers(user, user?.businesses_roles[0].uuid);
-      fetchLocationById(user?.businesses_roles[0].uuid);
+      fetchUsers(user, user?.businesses_roles[0].uuid || businessUuid);
+      fetchLocationById(user?.businesses_roles[0].uuid  || businessUuid);
     }
 
 
@@ -104,7 +104,7 @@ const Users = () => {
           ? user.businesses_roles.map(ubi => ubi.name).join(', ')
           : 'N/A',
         id: user.uuid,
-        businessUuid: businessUuid || user?.businesses_roles[0].uuid,
+        businessUuid: businessUuid || user.businesses_roles[0].uuid,
         estado: user.is_active
       }))
     : [];  
