@@ -92,7 +92,7 @@ const Users = () => {
     ? users?.filter(us => us?.businesses_roles.some(br => br.uuid == businessUuid))
     : users;
 
-    //console.log('filterUsersByOwner', filterUsersByOwner);  
+    console.log('filterUsersByOwner', filterUsersByOwner);  
     
     
 
@@ -111,7 +111,7 @@ const Users = () => {
 
 
 
-        //console.log(userCurrentRole);
+        console.log('user', user);
         
   return (
     <>
