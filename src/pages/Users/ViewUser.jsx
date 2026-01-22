@@ -4,9 +4,6 @@ import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useUsersStore } from '../../store/usersStore';
-import { useAlarmsStore } from '../../store/alarmsStore';
-import { useLocationUsersStore } from '../../store/locationUsersStore';
-import { useDataloggersStore } from '../../store/dataloggersStore';
 import { useAuthStore } from '../../store/authStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import CardImage from '../../components/CardImage/CardImage';
@@ -17,11 +14,14 @@ import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocation
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
+import ModalDelete from '../../components/ModalDelete/ModalDelete';
 
 const ViewUser = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { businessUuid, userId } = useParams();  
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalDeleteOpen, setModalDeleteOpen] = useState(false);
+  
 
   const { selectedUser, fetchUserById, loadingStates, error: errorUsers } = useUsersStore();  
 
@@ -68,12 +68,24 @@ const ViewUser = () => {
         type="danger"
         onClick={() => setModalOpen(true)}
       />
+      <BtnCallToAction
+        text="Eliminar"
+        icon="trash-alt-regular.svg"
+        type="danger"
+        onClick={() => setModalDeleteOpen(true)}
+      />
     </>):
     (<>
       <BtnCallToAction
         text="Desarchivar"
         icon="archive-solid.svg"
         onClick={() => setModalOpen(true)}
+      />
+      <BtnCallToAction
+        text="Eliminar"
+        icon="trash-alt-regular.svg"
+        type="danger"
+        onClick={() => setModalDeleteOpen(true)}
       />
 
     </>)
@@ -94,9 +106,9 @@ const ViewUser = () => {
     'Technician': 'Operario'
   }
 
- console.log('user', user);
- console.log('selecteduser', selectedUser);
- console.log(userCurrentRole == 'Technician' && user.uuid == selectedUser.uuid )
+// console.log('user', user);
+ //console.log('selecteduser', selectedUser);
+ //console.log(userCurrentRole == 'Technician' && user.uuid == selectedUser.uuid )
  
 
   return (
@@ -111,7 +123,16 @@ const ViewUser = () => {
       nombre={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
       businessUuid={businessUuid}
     />
-{/*}    */}
+    <ModalDelete
+      isOpen={modalDeleteOpen}
+      onRequestClose={() => setModalDeleteOpen(false)}
+      entidad="usuario"
+      entidadId={selectedUser?.uuid}      
+      redirectTo={`/panel/ubicaciones/${businessUuid}/usuarios/`}
+      nombre={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
+      businessUuid={businessUuid}
+    />
+
       {selectedUser && (
         <>
           <Title1

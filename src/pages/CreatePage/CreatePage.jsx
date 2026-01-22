@@ -98,7 +98,9 @@ const CreatePage = () => {
 */
   useEffect(() => {
     if (userId /*&& currentAction == 'editar'*/) {
-      fetchUserById(userId); 
+      //console.log('busco el selected user');
+      
+      fetchUserById(userId, businessUuid); 
     }
   }, [userId, currentAction]);
 
@@ -108,7 +110,9 @@ const CreatePage = () => {
 
   const FormComponent = formComponents[currentEntityName] || formComponents.default;
 
-//console.log('dataloggerId', dataloggerId);
+//console.log('userID', userId);
+//console.log('selectedUser', selectedUser);
+
 
   return (
     <>

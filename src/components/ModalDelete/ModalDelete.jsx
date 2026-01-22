@@ -1,6 +1,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import ModalTemplate from '../ModalTemplate/ModalTemplate';
+import styles from '../ModalTemplate/ModalTemplate.module.css';
 import { useUsersStore } from '../../store/usersStore';
 import { useLocationsStore } from '../../store/locationsStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
@@ -9,19 +10,18 @@ import { useAlarmsStore } from '../../store/alarmsStore';
 import toast from 'react-hot-toast';
 
 const ENTITY_MAP = {
-  usuario:   { store: useUsersStore,    update: 'updateUser' },
-  ubicacion: { store: useLocationsStore, update: 'updateLocation' },
-  datalogger: { store: useDataloggersStore, update: 'updateDatalogger' },
-  canal:     { store: useChannelsStore, update: 'updateChannel' },
-  alarma:    { store: useAlarmsStore,   update: 'updateAlarm' },
+  usuario:   { store: useUsersStore,    delete: 'deleteUser' },
+  ubicacion: { store: useLocationsStore, delete: null },
+  datalogger: { store: useDataloggersStore, delete: null },
+  canal:     { store: useChannelsStore, delete: null },
+  alarma:    { store: useAlarmsStore,   delete: null },
 };
 
-const ModalSetArchive = ({
+const ModalDelete = ({
   isOpen,
   onRequestClose,
   entidad,      // string: 'usuario', 'ubicacion', etc.
-  entidadId,    // id numérico
-  nuevoEstado,  // 0 o 1
+  entidadId,    // id numérico  
   redirectTo,   // ruta para redireccionar luego de la acción
   nombre,       // nombre visible de la entidad (opcional, para mostrar en el mensaje)
   businessUuid
@@ -31,15 +31,19 @@ const ModalSetArchive = ({
   // Obtener el store y la función de update correspondiente
   const entityConfig = ENTITY_MAP[entidad];
   const store = entityConfig?.store();
-  const updateFn = store?.[entityConfig.update];
+  const deleteFn = store?.[entityConfig.delete];
 
   const handleAccept = async () => {
-    if (updateFn && entidadId) {
+    if (deleteFn && entidadId) {
       //console.log('Updating entity:', entidad, 'ID:', entidadId, 'to new state:', nuevoEstado);
-      const responseStore = await updateFn(entidadId, { is_active: nuevoEstado, businessUuid: businessUuid });
-      //console.log('Response from update:', responseStore);
+      const responseStore = await deleteFn(businessUuid, entidadId);
+      console.log('Response from delete:', responseStore);
       onRequestClose();
-      toast.success(`${entidad.charAt(0).toUpperCase() + entidad.slice(1)} ${nuevoEstado == 0 ? 'archivado' : 'desarchivado'} exitosamente.`);
+      if (responseStore){
+        toast.success(`${entidad.charAt(0).toUpperCase() + entidad.slice(1)} eliminado exitosamente.`);
+      }else{
+        toast.error(`Error eliminando al ${entidad.charAt(0).toUpperCase() + entidad.slice(1)}`);
+      }
       navigate(redirectTo);
     }
   };
@@ -56,7 +60,7 @@ const ModalSetArchive = ({
     <ModalTemplate
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      title={`Confirmar ${nuevoEstado == false ? 'archivar' : 'desarchivar'}`}
+      title={'Confirmar eliminación'}
       buttons={[
         { title: 'Cancelar', onClick: onRequestClose },
         { title: 'Aceptar', onClick: handleAccept }
@@ -64,14 +68,15 @@ const ModalSetArchive = ({
     >
       <p>
         {`
-        ¿Estás seguro que deseas ${nuevoEstado === false  ? 'archivar' : 'desarchivar'} 
+        ¿Estás seguro que deseas eliminar definitivamente 
         ${(entidad == 'ubicacion' || entidad == 'alarma') ? ' la ' : ' el '}
         `}
         <strong> {entidad} </strong><br/>
-        <strong><em>{nombre}</em> </strong>
+        <strong><em>{nombre}</em> </strong><br/>
+        <span className={styles.textDanger}>ATENCION: ESTE PROCESO NO SE PUEDE REVERTIR!</span>
       </p>
     </ModalTemplate>
   );
 };
 
-export default ModalSetArchive;
+export default ModalDelete;

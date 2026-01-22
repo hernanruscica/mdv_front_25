@@ -119,7 +119,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
             //formData.append("image", newImage || profileImage); // Always send image, even if default
             // Manejo de la imagen
             if (newImage instanceof File) {            
-              console.log('newImage', newImage);
+              //console.log('newImage', newImage);
               
                 formData.append("image", newImage); // Backend expects 'image' field for file upload
             } else {
@@ -185,6 +185,9 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
     if (isSubmitting) {
         return <div>Guardando cambios...</div>;
     }
+
+   // console.log('userData', userData);
+    
     
     return (        
         <form onSubmit={handleSubmit} className={stylesForms.form}>

@@ -3,6 +3,7 @@ import { Title1 } from "../../components/Title1/Title1";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import { useAuthStore } from "../../store/authStore";
 import { useLocationsStore } from "../../store/locationsStore";
+import { useUsersStore } from '../../store/usersStore';
 import { LoadingSpinner } from "../../components/LoadingSpinner/LoadingSpinner";
 import styles from "./Dashboard.module.css";
 import CardInfo from '../../components/CardInfo/CardInfo';
@@ -20,24 +21,31 @@ const Dashboard = () => {
     error: locationsError,
     fetchLocations
   } = useLocationsStore();
+    const { 
+    users, 
+    loadingStates,
+    error: usersError,
+    fetchUsers 
+  } = useUsersStore();
 
   
 
   useEffect(() => {
     const loadData = async () => {      
       const currentResponseLocations = await fetchLocations(user);            
-      setCurrentDataloggers(currentResponseLocations.flatMap(location => location.dataloggers));            
+      setCurrentDataloggers(currentResponseLocations.flatMap(location => location.dataloggers));        
+      fetchUsers(user, user?.businesses_roles[0].uuid);    
     };
     loadData();   
   }, []);
 
   
 
-  if (isLoadingLocations ) {
+  if (isLoadingLocations || loadingStates?.fetchUsers) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-  if (locationsError) {
+  if (locationsError || usersError) {
     return <div className={styles.error}>Error cargando datos...</div>;
   }  
 
@@ -51,12 +59,16 @@ const Dashboard = () => {
     'Technician': 'Operario'
   }
 
+  //console.log('users', users);
+  
+
   return (
     <>      
       <Title1 type="panel" text="Panel de Control" />
       <Breadcrumb />     
       <p className={styles.description}>
-        Bienvenido al panel de control de <strong>MDV Sensores</strong>, su sistema integral para la gestión y monitoreo de dataloggers, ubicaciones, usuarios y alarmas. Desde este panel, usted puede supervisar el estado de sus equipos, administrar usuarios y configurar alarmas críticas para garantizar el funcionamiento óptimo de sus operaciones.
+        Bienvenido al panel de control de <strong>MDV Sensores</strong>, su sistema integral para la gestión y monitoreo de dataloggers, ubicaciones, usuarios y alarmas. 
+        Desde este panel, usted puede supervisar el estado de sus equipos, administrar usuarios y configurar alarmas críticas para garantizar el funcionamiento óptimo de sus operaciones.
       </p>     
      
       <Title2 text="Administracion" type='panel'/>
@@ -105,7 +117,7 @@ const Dashboard = () => {
           </div>
         </CardInfo>
 
-        {/* USERS 
+        {/* USERS */} 
         <CardInfo
           iconSrc={`/icons/${getIconFileName('usuarios')}`}
           title="Usuarios"
@@ -116,6 +128,22 @@ const Dashboard = () => {
               <strong>{users.length} Usuarios</strong>{" "}
               para ver o administrar, según los permisos de su usuario.
             </p>
+            <p className={cardInfoStyles.paragraph}>
+              Abajo puede ver los últimos 4 usuarios modificados.<br/>
+              En [VER MÁS] puede ver todos los del sistema.
+            </p>
+            {
+              users?.length > 0 
+              ? 
+              users.slice(0, 4).map(user  => 
+              <CardBtnSmall 
+                  key={user?.uuid}
+                  title={`${user?.first_name} ${user?.last_name}`}
+                  url={`/panel/ubicaciones/${user?.businesses_roles[0]?.uuid || 'sdfds'}/usuarios/${user?.uuid}`}
+                />
+               )
+              : ''
+            }
             {(user?.isOwner == 1 || user?.esadministrador == true) && (
               <CardBtnSmall 
                 title='Agregar usuario'
@@ -123,7 +151,7 @@ const Dashboard = () => {
               />
             )}
           </div>
-        </CardInfo>*/}        
+        </CardInfo>       
 
         {/* DATALOGGERS */}
         <CardInfo

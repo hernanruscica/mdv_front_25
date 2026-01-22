@@ -94,10 +94,10 @@ export const useUsersStore = create((set, get) => ({
     }
   },
 
-  deleteUser: async (id) => {
+  deleteUser: async (businessUuid, id) => {
     set(state => ({ loadingStates: { ...state.loadingStates, deleteUser: true }, error: null }));
     try {
-      const success = await usersService.delete(id);
+      const success = await usersService.delete(businessUuid, id);
       if (success) {
         set(state => ({
           users: state.users.filter(user => user.id !== id)

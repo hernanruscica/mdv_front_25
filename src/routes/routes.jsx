@@ -19,6 +19,7 @@ export const routes = [
   { path: "/panel/ubicaciones/:businessUuid/eliminar", element: <UnderConstruction />, private: true },  
   
   // Users routes
+  { path: "/panel/usuarios", element: <Users />, private: true },  
   { path: "/panel/ubicaciones/:businessUuid/usuarios", element: <Users />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId", element: <ViewUser />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/usuarios/activar/:token", element: <ActivateUser /> },

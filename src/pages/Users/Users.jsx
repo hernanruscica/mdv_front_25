@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useAuthStore } from '../../store/authStore';
@@ -24,13 +24,28 @@ const Users = () => {
     loadingStates: { fetchLocation: isLoadingLocation}
   } = useLocationsStore();
 
+  
   const isLoading = loadingStates?.fetchUsers || isLoadingLocation;  
   const { businessUuid } = useParams();
+
+  const userCurrentRole = 
+      user?.businesses_roles.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
   
   useEffect(() => {       
 
-   fetchUsers(user, businessUuid);
-   fetchLocationById(businessUuid);
+    if (businessUuid){
+      //console.log('has businessUuid');
+      
+      fetchUsers(user, businessUuid);
+      fetchLocationById(businessUuid);      
+    }else{
+      //console.log(`hasn't businessUuid`, user?.businesses_roles[0].uuid);
+      fetchUsers(user, user?.businesses_roles[0].uuid);
+      fetchLocationById(user?.businesses_roles[0].uuid);
+    }
+
 
   }, [user, businessUuid]);
 
@@ -73,23 +88,28 @@ const Users = () => {
     navigate(`/panel/ubicaciones/${row.businessUuid}/usuarios/${row.id}`);
   };
 
-  const preparedData = (users.length > 0)
-    ? users?.map(user => ({
-      nombreCompleto: user.first_name + ' ' + user.last_name,
-      email: user.email,
-      ubicaciones: Array.isArray(user.businesses_roles) && user.businesses_roles.length > 0
-        ? user.businesses_roles.map(ubi => ubi.name).join(', ')
-        : 'N/A',
-      id: user.uuid,
-      businessUuid: businessUuid,
-      estado: user.is_active
-    }))
+  const filterUsersByOwner = (userCurrentRole == 'Owner' && businessUuid)
+    ? users?.filter(us => us?.businesses_roles.some(br => br.uuid == businessUuid))
+    : users;
+
+    //console.log('filterUsersByOwner', filterUsersByOwner);  
+    
+    
+
+  const preparedData = (filterUsersByOwner.length > 0) 
+    ? filterUsersByOwner.map(user => ({
+        nombreCompleto: user.first_name + ' ' + user.last_name,
+        email: user.email,
+        ubicaciones: Array.isArray(user.businesses_roles) && user.businesses_roles.length > 0
+          ? user.businesses_roles.map(ubi => ubi.name).join(', ')
+          : 'N/A',
+        id: user.uuid,
+        businessUuid: businessUuid || user?.businesses_roles[0].uuid,
+        estado: user.is_active
+      }))
     : [];  
 
-  const userCurrentRole = 
-      user?.businesses_roles.some(br => br.role === 'Owner')
-        ? 'Owner'
-        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+
 
         //console.log(userCurrentRole);
         
