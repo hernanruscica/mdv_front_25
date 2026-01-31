@@ -35,7 +35,7 @@ const ShowLocationsCards = ({
 
    const mappedCurrentRole = {
     'Owner': 'Propietario',
-    'Admin': 'Administrador',
+    'Administrator': 'Administrador',
     'Technician': 'Operario'
   }
 
@@ -46,31 +46,7 @@ const ShowLocationsCards = ({
   return (
     <>
       <div className={styles.controlsContainer}>
-        {/*}
-        <ButtonsBar 
-          itemsName='ubicaciones' 
-          itemsQty={filteredLocations.length}
-          showAddButton={showAddButton}
-        >
-          <div className={styles.controls}>
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchChange={onSearchChange}
-              placeholder="Buscar ubicaciones..."
-            />
-            {showAddButton && (
-            <label className={styles.checkboxContainer}>
-              <input
-                type="checkbox"
-                checked={showArchived}
-                onChange={(e) => setShowArchived(e.target.checked)}
-              />
-              <span>Mostrar tambien las archivadas</span>
-            </label>
-            )}
-          </div>
-        </ButtonsBar>
-        */}
+        
          <ButtonsBar
           itemsName='ubicaciones'
           items={locations}

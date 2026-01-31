@@ -5,44 +5,55 @@ import { Title2 } from '../../components/Title2/Title2';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useUsersStore } from '../../store/usersStore';
 import { useAuthStore } from '../../store/authStore';
+import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import CardImage from '../../components/CardImage/CardImage';
 import styles from './ViewUser.module.css';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 
-import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
+//import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
+import Table from '../../components/Table/Table';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import ModalDelete from '../../components/ModalDelete/ModalDelete';
+import ModalAsignLocation from '../../components/ModalAsignLocation/ModalAsignLocation';
 
 const ViewUser = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { businessUuid, userId } = useParams();  
+  const {businessUuid, userId } = useParams();  
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDeleteOpen, setModalDeleteOpen] = useState(false);
+  const [modalAsignLocationOpen, setModalAsignLocationOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [clickedBusinessRole, setClickedBusinessRole] = useState({});
+  
   
 
   const { selectedUser, fetchUserById, loadingStates, error: errorUsers } = useUsersStore();  
+  const {locations, fetchLocations, loadingStates : {fetchLocations: loadingLocations}, error: errorLocations } = useLocationsStore();
+
+  const { user } = useAuthStore();
 
   useEffect(() => {
     const loadUser = async () => {
       if (userId || !modalOpen) {
         await fetchUserById(userId, businessUuid);
+        await fetchLocations(user);
       }      
     };
     loadUser();
   }, [userId, fetchUserById, modalOpen]);
 
-  const { user } = useAuthStore();
+
 
   
-  if (loadingStates.fetchUser ) {
+  if (loadingStates.fetchUser && loadingLocations ) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-  if (errorUsers ) {
-    return <div className={styles.error}>Error: {errorUsers }</div>;
+  if (errorUsers || errorLocations) {
+    return <div className={styles.error}>Error al cargar los datos</div>;
   }
 
   if (!selectedUser) {
@@ -50,6 +61,8 @@ const ViewUser = () => {
   }
 
   //console.log('user', user);
+  console.log('selectedUser', selectedUser);
+  
   
   
 
@@ -100,13 +113,61 @@ const ViewUser = () => {
       selectedUser?.businesses_roles.some(br => br.role === 'Owner')
         ? 'Owner'
         : selectedUser?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-     const mappedCurrentRole = {
+    const mappedCurrentRole = {
     'Owner': 'Propietario',
-    'Admin': 'Administrador',
+    'Administrator': 'Administrador',
     'Technician': 'Operario'
-  }
+    }
 
-// console.log('user', user);
+  const availableRoles = [
+                          {
+                            uuid: 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e',
+                            name: 'Administrator'
+                          },
+                          {
+                            uuid: 'c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f',
+                            name: 'Technician'
+                          }
+                        ]
+      
+
+   const handleRowClick = (row) => {
+    //navigate(`/panel/ubicaciones/${row.businessUuid}/usuarios/${row.id}`);
+    setIsEditing(true);
+    setModalAsignLocationOpen(true);
+    setClickedBusinessRole(selectedUser?.businesses_roles.find(br => br.uuid == row.uuid))
+    //console.log('clickebusinessRole', selectedUser?.businesses_roles.find(br => br.uuid == row.uuid));
+  };
+
+  const preparedData = (Array.isArray(selectedUser?.businesses_roles) && selectedUser?.businesses_roles.length > 0) 
+    ? selectedUser?.businesses_roles.map(br => ({
+        uuid: br.uuid,        
+        locationName: br?.name,
+        locationAddress: `${br?.address?.street} - ${br?.address?.city}`,
+        roleName: br?.role, 
+        rolUsuarioNombre: mappedCurrentRole[br?.role]               
+      }))
+    : [];  
+
+    const columns = [
+    { 
+      label: 'Ubicacion', 
+      accessor: 'locationName',
+      icon: '/icons/user-regular.svg' 
+    },
+    { 
+      label: 'Direccion', 
+      accessor: 'locationAddress',
+      icon: '/icons/envelope-regular.svg' 
+    } ,
+    { 
+      label: 'rol del usuario', 
+      accessor: 'rolUsuarioNombre',
+      icon: '/icons/envelope-regular.svg' 
+    }       
+  ];
+
+ //console.log('user', user);
  //console.log('selecteduser', selectedUser);
  //console.log(userCurrentRole == 'Technician' && user.uuid == selectedUser.uuid )
  
@@ -128,6 +189,19 @@ const ViewUser = () => {
       onRequestClose={() => setModalDeleteOpen(false)}
       entidad="usuario"
       entidadId={selectedUser?.uuid}      
+      redirectTo={`/panel/ubicaciones/${businessUuid}/usuarios/`}
+      nombre={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
+      businessUuid={businessUuid}
+    />   
+    <ModalAsignLocation
+      isOpen={modalAsignLocationOpen}
+      onRequestClose={() => {setModalAsignLocationOpen(false); setIsEditing(false)}}
+      isEditing = { isEditing }
+      user= {selectedUser}
+      availableLocations = { locations }  
+      availableRoles = { availableRoles }
+      currentRole = {clickedBusinessRole?.role}
+      currentLocation = {clickedBusinessRole}
       redirectTo={`/panel/ubicaciones/${businessUuid}/usuarios/`}
       nombre={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
       businessUuid={businessUuid}
@@ -197,14 +271,37 @@ const ViewUser = () => {
 
           <Title2 text={`Ubicaciones para el usuario ${selectedUser.first_name} ${selectedUser.last_name}`} type="ubicaciones"/>
 
+
+         {
+          (userCurrentRole == 'Owner') ?
+          <BtnCallToAction
+              text="Asignar ubicacion al usuario"
+              icon="plus-circle-solid.svg"
+              type="normal"
+              onClick={() => setModalAsignLocationOpen(true)}              
+          />
+          :
+          ''
+        }
           {(selectedUser.businesses_roles.length > 0) ? (          
-            <ShowLocationsCards
-              locations={selectedUser.businesses_roles}              
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              user={selectedUser}
-              showAddButton={false}
-            />
+           
+            // <ShowLocationsCards
+            //   locations={selectedUser.businesses_roles}              
+            //   searchTerm={searchTerm}
+            //   onSearchChange={setSearchTerm}
+            //   user={selectedUser}
+            //   showAddButton={false}
+            // />
+            
+            <div className={styles.tableContainer}>      
+              <Table 
+                columns={columns} 
+                data={preparedData} 
+                onRowClick={handleRowClick}
+                showAddButton={false}
+                addUrl={`/panel/ubicaciones/${businessUuid}/usuarios/agregar`}
+              />       
+            </div>
           ) : (
             <p className={styles.noLocations}>Este usuario no tiene ubicaciones asignadas</p>
           )}
