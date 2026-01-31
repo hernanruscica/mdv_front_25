@@ -136,7 +136,7 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                     />
                 </div>
                 <div className={stylesForms.formInput}>
-                    <label htmlFor="averaging_period">Tiempo a Promediar (segundos):</label>
+                    <label htmlFor="averaging_period">Tiempo a Promediar (Minutos):</label>
                     <input
                         type="number"
                         name="averaging_period"

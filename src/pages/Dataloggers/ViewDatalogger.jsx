@@ -103,7 +103,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       */}
     </>
   );
-  console.log('dataloggerUsage ',dataloggerUsage);
+  console.log('dataloggerUsage channel 2 ',dataloggerUsage?.channels[2]);
  
   return (
     <>
@@ -148,8 +148,8 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
               datalogger?.alarms.map((alarm, index) => { 
                 if (alarm.is_active !== 1) return null;
                 if (alarm.alarm_type !== 'porcentage_on') return null;
-                
-                const currentValue =  dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid)?.lastData.porcentageUsagePeriod || '--';                
+                const currentChannel = dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid);
+                const currentValue =  currentChannel?.lastData?.porcentageUsagePeriod || '--';                
                 console.log('ViewDatalooger - currentValue to show on gauge: ', currentValue);
                 let currentMin = null;                 
                 let currentMax = null;

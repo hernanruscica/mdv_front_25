@@ -37,13 +37,13 @@ const ViewUser = () => {
 
   useEffect(() => {
     const loadUser = async () => {
-      if (userId || !modalOpen) {
+      if (userId || !modalOpen || !modalAsignLocationOpen) {
         await fetchUserById(userId, businessUuid);
         await fetchLocations(user);
       }      
     };
     loadUser();
-  }, [userId, fetchUserById, modalOpen]);
+  }, [userId, fetchUserById, modalOpen, modalAsignLocationOpen]);
 
 
 
@@ -61,7 +61,7 @@ const ViewUser = () => {
   }
 
   //console.log('user', user);
-  console.log('selectedUser', selectedUser);
+  //console.log('selectedUser', selectedUser);
   
   
   
@@ -153,23 +153,25 @@ const ViewUser = () => {
     { 
       label: 'Ubicacion', 
       accessor: 'locationName',
-      icon: '/icons/user-regular.svg' 
+      icon: '/icons/building-regular.svg' 
     },
     { 
       label: 'Direccion', 
       accessor: 'locationAddress',
-      icon: '/icons/envelope-regular.svg' 
+      icon: '/icons/home-solid.svg' 
     } ,
     { 
       label: 'rol del usuario', 
       accessor: 'rolUsuarioNombre',
-      icon: '/icons/envelope-regular.svg' 
-    }       
+      icon: '/icons/user-shield-solid.svg' 
+    },           
   ];
 
  //console.log('user', user);
  //console.log('selecteduser', selectedUser);
  //console.log(userCurrentRole == 'Technician' && user.uuid == selectedUser.uuid )
+ //console.log('isediting', isEditing)
+ //console.log('clickedBusinessRoleUuid', clickedBusinessRole?.business_user_uuid);
  
 
   return (
@@ -198,7 +200,9 @@ const ViewUser = () => {
       onRequestClose={() => {setModalAsignLocationOpen(false); setIsEditing(false)}}
       isEditing = { isEditing }
       user= {selectedUser}
-      availableLocations = { locations }  
+      availableLocations = {!isEditing   
+        ? locations.filter(loc => !selectedUser?.businesses_roles?.some(br => br.uuid === loc.uuid)) 
+        : locations }
       availableRoles = { availableRoles }
       currentRole = {clickedBusinessRole?.role}
       currentLocation = {clickedBusinessRole}

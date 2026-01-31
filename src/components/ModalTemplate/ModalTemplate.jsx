@@ -4,13 +4,20 @@ import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 
 //ReactModal.setAppElement('#root'); // Ajusta esto según tu estructura
 
-const ModalTemplate = ({ isOpen, onRequestClose, title, children, buttons = [] }) => (
+const ModalTemplate = ({ 
+                isOpen, 
+                onRequestClose, 
+                title, 
+                children, 
+                buttons = [],
+                customStyles = {}  }) => (
   <ReactModal
     isOpen={isOpen}
     onRequestClose={onRequestClose}
     className={styles.modalContent}
     overlayClassName={styles.modalOverlay}
     shouldCloseOnOverlayClick={true}
+    style={customStyles}
   >
     <div className={styles.modalHeader}>
       <h2 className={styles.modalTitle}>{title}</h2>
