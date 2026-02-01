@@ -7,6 +7,10 @@ import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
 import styles from '../Dashboard/Dashboard.module.css';
 
+// NUEVOS IMPORTS
+import { LOCATIONS_LIST_INFO } from '../../utils/infoContent';
+import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
+import { GetUserCurrentRole } from '../../utils/userRoles';
 
 const Locations = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,8 +29,14 @@ const Locations = () => {
       }
     }
     fetchData();
-    
   }, [user]);
+
+  // ACTUALIZACIÓN: Lógica de rol y datos del acordeón
+  const userCurrentRole = GetUserCurrentRole(user); // Sin UUID para check global de Owner
+  
+  const infoData = userCurrentRole?.name === 'Owner' 
+    ? LOCATIONS_LIST_INFO.Owner 
+    : LOCATIONS_LIST_INFO.General;
 
   if (isLoadingLocations ) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -36,38 +46,25 @@ const Locations = () => {
     return <div className={styles.error}>{error}</div>;
   }
 
-  const userCurrentRole = 
-      user?.businesses_roles.some(br => br.role === 'Owner')
-        ? 'Owner'
-        : '';
-
   return (
     <>
-      
       <Title1 
         type="ubicaciones"
         text="Ubicaciones" 
       />      
-      {
-        userCurrentRole == 'Owner'
-        ? <>
-          <p className={styles.description}>
-            Como propietario, usted tiene acceso completo para administrar todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
-            Puede agregar nuevas ubicaciones y gestionar las existentes. Una ubicacion puede tener varios dataloggers.<br/><br/>
-            Puede buscar una ubicacion, ver u ocultar las archivadas segun sea necesario.
-          </p>          
-        </>
-        : <p className={styles.description}>
-            Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
-          </p>
-      }
+      
+      {/* REEMPLAZO: Acordeón informativo */}
+      <InfoAccordion data={infoData} />
+
       <Breadcrumb />
+      
       <ShowLocationsCards
         user={user}
         locations={locations}                
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}        
-        showAddButton={userCurrentRole === 'Owner'}
+        // ACTUALIZACIÓN: Usando el objeto de rol
+        showAddButton={userCurrentRole?.name === 'Owner'}
       />
     </>
   );

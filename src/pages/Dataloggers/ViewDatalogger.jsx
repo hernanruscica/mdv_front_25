@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom'; // Unificado Link aquí
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
@@ -7,34 +7,32 @@ import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardImage from '../../components/CardImage/CardImage';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import { useAuthStore } from '../../store/authStore';
-
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import styles from './ViewDatalogger.module.css';
 import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCards';
-
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
-import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
+import { useFetchDatalogger } from '../../hooks/useFetchDatalogger';
 import { useDataStore } from '../../store/dataStore';
-import { Link } from 'react-router-dom';
 import GaugeLinear from '../../components/GaugeLinear/GaugeLinear';
 
+// NUEVOS IMPORTS
+import { DATALOGGER_VIEW_INFO } from '../../utils/infoContent';
+import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
+import { GetUserCurrentRole } from '../../utils/userRoles';
 
 const ViewDatalogger = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  
   const { businessUuid, dataloggerId } = useParams();
-  
   const user = useAuthStore(state => state.user);    
+  
   const {
-      dataloggerUsage,
-      fetchDataloggerUsage,
-      loadingStates: { fetchDataloggerUsage: isLoadingDataloggerUsage},
-      error: errorLoadingDataloggerUsage
-      } = useDataStore();
- 
+    dataloggerUsage,
+    fetchDataloggerUsage,
+    loadingStates: { fetchDataloggerUsage: isLoadingDataloggerUsage }
+  } = useDataStore();
 
   const { 
     datalogger, 
@@ -44,34 +42,28 @@ const ViewDatalogger = () => {
     refreshDatalogger 
   } = useFetchDatalogger(dataloggerId, businessUuid);
 
+  // ACTUALIZACIÓN: Lógica de rol unificada
+  const userCurrentRole = GetUserCurrentRole(user, businessUuid);
 
-      useEffect(() => {
-      const loadDataloggerUsage = async () => {       
-        
-        if (dataloggerId && businessUuid) {
-          await fetchDataloggerUsage(businessUuid, dataloggerId);
-        }
-      };
-      
-      loadDataloggerUsage();
-    }, [dataloggerId, businessUuid]);  
+  // Determinamos la información para el acordeón
+  const infoData = userCurrentRole?.name === 'Owner' 
+    ? DATALOGGER_VIEW_INFO.Owner 
+    : DATALOGGER_VIEW_INFO.General;
 
-  
+  useEffect(() => {
+    const loadDataloggerUsage = async () => {       
+      if (dataloggerId && businessUuid) {
+        await fetchDataloggerUsage(businessUuid, dataloggerId);
+      }
+    };
+    loadDataloggerUsage();
+  }, [dataloggerId, businessUuid]);  
 
   if (isLoadingDatalogger || isCreatingDatalogger || isUpdattingDatalogger || isLoadingDataloggerUsage) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-  //console.log('dataloggerUsage', dataloggerUsage);
-
-  const userCurrentRole = 
-    user?.businesses_roles.some(br => br.role === 'Owner')
-      ? 'Owner'
-      : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-
-
-
-const dataloggerButtons = datalogger?.is_active == '1' ? (
+  const dataloggerButtons = datalogger?.is_active == '1' ? (
     <>
       <BtnCallToAction
         text="Editar"
@@ -93,17 +85,8 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
         icon="save-regular.svg"
         onClick={() => setModalOpen(true)}
       />
-      {/*
-      <BtnCallToAction
-        text="Eliminar"
-        icon="trash-alt-regular.svg"
-        type="danger"
-        url={`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${datalogger?.uuid}/eliminar`}
-      />
-      */}
     </>
   );
-  console.log('dataloggerUsage channel 2 ',dataloggerUsage?.channels[2]);
  
   return (
     <>
@@ -121,22 +104,10 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
         type="dataloggers"
         text={datalogger?.name}
       />
-      {
-        userCurrentRole == 'Owner'
-        ? <>
-          <p className={styles.description}>
-            Usted se encuentra en la pagina para ver mas detalles del datalogger seleccionado.<br/><br/>
-            Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
-            En esta pagina puede: <strong> Agregar nuevos canales, editar y/o archivar el datalogger</strong> actual. <br/><br/>
-            Un datalogger puede tener varios canales y alarmas asociadas.<br/><br/>
-            Puede buscar un canal, ver u ocultar los archivados segun sea necesario.
-          </p>          
-        </>
-        : <p className={styles.description}>
-          Usted se encuentra en la pagina de detalles del datalogger seleccionado.<br/><br/>
-            Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
-          </p>
-      }
+
+      {/* REEMPLAZO: Acordeón informativo centralizado */}
+      <InfoAccordion data={infoData} />
+
       <Breadcrumb datalogger={datalogger?.name} ubicacion={datalogger?.business.name}/>     
      
       <div className={styles.sectionRow}>
@@ -150,7 +121,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
                 if (alarm.alarm_type !== 'porcentage_on') return null;
                 const currentChannel = dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid);
                 const currentValue =  currentChannel?.lastData?.porcentageUsagePeriod || '--';                
-                console.log('ViewDatalooger - currentValue to show on gauge: ', currentValue);
+                
                 let currentMin = null;                 
                 let currentMax = null;
                 if (alarm?.condition_logic.includes('>')){
@@ -183,7 +154,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
         <CardImage
           image={datalogger?.img ? `${datalogger?.img}` : '/images/default_datalogger.webp'}
           title={datalogger?.name}
-          buttons={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator' ? dataloggerButtons : null}
+          buttons={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator' ? dataloggerButtons : null}
         >
           <div className={styles.dataloggerInfo}>
             {datalogger?.is_active == '0' && (
@@ -191,7 +162,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
             )}
             <p className={styles.description}>{datalogger?.description}</p>
             <p className={styles.highLightText}>
-              <strong>Ultimos datos recibidos:</strong> 
+              <strong>Últimos datos recibidos:</strong> 
               {dataloggerUsage?.lastConection 
                   ? FormatearFechaCompleta(dataloggerUsage?.lastConection) 
                   : 'Sin datos aún'}
@@ -199,7 +170,7 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
             <p><strong>MAC:</strong> {datalogger?.mac_address}</p>
             <p>
               <strong>Ubicación:</strong> {
-                location ? (
+                datalogger?.business ? (
                   <CardBtnSmall
                     title={datalogger?.business.name}
                     url={`/panel/ubicaciones/${datalogger?.business.uuid}`}
@@ -225,7 +196,6 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
             </p>
           </div>
         </CardImage>
-        
       </div>
  
       <Title2 
@@ -234,13 +204,12 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
       />      
       
       {datalogger?.channels.length > 0 ? (
-        
         <ShowChannelsCards
           channels={datalogger ? datalogger?.channels : []}
           alarms={datalogger?.alarms}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          showAddButton={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator'}
+          showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
         />
       ) : 
       (<>
@@ -252,8 +221,8 @@ const dataloggerButtons = datalogger?.is_active == '1' ? (
         />
         <p>No hay canales todavía</p>
         </>)}
-    
-  </>)
+    </>
+  )
 };
 
 export default ViewDatalogger;

@@ -12,34 +12,43 @@ import CardBtnSmall from "../../components/CardBtnSmall/CardBtnSmall";
 import { getIconFileName } from "../../utils/iconsDictionary";
 import { Title2 } from "../../components/Title2/Title2";
 
+// NUEVOS IMPORTS
+import { DASHBOARD_INFO } from '../../utils/infoContent';
+import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
+import { GetUserCurrentRole, mappedCurrentRole } from '../../utils/userRoles';
+
 const Dashboard = () => {
   const user = useAuthStore(state => state.user);
   const [currentDataloggers, setCurrentDataloggers] = useState([]);
+  
   const {
     locations,
     loadingStates: { fetchLocations: isLoadingLocations },
     error: locationsError,
     fetchLocations
   } = useLocationsStore();
-    const { 
+
+  const { 
     users, 
     loadingStates,
     error: usersError,
     fetchUsers 
   } = useUsersStore();
 
-  
+  // ACTUALIZACIÓN: Lógica de rol y datos del acordeón
+  const userCurrentRole = GetUserCurrentRole(user);
+  const infoData = userCurrentRole?.name === 'Owner' 
+    ? DASHBOARD_INFO.Owner 
+    : DASHBOARD_INFO.General;
 
   useEffect(() => {
     const loadData = async () => {      
       const currentResponseLocations = await fetchLocations(user);            
       setCurrentDataloggers(currentResponseLocations.flatMap(location => location.dataloggers));        
-      fetchUsers(user, user?.businesses_roles[0].uuid);    
+      fetchUsers(user, user?.businesses_roles[0]?.uuid);    
     };
     loadData();   
-  }, []);
-
-  
+  }, [user, fetchLocations, fetchUsers]);
 
   if (isLoadingLocations || loadingStates?.fetchUsers) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -49,38 +58,17 @@ const Dashboard = () => {
     return <div className={styles.error}>Error cargando datos...</div>;
   }  
 
- const userCurrentRole = 
-      user?.businesses_roles.some(br => br.role === 'Owner')
-        ? 'Owner'
-        : '';
-  const mappedCurrentRole = {
-    'Owner': 'Propietario',
-    'Administrator': 'Administrador',
-    'Technician': 'Operario'
-  }
-
-  //console.log('users', users);
-  
-
   return (
     <>      
       <Title1 type="panel" text="Panel de Control" />
-      <Breadcrumb />     
-      <p className={styles.description}>
-        Bienvenido al panel de control de <strong>MDV Sensores</strong>, su sistema integral para la gestión y monitoreo de dataloggers, ubicaciones, usuarios y alarmas. 
-        Desde este panel, usted puede supervisar el estado de sus equipos, administrar usuarios y configurar alarmas críticas para garantizar el funcionamiento óptimo de sus operaciones.
-      </p>     
-     
-      <Title2 text="Administracion" type='panel'/>
       
-      <p className={styles.description}>
-        {
-          userCurrentRole == 'Owner'
-          ? 'Como propietario, usted tiene acceso completo para administrar todas las ubicaciones, usuarios y dataloggers en el sistema.'
-          : 'Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.'
-        }
-      </p>
+      {/* REEMPLAZO: Acordeón centralizado en lugar de las descripciones estáticas */}
+      <InfoAccordion data={infoData} />
 
+      <Breadcrumb />     
+     
+      <Title2 text="Administración" type='panel'/>
+      
       <div className={styles.cardsContainer}>
 
         {/* BUSINESSES */}        
@@ -91,28 +79,21 @@ const Dashboard = () => {
         >
           <div className={cardInfoStyles.description}>
             <p className={cardInfoStyles.paragraph}>
-              <strong>{locations?.length} Ubicaciones</strong>{" "}
-              para ver o administrar, según los permisos de su usuario.
+              <strong>{locations?.length} Ubicaciones</strong> para administrar.
             </p>  
-            {
-              locations?.length > 0 &&
-              locations.map(loc => {
+            {locations?.length > 0 && locations.map(loc => {
                 const currentRole = user?.businesses_roles.some(br => br.role === 'Owner') 
                   ? 'Owner' 
                   : user.businesses_roles.find(br => br.uuid === loc.uuid)?.role;
                 return(
                 <CardBtnSmall 
                   key={loc.uuid} 
-                  title={`${loc.name} - Rol: ${mappedCurrentRole[currentRole]}`} 
+                  title={`${loc.name} - Rol: ${mappedCurrentRole[currentRole] || currentRole}`} 
                   url={`/panel/ubicaciones/${loc.uuid}`}/>                
-              )}
-            )
-            }
+              )
+            })}
             {user?.isOwner === 1 && (
-              <CardBtnSmall 
-                title='Agregar ubicación'
-                url='/panel/ubicaciones/agregar'
-              />
+              <CardBtnSmall title='Agregar ubicación' url='/panel/ubicaciones/agregar' />
             )}
           </div>
         </CardInfo>
@@ -125,30 +106,18 @@ const Dashboard = () => {
         >
           <div className={cardInfoStyles.description}>
             <p className={cardInfoStyles.paragraph}>
-              <strong>{users.length} Usuarios</strong>{" "}
-              para ver o administrar, según los permisos de su usuario.
+              <strong>{users?.length || 0} Usuarios</strong> registrados.
             </p>
-            <p className={cardInfoStyles.paragraph}>
-              Abajo puede ver los últimos 4 usuarios modificados.<br/>
-              En [VER MÁS] puede ver todos los del sistema.
-            </p>
-            {
-              users?.length > 0 
-              ? 
-              users.slice(0, 4).map(user  => 
+            <p className={cardInfoStyles.paragraph}>Últimos usuarios modificados:</p>
+            {users?.length > 0 && users.slice(0, 4).map(u => (
               <CardBtnSmall 
-                  key={user?.uuid}
-                  title={`${user?.first_name} ${user?.last_name}`}
-                  url={`/panel/ubicaciones/${user?.businesses_roles[0]?.uuid || 'sdfds'}/usuarios/${user?.uuid}`}
-                />
-               )
-              : ''
-            }
-            {(user?.isOwner == 1 || user?.esadministrador == true) && (
-              <CardBtnSmall 
-                title='Agregar usuario'
-                url='/panel/usuarios/agregar'
+                key={u?.uuid}
+                title={`${u?.first_name} ${u?.last_name}`}
+                url={`/panel/ubicaciones/${u?.businesses_roles[0]?.uuid}/usuarios/${u?.uuid}`}
               />
+            ))}
+            {(user?.isOwner === 1 || user?.esadministrador === true) && (
+              <CardBtnSmall title='Agregar usuario' url='/panel/usuarios/agregar' />
             )}
           </div>
         </CardInfo>       
@@ -161,29 +130,20 @@ const Dashboard = () => {
         >
           <div className={cardInfoStyles.description}>
             <p className={cardInfoStyles.paragraph}>
-              <strong>{currentDataloggers?.length} Dataloggers</strong>{" "}
-              para ver o administrar, según los permisos de su usuario.
+              <strong>{currentDataloggers?.length || 0} Dataloggers</strong> activos.
             </p>
-            {
-              currentDataloggers?.length > 0 
-              ? currentDataloggers.map(dl => (
-                <CardBtnSmall 
-                key={dl?.uuid}
-                title={`${dl?.name} - ${dl?.business.name}`}
-                url={`/panel/ubicaciones/${dl?.business.uuid}/dataloggers/${dl?.uuid}`}
-              />
-              ))
-              : ''
-            }
-            {user?.isOwner === 1 && (
+            {currentDataloggers?.length > 0 && currentDataloggers.map(dl => (
               <CardBtnSmall 
-                title='Agregar datalogger'
-                url='/panel/dataloggers/agregar'
+                key={dl?.uuid}
+                title={`${dl?.name} - ${dl?.business?.name}`}
+                url={`/panel/ubicaciones/${dl?.business?.uuid}/dataloggers/${dl?.uuid}`}
               />
+            ))}
+            {user?.isOwner === 1 && (
+              <CardBtnSmall title='Agregar datalogger' url='/panel/dataloggers/agregar' />
             )}
           </div>
         </CardInfo>
-
       </div>
     </>
   );

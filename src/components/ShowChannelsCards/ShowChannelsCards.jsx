@@ -75,7 +75,7 @@ const ShowChannelsCards = ({
               iconSrc={`/icons/${getIconFileName('canales')}`}
               title={channel.name}     
               url={`/panel/ubicaciones/${businessUuid}/dataloggers/${channel.datalogger_id}/canales/${channel.uuid}`}   
-              size='large'
+              size='normal'
             >
             <div className={cardInfoStyles.cardContent}>
               <div className={cardInfoStyles.cardImage}>

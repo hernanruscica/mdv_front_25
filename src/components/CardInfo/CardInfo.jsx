@@ -1,15 +1,21 @@
 import { Link } from 'react-router-dom';
-import CardTitle from '../CardTitle/CardTitle';
+
 import styles from './CardInfo.module.css';
 
 const CardInfo = ({ iconSrc, title, url, children, size = 'normal' }) => {
   return (
-    <div className={(size === 'large') ? styles.cardLarge : styles.card}>
-      <CardTitle 
-        iconSrc={iconSrc}
-        text={title}
-      />
-      {children}
+    <div className={`${styles.cardBase} ${size === 'large' ? styles.cardLarge : styles.card}`}>
+      <div className={styles.headerWrapper}>        
+         <div className={styles.title}>
+            <img src={iconSrc} alt={title} className={styles.icon} />
+            <span className={styles.text}>{title}</span>
+          </div>
+      </div>
+
+      <div className={styles.bodyContent}>
+        {children}
+      </div>
+
       <Link 
         to={url}
         className={styles.btn}
@@ -19,7 +25,7 @@ const CardInfo = ({ iconSrc, title, url, children, size = 'normal' }) => {
           alt="Ver más" 
           className={styles.btnImg}
         />
-        <span className={styles.btnText}>Ver más</span>
+        <span className={styles.btnText}>Ver detalles</span>
       </Link>
     </div>
   );

@@ -4,19 +4,27 @@ import {Title1} from '../../components/Title1/Title1';
 import styles from './Home.module.css';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 
+import { HOME_INFO } from '../../utils/infoContent';
+import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
+import { GetUserCurrentRole } from '../../utils/userRoles';
+
 const Home = () => {
   const { user } = useAuthStore();
+
+  const userCurrentRole = user ? GetUserCurrentRole(user) : null;
+
+   const infoData = userCurrentRole?.name === 'Owner' 
+      ? HOME_INFO.Owner 
+      : HOME_INFO.General;
      
   if (user) {   
     return (
       <>
       <Title1 text={`Bienvenido ${user.first_name} ${user.last_name}`}
           type="usuarios"/>
-        <p className={styles.description}>
-          Usted se encuentra en la pagina de inicio de <strong>MDV Sensores</strong>, su sistema de monitoreo y administración de dataloggers.<br/><br/>
-          Desde aquí, puede acceder rápidamente a las secciones principales del panel de control para gestionar sus dataloggers, ubicaciones, usuarios y alarmas.<br/><br/>
-          Utilice los botones de acción rápida a continuación para navegar por las diferentes áreas del sistema y comenzar a supervisar sus equipos críticos de manera eficiente.
-        </p>
+
+      <InfoAccordion data={infoData} />
+        
         <Breadcrumb />
       <main className={styles.pageMaincontent}>
         <div className={styles.actionButtons}>

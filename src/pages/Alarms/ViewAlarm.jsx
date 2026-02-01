@@ -17,7 +17,15 @@ import { RANGE_KEYS } from '../../components/ViewChart/constants/chartRanges';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useAlarmLogsStore } from '../../store/alarmLogsStore';
 import { useDataStore } from '../../store/dataStore';
+import { useAuthStore } from '../../store/authStore'
 import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
+
+// NUEVOS IMPORTS
+import { ALARM_DETAILS_INFO } from '../../utils/infoContent';
+import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
+import { GetUserCurrentRole } from '../../utils/userRoles';
+
+
 
 const ViewAlarm = () => {
   const { businessUuid, dataloggerId, channelId, alarmId, userId,  } = useParams();
@@ -51,6 +59,12 @@ const ViewAlarm = () => {
           loadingStates: { fetchChannelUsage: isLoadingChannelUsage, fetchDataloggerUsage: isLoadingDataloggerUsage },
     error: errorChannelUsage, 
   } = useDataStore();
+
+  const { user } = useAuthStore();
+
+  // ACTUALIZACIÓN: Lógica de rol y acordeón
+  const userCurrentRole = GetUserCurrentRole(user, businessUuid);
+  const infoData = userCurrentRole?.name === 'Owner' ? ALARM_DETAILS_INFO.Owner : ALARM_DETAILS_INFO.General;
 
 useEffect(() => {
   //console.log(businessUuid);
@@ -178,6 +192,10 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
         type="alarmas"
         text={`Alarma: ${selectedAlarm?.name}`}
       />
+
+      {/* REEMPLAZO: Acordeón centralizado */}
+      <InfoAccordion data={infoData} />
+
       <Breadcrumb
         // usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
         ubicacion={selectedAlarm?.business.name}

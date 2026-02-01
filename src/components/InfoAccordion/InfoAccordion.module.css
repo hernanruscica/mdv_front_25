@@ -1,0 +1,120 @@
+.accordionContainer {
+  background-color: #f9f9f9; /* Gris muy claro */
+  border: 1px solid #e0e0e0;
+  border-left: 5px solid #eeca6f; /* La línea amarilla de acento */
+  border-radius: 6px;
+  /* margin: 15px 0 25px 0; */
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  width: 100%;
+  max-width: 1000px;
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.2s;
+}
+
+.header:hover {
+  background-color: #f0f0f0; /* Cambio sutil al pasar el mouse */
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #444; /* Gris oscuro para el texto */
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  /* Si usas un SVG, podrías teñirlo aquí */
+  filter: opacity(0.7);
+}
+
+.arrow {
+  font-size: 0.8rem;
+  color: #888;
+  transition: transform 0.3s ease;
+}
+
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+.content {
+  padding: 0 18px 15px 50px; /* Padding extra a la izquierda para alinear con el título */
+  background-color: #f9f9f9;
+  animation: slideDown 0.3s ease-out;
+}
+
+.content p {
+  margin: 0 0 10px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #555;
+  text-align: left !important; /* Sobreescribimos el centrado que tenías en el modal */
+}
+
+.content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Animación de entrada */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ... tus estilos anteriores se mantienen ... */
+
+.actionsSection {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px dashed #e0e0e0; /* Una pequeña separación visual */
+}
+
+.actionsTitle {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.actionsList {
+  margin: 0;
+  padding-left: 20px; /* Espacio para los bullets */
+  list-style-type: disc;
+}
+
+.actionsList li {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.actionsList li::marker {
+  color: #eeca6f; /* Bullets del mismo amarillo de tu marca */
+  font-size: 1.1rem;
+}

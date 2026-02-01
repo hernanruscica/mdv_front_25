@@ -1,4 +1,4 @@
-import React from 'react';
+
 import styles from './CardTitle.module.css';
 
 const CardTitle = ({ iconSrc, text }) => {

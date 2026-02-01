@@ -9,6 +9,11 @@ import { useDataStore } from '../../store/dataStore';
 import {useFetchDatalogger} from '../../hooks/useFetchDatalogger';
 import styles from './ViewChannel.module.css';
 
+// NUEVOS IMPORTS
+import { CHANNELS_LIST_INFO } from '../../utils/infoContent';
+import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
+import { GetUserCurrentRole } from '../../utils/userRoles';
+
 const Channels = () => {
   const { businessUuid, dataloggerId } = useParams();
   const { user } = useAuthStore();  
@@ -47,12 +52,12 @@ const Channels = () => {
     return <div>Error cargando datos ... </div>
   }  
 
-  //console.log(user.businesses_roles.find(br => br.uuid === businessUuid).role);
-  //console.log('user', user);  
+  const userCurrentRole = GetUserCurrentRole(user, businessUuid);
 
-  const userCurrentRole = user?.businesses_roles.some(br => br.role === 'Owner')
-         ? 'Owner'
-         : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role
+  // Determinamos la información para el acordeón
+  const infoData = userCurrentRole?.name === 'Owner' 
+    ? CHANNELS_LIST_INFO.Owner 
+    : CHANNELS_LIST_INFO.General;
 
   
 //console.log(userCurrentRole);
@@ -63,22 +68,9 @@ const Channels = () => {
         type="canales"
         text={`Canales del datalogger "${datalogger?.name || ''}""`}
       />
-      {
-        userCurrentRole == 'Owner'
-        ? <>
-          <p className={styles.description}>
-            Usted se encuentra en la pagina para ver todos los canales del datalogger seleccionado.<br/><br/>
-            Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
-            En esta pagina puede: <strong> Agregar nuevos canales al datalogger</strong> actual. <br/><br/>
-            Un datalogger puede tener varios canales, y cada canal puede terner varias alarmas asociadas.<br/><br/>
-            Puede buscar un canal, ver u ocultar los archivados segun sea necesario.
-          </p>          
-        </>
-        : <p className={styles.description}>
-          Usted se encuentra en la pagina de detalles del datalogger seleccionado.<br/><br/>
-            Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
-          </p>
-      }
+
+      <InfoAccordion data={infoData} />
+     
       <Breadcrumb 
         datalogger={datalogger?.name || 'datalogger generico'}
         ubicacion={datalogger?.business.name}
@@ -90,7 +82,7 @@ const Channels = () => {
         alarms={datalogger?.alarms}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        showAddButton={userCurrentRole === 'Owner' || userCurrentRole === 'Administrator'}
+        showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
       />
       }
     </>

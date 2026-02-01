@@ -1,40 +1,42 @@
-.card {
+.cardBase {
   display: flex;
   flex-direction: column;   
   justify-content: space-between;   
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 2px 2px 6px 0px rgba(0,0,0,0.5);    
-  background-color: #EDEFF0;
-  max-width: 360px;
-  min-width: 340px;
-  width: 90%;
+  /* Sombra más suave y moderna */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);    
+  background-color: #ffffff; /* Fondo blanco para mayor claridad */
+  border: 1px solid #e1e4e8;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 50%;
+  margin-bottom: 20px;
 }
+
+.cardBase:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.card {
+  max-width: 340px;
+  min-width: 310px;
+}
+
 .cardLarge {
-  display: flex;
-  flex-direction: column;   
-  justify-content: space-between; 
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 2px 2px 6px 0px rgba(0,0,0,0.5);    
-  max-width: 560px;
-  min-width: 340px;
-  width: 90%;
+  max-width: 600px;
+  min-width: 320px;
 }
 
 .description {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;        
-  justify-content: start;
-  gap: 20px;
-  padding: 20px 10px;
-  color: #362702;
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .paragraph {
-  text-align: center;
+  text-align: center; /* Alineación a la izquierda suele verse más profesional */
+  margin-bottom: 15px;
 }
 
 .btn {
@@ -42,24 +44,26 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 10px 0;
+  gap: 12px;
+  padding: 14px 0;
   background-color: #F6B510;
   text-decoration: none;
+  transition: background-color 0.2s;
 }
 
 .btn:hover {
-  background-color: #d39b0e;
+  background-color: #e5a700;
 }
 
 .btnImg {
-  width: 25px;
+  width: 18px; /* Un poco más pequeño para ser elegante */
   height: auto;
 }
 
 .btnText {
   text-transform: uppercase;
-  font-size: 20px;
+  font-size: 14px; /* Bajamos el tamaño para que no "grite" */
+  letter-spacing: 1px;
   font-weight: 700;
   color: #FFF;
 }
@@ -148,4 +152,41 @@
     width: 20px;
     height: 20px;
   }
+}
+
+.bodyContent {
+  padding: 24px 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  font-family: "Montserrat", sans-serif;
+  font-size: 20px;
+  text-transform: uppercase;
+  /* background: linear-gradient(to bottom, #fff 0%, #fbe2a2 100%); */
+  /* background-color: #f8f9fa; */
+}
+
+.icon {
+  width: 20px;
+  height: auto;
+}
+
+.headerWrapper {
+  background-color: #e9eeee; /* Gris muy tenue */
+  border: none;
+  padding: 5px 0;
+  /* Acento sutil arriba para conectar con tu marca */
+  border-top: 4px solid #F6B510; 
+  border-bottom: 2px solid #ccc; 
+
 }

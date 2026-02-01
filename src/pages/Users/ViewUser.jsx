@@ -11,7 +11,6 @@ import CardImage from '../../components/CardImage/CardImage';
 import styles from './ViewUser.module.css';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 
-//import ShowLocationsCards from '../../components/ShowLocationsCards/ShowLocationsCards';
 import Table from '../../components/Table/Table';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
@@ -19,20 +18,19 @@ import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import ModalDelete from '../../components/ModalDelete/ModalDelete';
 import ModalAsignLocation from '../../components/ModalAsignLocation/ModalAsignLocation';
 
-const ViewUser = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+import { USER_VIEW_INFO } from '../../utils/infoContent';
+import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
+import { GetUserCurrentRole, mappedCurrentRole } from '../../utils/userRoles';
+
+const ViewUser = () => {  
   const {businessUuid, userId } = useParams();  
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDeleteOpen, setModalDeleteOpen] = useState(false);
   const [modalAsignLocationOpen, setModalAsignLocationOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [clickedBusinessRole, setClickedBusinessRole] = useState({});
-  
-  
-
   const { selectedUser, fetchUserById, loadingStates, error: errorUsers } = useUsersStore();  
   const {locations, fetchLocations, loadingStates : {fetchLocations: loadingLocations}, error: errorLocations } = useLocationsStore();
-
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -44,8 +42,6 @@ const ViewUser = () => {
     };
     loadUser();
   }, [userId, fetchUserById, modalOpen, modalAsignLocationOpen]);
-
-
 
   
   if (loadingStates.fetchUser && loadingLocations ) {
@@ -61,9 +57,7 @@ const ViewUser = () => {
   }
 
   //console.log('user', user);
-  //console.log('selectedUser', selectedUser);
-  
-  
+  //console.log('selectedUser', selectedUser);  
   
 
   const userButtons = (
@@ -102,22 +96,11 @@ const ViewUser = () => {
       />
 
     </>)
-  );
+  ); 
 
-    const userCurrentRole = 
-      user?.businesses_roles.some(br => br.role === 'Owner')
-        ? 'Owner'
-        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-
-    const selectedUserCurrentRole = 
-      selectedUser?.businesses_roles.some(br => br.role === 'Owner')
-        ? 'Owner'
-        : selectedUser?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
-    const mappedCurrentRole = {
-    'Owner': 'Propietario',
-    'Administrator': 'Administrador',
-    'Technician': 'Operario'
-    }
+  const userCurrentRole = GetUserCurrentRole(user, businessUuid);
+  const selectedUserCurrentRole = GetUserCurrentRole(selectedUser, businessUuid)
+  
 
   const availableRoles = [
                           {
@@ -131,12 +114,10 @@ const ViewUser = () => {
                         ]
       
 
-   const handleRowClick = (row) => {
-    //navigate(`/panel/ubicaciones/${row.businessUuid}/usuarios/${row.id}`);
+   const handleRowClick = (row) => {    
     setIsEditing(true);
     setModalAsignLocationOpen(true);
-    setClickedBusinessRole(selectedUser?.businesses_roles.find(br => br.uuid == row.uuid))
-    //console.log('clickebusinessRole', selectedUser?.businesses_roles.find(br => br.uuid == row.uuid));
+    setClickedBusinessRole(selectedUser?.businesses_roles.find(br => br.uuid == row.uuid))    
   };
 
   const preparedData = (Array.isArray(selectedUser?.businesses_roles) && selectedUser?.businesses_roles.length > 0) 
@@ -167,12 +148,12 @@ const ViewUser = () => {
     },           
   ];
 
- //console.log('user', user);
- //console.log('selecteduser', selectedUser);
- //console.log(userCurrentRole == 'Technician' && user.uuid == selectedUser.uuid )
- //console.log('isediting', isEditing)
- //console.log('clickedBusinessRoleUuid', clickedBusinessRole?.business_user_uuid);
+  // Determinamos qué info mostrar
+  const infoData = userCurrentRole?.name === 'Owner' 
+    ? USER_VIEW_INFO.Owner 
+    : USER_VIEW_INFO.General;
  
+ //console.log('user', user);
 
   return (
     <>
@@ -217,22 +198,9 @@ const ViewUser = () => {
             text={selectedUser ? `Perfil de ${selectedUser.first_name} ${selectedUser.last_name}` : 'Cargando perfil...'}
             type="usuarios"
           />
-          {
-            userCurrentRole == 'Owner'
-            ? <>
-              <p className={styles.description}>
-                Usted se encuentra en la pagina para ver mas detalles del usuario seleccionado.<br/><br/>
-                Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
-                En esta pagina puede: <strong> Editar y/o archivar al usuario</strong> actual. <br/><br/>
-                Un usuario puede estar asociado a una o varias ubicaciones. Dentro de cada ubicacion, podra ver los dataloggers, canales y/o alarmas (si tiene asociadas)<br/><br/>
-                Puede ver las ubicaciones donde pertenece, buscar, ver u ocultar las archivadas segun sea necesario.
-              </p>          
-            </>
-            : <p className={styles.description}>
-                Usted se encuentra en la pagina para ver mas detalles del usuario seleccionado.<br/><br/>
-                Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
-              </p>
-          }
+
+          <InfoAccordion data={infoData} />
+          
           <Breadcrumb 
             usuario={selectedUser ? `${selectedUser.first_name} ${selectedUser.last_name}` : '' }
             ubicacion={selectedUser?.businesses_roles.find(br => br.uuid === businessUuid)?.name}
@@ -241,9 +209,9 @@ const ViewUser = () => {
           <CardImage
             image={selectedUser?.avatar_url ? `${selectedUser?.avatar_url}` : '/images/default_avatar.png'}
             title={`${selectedUser?.first_name} ${selectedUser?.last_name}`}
-            buttons={ (userCurrentRole == 'Owner' || userCurrentRole == 'Administrator')               
+            buttons={ (userCurrentRole?.name == 'Owner' || userCurrentRole?.name == 'Administrator')               
               ? userButtons
-              : (userCurrentRole == 'Technician' && user.uuid == selectedUser.uuid )
+              : (userCurrentRole?.name == 'Technician' && user.uuid == selectedUser.uuid )
               ?
               <BtnCallToAction
                   text="Editar"
@@ -263,7 +231,7 @@ const ViewUser = () => {
               <p><strong>Email:</strong> {selectedUser?.email}</p>
               <p><strong>Teléfono:</strong> {selectedUser?.phone}</p>
               <p><strong>Estado:</strong> {selectedUser.is_active ? 'Activo' : 'Inactivo'}</p>
-              <p><strong>Rol:</strong> {mappedCurrentRole[selectedUserCurrentRole]} </p>
+              <p><strong>Rol:</strong> {selectedUserCurrentRole?.nameToShow} </p>
               <p><strong>Fecha de creación:</strong> {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : 'No disponible'}</p>
               <CardBtnSmall
                 key={selectedUser.uuid}
@@ -277,7 +245,7 @@ const ViewUser = () => {
 
 
          {
-          (userCurrentRole == 'Owner') ?
+          (userCurrentRole?.name == 'Owner') ?
           <BtnCallToAction
               text="Asignar ubicacion al usuario"
               icon="plus-circle-solid.svg"
@@ -288,15 +256,6 @@ const ViewUser = () => {
           ''
         }
           {(selectedUser.businesses_roles.length > 0) ? (          
-           
-            // <ShowLocationsCards
-            //   locations={selectedUser.businesses_roles}              
-            //   searchTerm={searchTerm}
-            //   onSearchChange={setSearchTerm}
-            //   user={selectedUser}
-            //   showAddButton={false}
-            // />
-            
             <div className={styles.tableContainer}>      
               <Table 
                 columns={columns} 

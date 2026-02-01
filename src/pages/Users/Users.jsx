@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { useAuthStore } from '../../store/authStore';
@@ -8,6 +8,11 @@ import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import styles from './Users.module.css';
 import Table from '../../components/Table/Table';
+
+// NUEVOS IMPORTS
+import { USERS_LIST_INFO } from '../../utils/infoContent';
+import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
+import { GetUserCurrentRole } from '../../utils/userRoles';
 
 const Users = () => {
   const navigate = useNavigate(); 
@@ -24,32 +29,26 @@ const Users = () => {
     loadingStates: { fetchLocation: isLoadingLocation}
   } = useLocationsStore();
 
-  
   const isLoading = loadingStates?.fetchUsers || isLoadingLocation;  
   const { businessUuid } = useParams();
 
-  const userCurrentRole = 
-      user?.businesses_roles.some(br => br.role === 'Owner')
-        ? 'Owner'
-        : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
+  // ACTUALIZACIÓN: Lógica de rol unificada
+  const userCurrentRole = GetUserCurrentRole(user, businessUuid);
   
-  useEffect(() => {       
+  // Determinamos la información para el acordeón
+  const infoData = userCurrentRole?.name === 'Owner' 
+    ? USERS_LIST_INFO.Owner 
+    : USERS_LIST_INFO.General;
 
+  useEffect(() => {       
     if (businessUuid){
-      //console.log('has businessUuid');
-      
       fetchUsers(user, businessUuid);
       fetchLocationById(businessUuid);      
-    }else{
-      //console.log(`hasn't businessUuid`, user?.businesses_roles[0].uuid);
+    } else {
       fetchUsers(user, user?.businesses_roles[0].uuid || businessUuid);
       fetchLocationById(user?.businesses_roles[0].uuid  || businessUuid);
     }
-
-
   }, [user, businessUuid]);
-
-
 
   if (isLoading || !users ) {
     return <LoadingSpinner message="Cargando usuarios..." />;
@@ -59,42 +58,20 @@ const Users = () => {
     return <div className={styles.error}>{error}</div>;
   }  
 
-  //console.log('users', users);  
-
   const columns = [
-    { 
-      label: 'NOMBRE Y APELLIDO', 
-      accessor: 'nombreCompleto',
-      icon: '/icons/user-regular.svg' 
-    },
-    { 
-      label: 'CORREO ELECTRONICO', 
-      accessor: 'email',
-      icon: '/icons/envelope-regular.svg' 
-    },    
-    { 
-      label: 'UBICACION/ES', 
-      accessor: 'ubicaciones',
-      icon: '/icons/building-regular.svg' 
-    },   
-    { 
-      label: 'ESTADO', 
-      accessor: 'estado',
-      icon: '/icons/eye-regular.svg' 
-    }
+    { label: 'NOMBRE Y APELLIDO', accessor: 'nombreCompleto', icon: '/icons/user-regular.svg' },
+    { label: 'CORREO ELECTRONICO', accessor: 'email', icon: '/icons/envelope-regular.svg' },    
+    { label: 'UBICACION/ES', accessor: 'ubicaciones', icon: '/icons/building-regular.svg' },   
+    { label: 'ESTADO', accessor: 'estado', icon: '/icons/eye-regular.svg' }
   ];
 
   const handleRowClick = (row) => {
     navigate(`/panel/ubicaciones/${row.businessUuid}/usuarios/${row.id}`);
   };
 
-  const filterUsersByOwner = (userCurrentRole == 'Owner' && businessUuid)
+  const filterUsersByOwner = (userCurrentRole?.name === 'Owner' && businessUuid)
     ? users?.filter(us => us?.businesses_roles.some(br => br.uuid == businessUuid))
     : users;
-
-    //console.log('filterUsersByOwner', filterUsersByOwner);  
-    
-    
 
   const preparedData = (filterUsersByOwner.length > 0) 
     ? filterUsersByOwner.map(us => ({
@@ -110,45 +87,22 @@ const Users = () => {
         estado: us.is_active
       }))
     : [];  
-
-
-
-    //console.log('user businessesUuid', user?.businesses_roles[0]?.uuid);
         
   return (
     <>
-      <Title1 
-        type="usuarios"
-        text="Usuarios" 
-      />
-      {
-        userCurrentRole == 'Owner'
-        ? <>
-          <p className={styles.description}>
-            Usted se encuentra en la pagina para ver los usuarios de la ubicacion actual.<br/><br/>
-            Como  <strong>propietario, usted tiene acceso completo para administrar </strong> todas las ubicaciones, usuarios y dataloggers en el sistema.<br/><br/>
-            En esta pagina puede: <strong> Ver el listado de usuarios</strong>, algunos datos y/o hacer <strong>click para ver mas</strong> datos de un usuario. <br/><br/>
-            Y tambien puede <strong>agregar nuevos usuarios</strong> a la ubicacion actual.<br/><br/>
-            Un usuario puede estar asociado a una o varias ubicaciones. 
-            Dentro de cada usuario, podra ver a que ubicacion/es donde esta asociado, los dataloggers, canales y/o alarmas (si tiene asociadas)<br/><br/>
-            Puede ver las ubicaciones donde pertenece, buscar, ver u ocultar los usuarios archivados segun sea necesario.
-          </p>          
-        </>
-        : <p className={styles.description}>
-            Usted se encuentra en la pagina para ver mas detalles del usuario seleccionado.<br/><br/>
-            Dependiendo de su rol, usted puede tener permisos limitados para ver o administrar ciertas ubicaciones, usuarios y dataloggers.
-          </p>
-      }
-      <Breadcrumb       
-        ubicacion={selectedLocation?.name || 'Desconocida'}
-      />
+      <Title1 type="usuarios" text="Usuarios" />
+      
+      {/* REEMPLAZO: Acordeón centralizado en lugar de párrafos condicionales */}
+      <InfoAccordion data={infoData} />
+
+      <Breadcrumb ubicacion={selectedLocation?.name || 'Desconocida'} />
       
       <div className={styles.tableContainer}>      
         <Table 
           columns={columns} 
           data={preparedData} 
           onRowClick={handleRowClick}
-          showAddButton={ userCurrentRole === 'Owner'  || userCurrentRole === 'Administrator'}
+          showAddButton={ userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
           addUrl={`/panel/ubicaciones/${businessUuid}/usuarios/agregar`}
         />       
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './FloatingButtons.module.css';
 
@@ -8,8 +8,8 @@ const FloatingButtons = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const halfViewportHeight = window.innerHeight / 2;
-      setShowScrollButton(window.scrollY > halfViewportHeight);
+      // Se muestra al bajar más de 300px
+      setShowScrollButton(window.scrollY > 300);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -17,10 +17,7 @@ const FloatingButtons = () => {
   }, []);
 
   const handleScrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleGoBack = () => {
@@ -28,22 +25,26 @@ const FloatingButtons = () => {
   };
 
   return (
-    <div className={styles.floatingButtonsContainer}>
+    <div className={styles.floatingContainer}>
+      {/* Botón Volver */}
       <button 
-        className={`${styles.floatingButton} ${styles.backButton}`}
+        className={`${styles.btn} ${styles.backBtn}`}
         onClick={handleGoBack}
-        aria-label="Atrás"
+        title="Volver a la página anterior"
       >
-        ← Atrás
+        <span className={styles.icon}>←</span>
+        <span className={styles.text}>Volver</span>
       </button>
-      {showScrollButton && (
 
+      {/* Botón Subir */}
+      {showScrollButton && (
         <button 
-          className={`${styles.floatingButton} ${styles.topButton}`}
+          className={`${styles.btn} ${styles.topBtn}`}
           onClick={handleScrollToTop}
-          aria-label="Arriba"
+          title="Ir al inicio"
         >
-          ↑ Arriba
+          <span className={styles.icon}>↑</span>
+          <span className={styles.text}>Subir</span>
         </button>
       )}
     </div>
