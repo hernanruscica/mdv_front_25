@@ -15,12 +15,14 @@ import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 import { useFetchDatalogger } from '../../hooks/useFetchDatalogger';
 import { useDataStore } from '../../store/dataStore';
-import GaugeLinear from '../../components/GaugeLinear/GaugeLinear';
+//import GaugeLinear from '../../components/GaugeLinear/GaugeLinear';
+import AlarmLinkCard from '../../components/AlarmLinkCard/AlarmLinkCard';
 
 // NUEVOS IMPORTS
 import { DATALOGGER_VIEW_INFO } from '../../utils/infoContent';
 import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
 import { GetUserCurrentRole } from '../../utils/userRoles';
+
 
 const ViewDatalogger = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -131,18 +133,16 @@ const ViewDatalogger = () => {
                   currentMin = alarm?.var01;
                   currentMax = 100
                 }
-                return (
-                  <Link 
+                return (                  
+                  <AlarmLinkCard 
                     to={`/panel/ubicaciones/${alarm.business_uuid}/dataloggers/${alarm.datalogger_uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`} 
-                    title="Ver alarma"
-                    key={index} 
-                    className={styles.cardGauge}>
-                    <h3>{alarm.name} </h3>      
-                    <p >
-                      condicion: {alarm.condition_show}
-                    </p>       
-                    <GaugeLinear currentValue={currentValue} alarmMin={currentMin} alarmMax={currentMax} />
-                  </Link>
+                    alarm={alarm}
+                    currentValue={currentValue}
+                    currentMin={currentMin} 
+                    currentMax={currentMax}               
+                    >                         
+                    {/* <GaugeLinear currentValue={currentValue} alarmMin={currentMin} alarmMax={currentMax} /> */}
+                  </AlarmLinkCard>                                   
                 );
               })
             )}

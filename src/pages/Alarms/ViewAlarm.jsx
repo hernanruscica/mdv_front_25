@@ -6,6 +6,8 @@ import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardImage from '../../components/CardImage/CardImage';
+
+import AlarmMonitorCard from '../../components/AlarmMonitorCard/AlarmMonitorCard';
 import Table from '../../components/Table/Table';
 import styles from './ViewAlarm.module.css';
 import CustomTag from '../../components/CustomTag/CustomTag';
@@ -157,12 +159,16 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
   const preparedLogs = alarmLogs.length > 0 ? alarmLogs.map(al => {
     return {
       ...al,
-      fecha: FormatearFechaCompleta(al.triggered_at),//new Date(al.triggered_at).toLocaleString(),
+      fecha: FormatearFechaCompleta(al.triggered_at),
       evento: (al.triggered == 1) ? 'Disparada' : 'Reseteada',
       mensaje: al.message,
       usuarios: al.notified_users.map(u => `${u.first_name} ${u.last_name}`).join(', ')
     };
   }) : [];
+
+//console.log('alarmLogs', alarmLogs[0]);
+//console.log('harcodeada formateada 2026-01-20T15:40:01.000Z', FormatearFechaCompleta('2026-01-20T15:40:01.000Z'));
+//console.log('selectedAlarm', selectedAlarm);
 
 
 
@@ -203,6 +209,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
         canal={channelUsage?.name}
         alarma={selectedAlarm?.name}
       />
+    {/*       
       <CardImage
         image="/images/default_channel.png"
         title={selectedAlarm?.name}
@@ -242,10 +249,16 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
               </div>         
 
           <p><strong>Fecha de creación:</strong> {new Date(selectedAlarm?.created_at).toLocaleDateString()}</p>
-        </div>
+        </div>       
+      </CardImage>               
+    */}
 
-       {/* */}
-      </CardImage>      
+    <AlarmMonitorCard
+        alarm={selectedAlarm}
+        usageData={channelUsage}
+        buttons={alarmButtons}
+        formatDate={FormatearFechaCompleta} // Pasamos tu función de fecha
+    />
 
       <div className={styles.chartContainer}>
         <ViewChart 

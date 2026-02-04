@@ -1,0 +1,71 @@
+/* Configuración base del Link como tarjeta */
+.cardLink {
+  /* Hacemos que el link se comporte como un bloque contenedor */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  
+  /* Estilos visuales base (iguales al anterior) */
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 15px;
+  text-decoration: none; /* Quitamos el subrayado típico de los links */
+  color: inherit; /* Mantiene el color de texto normal */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  height: 100%; /* Para que todas las cards tengan misma altura si usas grid */
+}
+
+/* --- INTERACTIVIDAD (Hover) --- */
+.cardLink:hover {
+  transform: translateY(-5px); /* Se levanta un poco */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12); /* Sombra más fuerte */
+  cursor: pointer;
+}
+
+/* --- ESTADOS (Igual que el componente anterior) --- */
+
+.normal {
+  border-top: 5px solid #10b981; /* Verde */
+}
+
+.triggered {
+  border-top: 5px solid #ef4444; /* Rojo */
+  background-color: #fff5f5; /* Un fondo rojo muy sutil opcional */
+  animation: pulseRed 2s infinite;
+}
+
+@keyframes pulseRed {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* --- TEXTOS INTERNOS --- */
+.title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.condition {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Ajuste para el GaugeLinear si es necesario */
+.gaugeWrapper {
+  margin-top: auto; /* Empuja el gauge hacia abajo si hay espacio extra */
+  width: 100%;
+}
