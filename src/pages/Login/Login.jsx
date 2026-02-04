@@ -9,7 +9,7 @@ import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // Estado para el ojo
+  const [showPassword, setShowPassword] = useState(false); 
   const [isLoading, setIsLoading] = useState(false);
   
   const login = useAuthStore(state => state.login);

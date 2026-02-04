@@ -37,14 +37,14 @@ const ViewUser = () => {
     const loadUser = async () => {
       if (userId || !modalOpen || !modalAsignLocationOpen) {
         await fetchUserById(userId, businessUuid);
-        await fetchLocations(user);
+        //await fetchLocations(user);
       }      
     };
     loadUser();
   }, [userId, fetchUserById, modalOpen, modalAsignLocationOpen]);
 
   
-  if (loadingStates.fetchUser && loadingLocations ) {
+  if (loadingStates.fetchUser || loadingLocations ) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 

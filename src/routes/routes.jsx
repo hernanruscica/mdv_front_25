@@ -35,29 +35,29 @@ export const routes = [
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/eliminar", element: <UnderConstruction />, private: true }, 
 
   // Channels routes
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales", element: <Channels />, private: true },//done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId", element: <ViewChannel />, private: true },//done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/agregar", element: <CreatePage />, private: true },//done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/editar", element: <CreatePage />, private: true },//done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/eliminar", element: <UnderConstruction />, private: true },//Done (put is_active === 0)
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales", element: <Channels />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId", element: <ViewChannel />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/agregar", element: <CreatePage />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/editar", element: <CreatePage />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/eliminar", element: <UnderConstruction />, private: true }, 
 
   /* Alarms routes */
   // Alarmas routes / dataloggers
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true },//done
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true },//on progress
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   // Alarmas routes / locations
-  { path: "/panel/ubicaciones/:businessUuid/alarmas", element: <Alarms />, private: true }, //done
-  { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId", element: <ViewAlarm />, private: true },//on progress
+  { path: "/panel/ubicaciones/:businessUuid/alarmas", element: <Alarms />, private: true }, 
+  { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId/editar", element: <CreatePage />, private: true },
   // Alarmas routes / users
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas", element: <Alarms />, private: true },
-  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId", element: <ViewAlarm />, private: true }, //on progress
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId", element: <ViewAlarm />, private: true }, 
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId/editar", element: <CreatePage />, private: true },
   // Alarmas routes / channels
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },//done
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas", element: <Alarms />, private: true },
   
   
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId", element: <ViewAlarm />, private: true },//on progress
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/agregar", element: <CreatePage />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/agregar", element: <CreatePage />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/alarmas/:alarmId/editar", element: <CreatePage />, private: true },  
