@@ -108,7 +108,7 @@ const ViewChart = ({
       fetchDataForRange('CUSTOM_WEEK_ZOOM', start, end);
     }
   };
-
+/*
   const handleDayClick = (dataPoint) => {
     if (dataPoint && dataPoint.date) {
       const targetDate = new Date(dataPoint.date);
@@ -118,7 +118,34 @@ const ViewChart = ({
       setZoomedDay(targetDate); 
       fetchDataForRange('CUSTOM_DAY_ZOOM', targetDate, endDate);
     }
-  };
+  };*/
+ const handleDayClick = (dataPoint) => {
+  if (dataPoint && dataPoint.date) {
+    // El timestamp ya está en UTC y representa medianoche del día target
+    const clickedDate = new Date(dataPoint.date);
+    
+    // Extraer componentes UTC (no locales)
+    const year = clickedDate.getUTCFullYear();
+    const month = clickedDate.getUTCMonth();
+    const day = clickedDate.getUTCDate();
+    
+    // Recrear fecha UTC para ese día (medianoche a medianoche UTC)
+    const targetDate = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+    
+    console.log('📅 [handleDayClick]', {
+      clicked: clickedDate.toISOString(),
+      day: day,
+      start: targetDate.toISOString(),
+      end: endDate.toISOString()
+    });
+    
+    setZoomedDay(targetDate);
+    fetchDataForRange('CUSTOM_DAY_ZOOM', targetDate, endDate);
+  }
+};
+
+
 
   const showWeeklyBarChart = !zoomedDay && !zoomedWeek && (
     activeRange === RANGE_KEYS.LAST_6_MONTHS || 
@@ -321,6 +348,7 @@ const ViewChart = ({
         conection_failures = Number(item.conection_failures || 0); 
         energy_failures = Number(item.energy_failures || 0);
         phase_failures = Number(item.phase_failures || 0);
+         
       } 
 
       if (!date && item.date) date = item.date;
@@ -344,24 +372,29 @@ const ViewChart = ({
       }
       */
      let finalDate = date;
-if (date && typeof date === 'string') {
-  if (date.includes('T')) {
-    // Timestamp ISO con hora
-    const d = new Date(date);
-    if (!isNaN(d.getTime())) finalDate = d.getTime();
-  } else {
-    // ✅ SOLUCIÓN: Parsear fecha como UTC para que sea consistente
-    const [y, m, d] = date.split('-').map(Number);
-    
-    if (dataType === 'daily') {
-      // Para datos diarios, interpretar como medianoche UTC
-      finalDate = Date.UTC(y, m - 1, d, 0, 0, 0, 0);
-    } else {
-      // Para otros tipos, usar Date normal
-      finalDate = new Date(y, m - 1, d).getTime();
-    }
-  }
-}
+      if (date && typeof date === 'string') {
+        if (date.includes('T')) {
+          // Timestamp ISO con hora
+          const d = new Date(date);
+          if (!isNaN(d.getTime())) finalDate = d.getTime();
+        } else {
+          // ✅ SOLUCIÓN: Parsear fecha como UTC para que sea consistente
+          const [y, m, d] = date.split('-').map(Number);
+          
+          if (dataType === 'daily') {
+            // Para datos diarios, interpretar como medianoche UTC
+            finalDate = Date.UTC(y, m - 1, d, 0, 0, 0, 0);
+            console.log('📊 [Daily Data Sample]', {
+                  original: rawData[0],
+                  mapped: mappedData[0],
+                  timezone: timezoneOffset
+                });
+          } else {
+            // Para otros tipos, usar Date normal
+            finalDate = new Date(y, m - 1, d).getTime();
+          }
+        }
+      }
 
 
       return { 
@@ -473,6 +506,7 @@ if (date && typeof date === 'string') {
 
   }, [activeRange, zoomedDay, zoomedWeek, channelAllRegistersData, channelDailyData, channelWeeklyData, timezoneOffset, average_period, processedAlarms]);
 
+  
 
   const isLineChartClickable = !zoomedDay && (
     activeRange === RANGE_KEYS.LAST_WEEK || 
@@ -587,14 +621,34 @@ const getXAxisFormatter = (tickItem) => {
 */
   let displayTitle = "";
   if (zoomedDay) {
-    displayTitle = `Todos los registros, integración: ${average_period} min. Detalle del día: ${zoomedDay.toLocaleDateString()}`;
+    //displayTitle = `Todos los registros, integración: ${average_period} min. Detalle del día: ${zoomedDay.toLocaleDateString()}`;
+     // Extraer componentes UTC para mostrar la fecha correcta
+  const day = zoomedDay.getUTCDate();
+  const month = zoomedDay.getUTCMonth() + 1;
+  const year = zoomedDay.getUTCFullYear();
+  
+  displayTitle = `Todos los registros, integración ${average_period} min. Detalle del día: ${day}/${month}/${year}`;
   } 
   else if (zoomedWeek) {
-    const weekStart = zoomedWeek.start.toLocaleDateString();
-    const weekEnd = zoomedWeek.end.toLocaleDateString();
-    const weekNumber = zoomedWeek.label ? zoomedWeek.label.toString().slice(-2) : '--';
-    const yearNumber = zoomedWeek.label ? zoomedWeek.label.toString().slice(0,4) : '----';
-    displayTitle = `Semana: ${weekNumber} de ${yearNumber} (${weekStart} al ${weekEnd}). Promedios diarios. (Click para detalle)`;
+    // Para las semanas también necesitás ajustar:
+  const weekStart = zoomedWeek.start;
+  const weekEnd = zoomedWeek.end;
+  
+  const startDay = String(weekStart.getUTCDate()).padStart(2, '0');
+  const startMonth = String(weekStart.getUTCMonth() + 1).padStart(2, '0');
+  const startYear = weekStart.getUTCFullYear();
+  
+  const endDay = String(weekEnd.getUTCDate()).padStart(2, '0');
+  const endMonth = String(weekEnd.getUTCMonth() + 1).padStart(2, '0');
+  const endYear = weekEnd.getUTCFullYear();
+  
+  const weekStartFormatted = `${startDay}/${startMonth}/${startYear}`;
+  const weekEndFormatted = `${endDay}/${endMonth}/${endYear}`;
+  
+  const weekNumber = zoomedWeek.label ? zoomedWeek.label.toString().slice(-2) : '--';
+  const yearNumber = zoomedWeek.label ? zoomedWeek.label.toString().slice(0, 4) : '----';
+  
+  displayTitle = `Semana ${weekNumber} de ${yearNumber} (${weekStartFormatted} al ${weekEndFormatted}). Promedios diarios. Click para detalle`;
   } 
   else {
     switch (activeRange) {
