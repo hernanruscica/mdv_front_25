@@ -20,7 +20,9 @@ const ModalViewAlarmLog = ({ isOpen, onRequestClose, evento, businessUuid, solut
 
   // CAMBIO 1: useEffect Inteligente
   // Solo actualizamos localSolutions si la prop 'solutions' trae ALGO NUEVO o diferente.
-  // Esto evita que un re-render del padre con datos viejos nos borre lo que agregamos a mano.
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+
+
   useEffect(() => {
     if (isOpen && Array.isArray(solutions)) {
       setLocalSolutions(prevLocal => {

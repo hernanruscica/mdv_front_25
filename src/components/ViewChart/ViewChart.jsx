@@ -400,7 +400,7 @@ const ViewChart = ({
             return {
                 date: timestamp,
                 value: yValue,
-                texto: combinedMessage, // Aquí va el texto concatenado
+                texto: combinedMessage, 
                 isAlarm: true,
                 alarmType: finalAlarmType, 
                 conection_failures: 0,
@@ -446,7 +446,6 @@ const ViewChart = ({
 
   }, [activeRange, zoomedDay, zoomedWeek, channelAllRegistersData, channelDailyData, channelWeeklyData, timezoneOffset, average_period, processedAlarms]);
 
-  // ... (Resto del componente sin cambios) ...
 
   const isLineChartClickable = !zoomedDay && (
     activeRange === RANGE_KEYS.LAST_WEEK || 

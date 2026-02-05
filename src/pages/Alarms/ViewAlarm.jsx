@@ -5,15 +5,13 @@ import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
-import CardImage from '../../components/CardImage/CardImage';
 
 import AlarmMonitorCard from '../../components/AlarmMonitorCard/AlarmMonitorCard';
 import Table from '../../components/Table/Table';
 import styles from './ViewAlarm.module.css';
-import CustomTag from '../../components/CustomTag/CustomTag';
+
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import ModalViewAlarmLog from '../../components/ModalViewAlarmLog/ModalViewAlarmLog';
-import Gauge from '../../components/Gauge/Gauge';
 import ViewChart from '../../components/ViewChart/ViewChart';
 import { RANGE_KEYS } from '../../components/ViewChart/constants/chartRanges';
 import { useAlarmsStore } from '../../store/alarmsStore';
@@ -68,35 +66,52 @@ const ViewAlarm = () => {
   const userCurrentRole = GetUserCurrentRole(user, businessUuid);
   const infoData = userCurrentRole?.name === 'Owner' ? ALARM_DETAILS_INFO.Owner : ALARM_DETAILS_INFO.General;
 
+// 1) Cargar solo la alarma cuando cambian ids
 useEffect(() => {
-  //console.log(businessUuid);
-  const loadData = async () => {
-    if (businessUuid && alarmId) {      
-      const alarmData = await fetchAlarmById(businessUuid, alarmId);
-      if (alarmData  ){
-        if (alarmData.alarm_type == 'porcentage_on'){
-          await fetchChannelUsage(businessUuid, alarmData.datalogger_uuid, alarmData.channel_uuid);     
-        }
-        if(alarmData.alarm_type == 'comunication_failure'){
-          await fetchDataloggerUsage(businessUuid, dataloggerId);
-        }
+  if (!businessUuid || !alarmId) return;
+  fetchAlarmById(businessUuid, alarmId);
+}, [businessUuid, alarmId, dataloggerId, channelId]);
 
-        const logs = await fetchAlarmLogsByAlarmId(businessUuid, alarmData.uuid);   
-        const alarmLogs = {
-          uuid: alarmData.uuid,
-          logs: logs
-        }               
-        setCurrentAlarmsLogs([alarmLogs]);
+// 2) Cuando la alarma ya está, cargar lo demás en paralelo
+useEffect(() => {
+  if (!businessUuid || !selectedAlarm) return;
 
-        const alarmLogsByDatalogger = await fetchAlarmLogsByDataloggerId(businessUuid, alarmData.datalogger_uuid);
-        setAlarmLogsComunicationFailure(alarmLogsByDatalogger?.filter(log => log.alarm_type === "comunication_failure"));
+  const load = async () => {
+    const promises =  [];
 
-      };
-      
-      
-    }}
-  loadData();
-}, [businessUuid, dataloggerId, channelId, alarmId, modalLogOpen]);
+    if (selectedAlarm.alarm_type === 'porcentage_on') {
+      promises.push(
+        fetchChannelUsage(businessUuid, selectedAlarm.datalogger_uuid, selectedAlarm.channel_uuid)
+      );
+    } else if (selectedAlarm.alarm_type === 'comunication_failure') {
+      promises.push(fetchDataloggerUsage(businessUuid, selectedAlarm.datalogger_uuid));
+    }
+
+    promises.push(
+      (async () => {
+        const logs = await fetchAlarmLogsByAlarmId(businessUuid, selectedAlarm.uuid);
+        setCurrentAlarmsLogs([{ uuid: selectedAlarm.uuid, logs }]);
+      })()
+    );
+
+    promises.push(
+      (async () => {
+        const byDatalogger = await fetchAlarmLogsByDataloggerId(
+          businessUuid,
+          selectedAlarm.datalogger_uuid
+        );
+        setAlarmLogsComunicationFailure(
+          byDatalogger?.filter(log => log.alarm_type === 'comunication_failure')
+        );
+      })()
+    );
+
+    await Promise.all(promises);
+  };
+
+  load();
+}, [businessUuid, selectedAlarm]);
+
 
 if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAlarmLogsByDataloggerId || isLoadingDataloggerUsage) {
   return <LoadingSpinner message="Cargando datos..." />;
@@ -104,7 +119,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
 
   //console.log('selectedAlarm', selectedAlarm);
   //console.log('channelUsage', channelUsage);
-  console.log('dataloggerUsage', dataloggerUsage)
+  //console.log('dataloggerUsage', dataloggerUsage)
   //console.log('alarmLogs', alarmLogs);
   //console.log('currentAlarmLoigs', currentAlarmsLogs);
 
@@ -208,50 +223,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
         datalogger={channelUsage?.datalogger.name || dataloggerUsage?.name}
         canal={channelUsage?.name}
         alarma={selectedAlarm?.name}
-      />
-    {/*       
-      <CardImage
-        image="/images/default_channel.png"
-        title={selectedAlarm?.name}
-        buttons={alarmButtons}
-      >
-        
-        <div className={styles.alarmInfo}>
-          {selectedAlarm?.is_active == '0' && (
-            <CustomTag text="Archivada" type="archive" icon="/icons/archive-solid.svg" />
-          )}
-          <p><strong>Condición:</strong> {selectedAlarm?.condition_show}</p><br/>
-          <p><strong>Tipo de Alarma:</strong> {selectedAlarm?.alarm_type}</p><br/>
-          <p><strong>Descripción:</strong> {selectedAlarm?.description}</p><br/>
-          <p><strong>Integra los valores de los ultimos:</strong> {selectedAlarm?.time_range} minutos.</p><br/>
-          <p><strong>Ultimo registro:</strong> {FormatearFechaCompleta(channelUsage?.lastData.last_record_date)} </p>
-          
-          
-          <div className={styles.gaugePlaceholder}>              
-                {selectedAlarm?.alarm_type == "porcentage_on" && (() => {          
-                  let currentMin = null;                 
-                  let currentMax = null;
-                  if (selectedAlarm?.condition_logic.includes('>')){
-                    currentMin = 0;
-                    currentMax = selectedAlarm?.var01;
-                  }else{
-                    currentMin = selectedAlarm?.var01;
-                    currentMax = 100
-                  }       
-                  return (
-                    <Gauge 
-                      currentValue={channelUsage?.lastData.porcentageUsagePeriod}
-                      alarmMin={currentMin}
-                      alarmMax={currentMax}                              
-                    />
-                  );
-                })()}
-              </div>         
-
-          <p><strong>Fecha de creación:</strong> {new Date(selectedAlarm?.created_at).toLocaleDateString()}</p>
-        </div>       
-      </CardImage>               
-    */}
+      />   
 
     <AlarmMonitorCard
         alarm={selectedAlarm}
