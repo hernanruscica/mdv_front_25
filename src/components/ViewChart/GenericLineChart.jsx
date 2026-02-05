@@ -6,7 +6,7 @@ import {
 const COLOR_PHASE = "#DC2626";   
 const COLOR_WARNING = "#FACC15"; 
 const COLOR_NORMAL = "#0052cc";  
-const COLOR_ALARM_VIOLET = "#8b5cf6"; 
+const COLOR_ALARM_VIOLET = "#aa89f8"; 
 const COLOR_ALARM_COMMS = "#FACC15";  //verde de antes #006400
 
 const GenericLineChart = ({ 
@@ -108,8 +108,8 @@ const GenericLineChart = ({
           {isAlarmPoint && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 
-                <p style={{ marginBottom: '8px', fontSize: '1.2em', fontWeight: 'bold', backgroundColor: alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET }}>
-                   🚨 {alarmType === 'comunication_failure' ? 'Fallo Transmisión Datos' : 'Alarma Disparada'}
+                <p style={{ marginBottom: '8px', fontSize: '1.2em', fontWeight: 'bold', padding: '8px', backgroundColor: alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET }}>
+                   🚨 {alarmType === 'comunication_failure' ? 'Fallo Transmisión Datos' : alarmType === 'porcentage_on' ? 'Porcentaje de encendido excedido' : 'Alarma Disparada'}
                 </p>
                  
                 <p style={{ margin: '2px 0 2px 0', fontSize: '1em', color: '#666', fontStyle: 'italic' }}>

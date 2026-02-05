@@ -326,6 +326,7 @@ const ViewChart = ({
       if (!date && item.date) date = item.date;
       if (value === undefined || value === null) value = item.value || 0;
 
+      /*
       let finalDate = date;
       if (date && typeof date === 'string') {
           if (date.includes('T')) {
@@ -341,6 +342,27 @@ const ViewChart = ({
           const pointDateStr = new Date(finalDate).toISOString().split('T')[0];
           alarm_count = processedAlarms.filter(a => a.dateStr === pointDateStr).length;
       }
+      */
+     let finalDate = date;
+if (date && typeof date === 'string') {
+  if (date.includes('T')) {
+    // Timestamp ISO con hora
+    const d = new Date(date);
+    if (!isNaN(d.getTime())) finalDate = d.getTime();
+  } else {
+    // ✅ SOLUCIÓN: Parsear fecha como UTC para que sea consistente
+    const [y, m, d] = date.split('-').map(Number);
+    
+    if (dataType === 'daily') {
+      // Para datos diarios, interpretar como medianoche UTC
+      finalDate = Date.UTC(y, m - 1, d, 0, 0, 0, 0);
+    } else {
+      // Para otros tipos, usar Date normal
+      finalDate = new Date(y, m - 1, d).getTime();
+    }
+  }
+}
+
 
       return { 
         date: finalDate, 
@@ -458,23 +480,28 @@ const ViewChart = ({
     !!zoomedWeek 
   );
 
-  const getXAxisFormatter = (tickItem) => {
-    if (tickItem === undefined || tickItem === null) return '';
-    if (showWeeklyBarChart) return `Sem ${String(tickItem).slice(-2)}`;
-    
-    const date = new Date(tickItem);
-    if (isNaN(date.getTime())) return tickItem;
+const getXAxisFormatter = (tickItem) => {
+  if (tickItem === undefined || tickItem === null) return '';
+  
+  if (showWeeklyBarChart) return `Sem ${String(tickItem).slice(-2)}`;
+  
+  const date = new Date(tickItem);
+  if (isNaN(date.getTime())) return tickItem;
+  
+  // Para rangos horarios, mostrar hora UTC (que es la que está en los datos)
+  if (zoomedDay || activeRange === RANGE_KEYS.LAST_HOUR || 
+      activeRange === RANGE_KEYS.LAST_12H || activeRange === RANGE_KEYS.LAST_24H) {
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+  
+  // Para rangos diarios, mostrar fecha UTC
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  return `${day}/${month}`;
+};
 
-    if (zoomedDay || activeRange === RANGE_KEYS.LAST_HOUR || activeRange === RANGE_KEYS.LAST_12H || activeRange === RANGE_KEYS.LAST_24H) {
-       const hours = String(date.getUTCHours()).padStart(2, '0');
-       const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-       return `${hours}:${minutes}`;
-    }
-    
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    return `${day}/${month}`;
-  };
 
   const fetchDataForRange = async (rangeKey, start, end) => {
     if (!channelUuid) return;
