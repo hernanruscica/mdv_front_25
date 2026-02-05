@@ -7,7 +7,7 @@ const COLOR_PHASE = "#DC2626";
 const COLOR_WARNING = "#FACC15"; 
 const COLOR_NORMAL = "#0052cc";  
 const COLOR_ALARM_VIOLET = "#8b5cf6"; 
-const COLOR_ALARM_COMMS = "#006400"; 
+const COLOR_ALARM_COMMS = "#FACC15";  //verde de antes #006400
 
 const GenericLineChart = ({ 
   data = [], 
@@ -71,9 +71,10 @@ const GenericLineChart = ({
       }
       else if (alarmCount > 0) eventColor = COLOR_ALARM_VIOLET; 
       else if (isPhaseEvent || countPhase > 0) eventColor = COLOR_PHASE;
+      /*
       else if (countReset > 0 || countTransm > 0) eventColor = COLOR_WARNING;
       else if (rawText === 'Iniciando equipo' || rawText === 'Fallo en transmision de trama') eventColor = COLOR_WARNING;
-
+*/
       const containerStyle = {
         backgroundColor: '#fff',
         padding: '10px',
@@ -92,7 +93,8 @@ const GenericLineChart = ({
           <p style={{ fontWeight: 'bold', margin: '0 0 5px' }}>{formattedDate}</p>
           
           <p style={{ color: lineColor, margin: 0 }}>
-             {isAlarmPoint ? `Valor: ${dataPoint.value}%` : `Uso: ${dataPoint.value}%`}
+             {isAlarmPoint && alarmType !== 'comunication_failure' ? `Valor: ${dataPoint.value}%` : ``}
+              {!isAlarmPoint  && `Valor: ${dataPoint.value}%`}
           </p>
           
           {alarmCount > 0 && !isAlarmPoint && (
@@ -105,10 +107,12 @@ const GenericLineChart = ({
 
           {isAlarmPoint && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
-                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET }}>
+                
+                <p style={{ marginBottom: '8px', fontSize: '1.2em', fontWeight: 'bold', backgroundColor: alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET }}>
                    🚨 {alarmType === 'comunication_failure' ? 'Fallo Transmisión Datos' : 'Alarma Disparada'}
                 </p>
-                <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#666', fontStyle: 'italic' }}>
+                 
+                <p style={{ margin: '2px 0 2px 0', fontSize: '1em', color: '#666', fontStyle: 'italic' }}>
                   "{rawText}"
                 </p>
              </div>
@@ -122,7 +126,7 @@ const GenericLineChart = ({
              </div>
           )}
 
-          {(countReset > 0 || countTransm > 0) && (
+          {/*(countReset > 0 || countTransm > 0) && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 {countReset > 0 && (
                   <p style={{ margin: '2px 0', fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>
@@ -135,15 +139,15 @@ const GenericLineChart = ({
                   </p>
                 )}
              </div>
-          )}
+          )*/}
 
-          {!isAlarmPoint && (rawText === 'Iniciando equipo' || rawText === 'Fallo en transmision de trama' || rawText === 'Fallo de conexion con el router') && (
+          {/*!isAlarmPoint && (rawText === 'Iniciando equipo' || rawText === 'Fallo en transmision de trama' || rawText === 'Fallo de conexion con el router') && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
                 <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: '#444' }}>
                    {rawText === 'Iniciando equipo' ? "⚡ Reset datalogger" : "📡 Fallo de transmisión"}
                 </p>
              </div>
-          )}
+          )*/}
         </div>
       );
     }
@@ -155,20 +159,39 @@ const GenericLineChart = ({
     const texto = payload.texto || '';
 
     if (payload.isAlarm) {
+      
         const fill = payload.alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET;
-        return <circle cx={cx} cy={cy} r={6} fill={fill} stroke="#fff" strokeWidth={2} />;
+        return  <g>
+                  {/* Área invisible grande para facilitar hover */}
+                  <circle cx={cx} cy={cy} r={18} fill="transparent" stroke="none" />
+                  {/* Punto visible */}
+                  <circle cx={cx} cy={cy} r={10} fill={fill} stroke="#fff" strokeWidth={2} />
+                </g>
     }
 
     if (payload.energia === 1) {
-        return <circle cx={cx} cy={cy} r={6} fill={COLOR_PHASE} stroke="#fff" strokeWidth={2} />;
+        const fill = payload.alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET;
+        return <g>
+                  {/* Área invisible grande para facilitar hover */}
+                  <circle cx={cx} cy={cy} r={18} fill="transparent" stroke="none" />
+                  {/* Punto visible */}
+                  <circle cx={cx} cy={cy} r={10} fill={fill} stroke="#fff" strokeWidth={2} />
+                </g>
     }
-    
+    /*
     if (texto === 'Iniciando equipo' || texto === 'Fallo en transmision de trama' || texto === 'Fallo de conexion con el router') {
         return <circle cx={cx} cy={cy} r={6} fill={COLOR_WARNING} stroke="#fff" strokeWidth={2} />;
     }
-
-    if (isClickable) return <circle cx={cx} cy={cy} r={4} fill={lineColor} stroke="none" />;
-    
+*/
+    if (isClickable) {
+      const fill = payload.alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET;
+            return <g>
+                      {/* Área invisible grande para facilitar hover */}
+                      <circle cx={cx} cy={cy} r={18} fill="transparent" stroke="none" />
+                      {/* Punto visible */}
+                      <circle cx={cx} cy={cy} r={10} fill={fill} stroke="#fff" strokeWidth={2} />
+                    </g>
+      }
     return null;
   };
 
@@ -193,7 +216,11 @@ const GenericLineChart = ({
           
           <YAxis domain={[0, 100]} stroke="#666" tick={{ fontSize: 12 }} unit="%" />
           
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip />}
+          cursor={{ stroke: '#ccc', strokeWidth: 1 }}
+          wrapperStyle={{ zIndex: 100 }}
+          allowEscapeViewBox={{ x: true, y: true }}
+          />
           
           <Legend 
             verticalAlign="top" 
@@ -203,7 +230,7 @@ const GenericLineChart = ({
               { value: 'Alarma disparada', type: 'circle', color: COLOR_ALARM_VIOLET },
               { value: 'Fallo Transmisión Datos', type: 'circle', color: COLOR_ALARM_COMMS },
               { value: 'Corte de alguna fase', type: 'circle', color: COLOR_PHASE },
-              { value: 'Reset / Fallo Transmisión', type: 'circle', color: COLOR_WARNING }
+              // { value: 'Reset / Fallo Transmisión', type: 'circle', color: COLOR_WARNING }
             ]}
           />
           
@@ -214,7 +241,7 @@ const GenericLineChart = ({
             stroke={lineColor} 
             strokeWidth={2}
             dot={<CustomDot />}
-            activeDot={{ r: 8, cursor: isClickable ? 'pointer' : 'default', onClick: (e, payload) => { if (isClickable && onPointClick) onPointClick(payload.payload); } }} 
+            activeDot={{ r: 10, cursor: isClickable ? 'pointer' : 'default', onClick: (e, payload) => { if (isClickable && onPointClick) onPointClick(payload.payload); } }} 
             connectNulls={false} 
           />
         </LineChart>

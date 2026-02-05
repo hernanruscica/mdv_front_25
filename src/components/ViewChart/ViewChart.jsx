@@ -66,7 +66,7 @@ const ViewChart = ({
         });
     }
 
-    // B. Alarmas de Comunicación (Verde)
+    // B. Alarmas de Comunicación (Verde)    
     if (alarmLogsComunicationFailure && Array.isArray(alarmLogsComunicationFailure)) {
         alarmLogsComunicationFailure.forEach(log => {
             if (log.triggered === 1) { 
@@ -155,13 +155,18 @@ const ViewChart = ({
         start = startDate.getTime();
 
     } else {
+     
         let nowTs = nowRef.current.getTime();
         if (timezoneOffset !== 0) {
             nowTs += (timezoneOffset * 60 * 60 * 1000);
         }
-        end = nowTs; //+ (10 * 60 * 1000); 
+        end = nowTs //+ (10 * 60 * 1000); 
         const referenceEnd = nowTs;
-
+ /*
+        const now = new Date();
+        end = now.getTime();
+        const referenceEnd = end;
+       */ 
         switch (activeRange) {
           case RANGE_KEYS.LAST_HOUR:
             start = referenceEnd - (60 * 60 * 1000); break;
