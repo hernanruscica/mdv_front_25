@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
@@ -15,15 +15,18 @@ import ModalViewAlarmLog from '../../components/ModalViewAlarmLog/ModalViewAlarm
 import ViewChart from '../../components/ViewChart/ViewChart';
 import { RANGE_KEYS } from '../../components/ViewChart/constants/chartRanges';
 import { useAlarmsStore } from '../../store/alarmsStore';
+import { useUsersAlarmsStore } from '../../store/usersAlarmsStore';
 import { useAlarmLogsStore } from '../../store/alarmLogsStore';
 import { useDataStore } from '../../store/dataStore';
 import { useAuthStore } from '../../store/authStore'
 import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 
-// NUEVOS IMPORTS
 import { ALARM_DETAILS_INFO } from '../../utils/infoContent';
 import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
 import { GetUserCurrentRole } from '../../utils/userRoles';
+
+import ModalConfirmation from '../../components/ModalConfirmation/ModalConfirmation'; 
+
 
 
 
@@ -35,7 +38,14 @@ const ViewAlarm = () => {
   const [selectedLog, setSelectedLog] = useState(null);
   const [currentAlarmsLogs, setCurrentAlarmsLogs] = useState([]);
   const [alarmLogsComunicationFailure, setAlarmLogsComunicationFailure] = useState([]);
+  const usuariosRef = useRef(null);
 
+  const scrollToUsuarios = () => {
+    usuariosRef.current?.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'start' 
+    });
+  };
 
   const {
     selectedAlarm,
@@ -43,6 +53,12 @@ const ViewAlarm = () => {
     loadingStates: {fetchAlarm : isLoadingAlarm},
     error: errorLoadingAlarm
   } = useAlarmsStore();
+
+  const {
+    users: usersByAlarmId,
+    fetchUsersByAlarmId,
+    loadingStates: { fetchUsersByAlarmId: isLoadingUsersByAlarmId },
+  } = useUsersAlarmsStore();
 
   const {
     alarmLogs,
@@ -62,7 +78,14 @@ const ViewAlarm = () => {
 
   const { user } = useAuthStore();
 
-  // ACTUALIZACIÓN: Lógica de rol y acordeón
+  // 1. NUEVOS ESTADOS para la desuscripción
+  const [modalUnsubscribeOpen, setModalUnsubscribeOpen] = useState(false);
+  const [selectedUserToUnsubscribe, setSelectedUserToUnsubscribe] = useState(null);
+
+  // 2. Traer la función para desuscribir del store (asumiendo que existe)
+  const { unsubscribeUserFromAlarm } = useUsersAlarmsStore();
+
+  
   const userCurrentRole = GetUserCurrentRole(user, businessUuid);
   const infoData = userCurrentRole?.name === 'Owner' ? ALARM_DETAILS_INFO.Owner : ALARM_DETAILS_INFO.General;
 
@@ -70,6 +93,7 @@ const ViewAlarm = () => {
 useEffect(() => {
   if (!businessUuid || !alarmId) return;
   fetchAlarmById(businessUuid, alarmId);
+  fetchUsersByAlarmId(businessUuid, alarmId);
 }, [businessUuid, alarmId, dataloggerId, channelId]);
 
 // 2) Cuando la alarma ya está, cargar lo demás en paralelo
@@ -113,7 +137,7 @@ useEffect(() => {
 }, [businessUuid, selectedAlarm]);
 
 
-if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAlarmLogsByDataloggerId || isLoadingDataloggerUsage) {
+if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAlarmLogsByDataloggerId || isLoadingDataloggerUsage || isLoadingUsersByAlarmId) {
   return <LoadingSpinner message="Cargando datos..." />;
 }
 
@@ -122,6 +146,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
   //console.log('dataloggerUsage', dataloggerUsage)
   //console.log('alarmLogs', alarmLogs);
   //console.log('currentAlarmLoigs', currentAlarmsLogs);
+//console.log('Users by Alarm', usersByAlarmId);
 
   
   
@@ -151,6 +176,12 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
         type="danger"
         onClick={() => setModalArchiveOpen(true)}
       />
+      <BtnCallToAction
+        text={`Ver ${usersByAlarmId?.length || 0} usuarios suscriptos`}
+        icon="eye-regular.svg"
+        type="success"
+        onClick={scrollToUsuarios}
+      />
     </>) :
     (<>
       <BtnCallToAction
@@ -166,9 +197,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
     { label: 'EVENTO', accessor: 'evento', icon: '/icons/flag-regular.svg' },
     { label: 'MENSAJE', accessor: 'mensaje', icon: '/icons/envelope-regular.svg' },
     { label: 'USUARIOS NOTIFICADOS', accessor: 'usuarios', icon: '/icons/user-regular.svg' }
-  ];
-
-  
+  ]; 
 
   
   const preparedLogs = alarmLogs.length > 0 ? alarmLogs.map(al => {
@@ -180,6 +209,41 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
       usuarios: al.notified_users.map(u => `${u.first_name} ${u.last_name}`).join(', ')
     };
   }) : [];
+
+
+  // 3. HANDLERS para el nuevo modal
+  const handleOpenUnsubscribeModal = (user) => {
+    setSelectedUserToUnsubscribe(user);
+    setModalUnsubscribeOpen(true);
+  };
+
+  const handleCloseUnsubscribeModal = () => {
+    setModalUnsubscribeOpen(false);
+    setSelectedUserToUnsubscribe(null);
+  };
+
+  const handleConfirmUnsubscribe = async () => {
+    // Aquí llamarías a tu API a través del store
+    // await unsubscribeUserFromAlarm(businessUuid, selectedAlarm.uuid, selectedUserToUnsubscribe.user_uuid);
+    console.log("Desuscribiendo a:", selectedUserToUnsubscribe.user_uuid);
+    handleCloseUnsubscribeModal();
+    // Tip: Deberías refrescar la lista después: fetchUsersByAlarmId(businessUuid, alarmId);
+  };
+
+  // 4. CONFIGURACIÓN DE COLUMNAS DE USUARIOS
+  const userColumns = [
+    { label: 'NOMBRE Y APELLIDO', accessor: 'fullName', icon: '/icons/user-regular.svg' },
+    { label: 'CORREO', accessor: 'email', icon: '/icons/envelope-regular.svg' },
+    { label: 'TELÉFONO', accessor: 'phone', icon: '/icons/phone-solid.svg' },
+    { label: 'ACCIÓN', accessor: 'actionLabel', icon: '/icons/trash-can-regular.svg' }
+  ];
+
+  // 5. PREPARACIÓN DE DATOS DE USUARIOS
+  const preparedUsers = usersByAlarmId?.map(u => ({
+    ...u,
+    fullName: `${u.first_name} ${u.last_name}`,
+    actionLabel: 'Click para desuscribir' // O podrías usar un componente de Icono aquí
+  })) || [];
 
 //console.log('alarmLogs', alarmLogs[0]);
 //console.log('harcodeada formateada 2026-01-20T15:40:01.000Z', FormatearFechaCompleta('2026-01-20T15:40:01.000Z'));
@@ -209,6 +273,17 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
         />
       )}
 
+      {modalUnsubscribeOpen && (
+        <ModalConfirmation
+          isOpen={modalUnsubscribeOpen}
+          onRequestClose={handleCloseUnsubscribeModal}
+          onConfirm={handleConfirmUnsubscribe}
+          title="Confirmar Desuscripción"
+          message={`¿Estás seguro de que deseas quitar a ${selectedUserToUnsubscribe?.fullName} de esta alarma? Ya no recibirá notificaciones.`}
+          type="danger"
+        />
+      )}
+
       <Title1
         type="alarmas"
         text={`Alarma: ${selectedAlarm?.name}`}
@@ -229,8 +304,10 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
         alarm={selectedAlarm}
         usageData={channelUsage}
         buttons={alarmButtons}
-        formatDate={FormatearFechaCompleta} // Pasamos tu función de fecha
+        formatDate={FormatearFechaCompleta}         
     />
+
+    
 
       <div className={styles.chartContainer}>
         <ViewChart 
@@ -256,8 +333,7 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
         />
       </div>
 
-      <Title2 type="historial" text={`Historial de disparos para alarma ${selectedAlarm?.name}`} />
-      
+      <Title2 type="historial" text={`Historial de disparos para alarma ${selectedAlarm?.name}`} />      
       {isLoadingAlarm ? (
         <LoadingSpinner message="Cargando historial de alarmas..." />
       ) : error ? (
@@ -270,6 +346,24 @@ if (isLoadingAlarm && isLoadingAlarmLogs && isLoadingChannelUsage || isLoadingAl
             columns={columns}
             data={preparedLogs}
             onRowClick={(row) => handleOpenLogModal(row)}
+          />
+        </div>
+      )}
+
+      <hr className={styles.separator}  />
+
+      {/* 7. NUEVA SECCIÓN: TABLA DE USUARIOS SUSCRIPTOS */}
+      <Title2 type="usuarios" text="Usuarios suscriptos a esta alarma"/>      
+      {isLoadingUsersByAlarmId ? (
+        <LoadingSpinner message="Cargando usuarios..." />
+      ) : preparedUsers.length === 0 ? (
+        <div className={styles.noData}>No hay usuarios suscriptos a esta alarma</div>
+      ) : (
+        <div className={styles.tableContainer}  ref={usuariosRef}>
+          <Table
+            columns={userColumns}
+            data={preparedUsers}
+            onRowClick={(row) => handleOpenUnsubscribeModal(row)}
           />
         </div>
       )}

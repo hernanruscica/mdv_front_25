@@ -43,14 +43,14 @@ export const routes = [
 
   /* Alarms routes */
   // Alarmas routes / dataloggers
-  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas", element: <Alarms />, private: true }, 
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   // Alarmas routes / locations
   { path: "/panel/ubicaciones/:businessUuid/alarmas", element: <Alarms />, private: true }, 
   { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId", element: <ViewAlarm />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/alarmas/:alarmId/editar", element: <CreatePage />, private: true },
   // Alarmas routes / users
-  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas", element: <Alarms />, private: true },
+  { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas", element: <Alarms />, private: true }, 
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId", element: <ViewAlarm />, private: true }, 
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/alarmas/:alarmId/editar", element: <CreatePage />, private: true },
   // Alarmas routes / channels

@@ -10,7 +10,6 @@ import { useDataloggersStore } from '../../store/dataloggersStore';
 import { useLocationsStore } from '../../store/locationsStore';
 import { useUsersStore } from '../../store/usersStore';
 
-// NUEVOS IMPORTS
 import { ALARMS_LIST_INFO } from '../../utils/infoContent';
 import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
 import { GetUserCurrentRole } from '../../utils/userRoles';
@@ -54,6 +53,9 @@ const ViewAlarms = () => {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
+  
+  
+
   return (
     <>    
       <Title1 type="alarmas" text={title} />
@@ -73,8 +75,7 @@ const ViewAlarms = () => {
         alarms={alarms} 
         channelId={params.channelId}
         dataloggerId={params.dataloggerId || selectedDatalogger?.uuid}
-        onAlarmClick={handleAlarmClick}
-        // ACTUALIZACIÓN: Verificación con el objeto de rol
+        onAlarmClick={handleAlarmClick}        
         showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
       />      
     </>

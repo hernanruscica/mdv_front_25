@@ -2,6 +2,7 @@
 import styles from './AlarmMonitorCard.module.css'; 
 import CustomTag from '../CustomTag/CustomTag';
 import Gauge from '../Gauge/Gauge';
+import { Link } from 'react-router-dom';
 
 const AlarmMonitorCard = ({ alarm, usageData, buttons, formatDate }) => {
   if (!alarm) return null;
@@ -92,6 +93,7 @@ const AlarmMonitorCard = ({ alarm, usageData, buttons, formatDate }) => {
            <span className={styles.label}>Creada el</span>
            {new Date(alarm.created_at).toLocaleDateString()}
         </div>
+        
       </div>
 
       {/* 3. Visualización Gráfica (Gauge) */}

@@ -33,12 +33,12 @@ export const alarmsService = {
       return null;
     }
   },
-  //{{api}}/businesses/{{own_business_uuid}}/users/f2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e/alarms
+  //{{api}}/businesses/{{business_mdvsrl}}/alarms/user/{{user_norberto}}
   getAllByUser: async (userId, locationId) => {
     try {
-      const { data } = await axiosClient.get(`/api/businesses/${locationId}/users/${userId}/alarms`);
+      const { data } = await axiosClient.get(`/api/businesses/${locationId}/alarms/user/${userId}`);
       
-      return data.items;
+      return data.alarms;
     } catch (error) {
       console.error('Get location alarms error:', error);
       return null;

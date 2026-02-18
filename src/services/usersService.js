@@ -2,6 +2,8 @@ import axiosClient from '../utils/axiosClient';
 
 export const usersService = {
   getAll: async (businessUuid) => {
+    console.log('getall');
+    
     try {
       const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/users/`);
       return data.users;
@@ -12,9 +14,14 @@ export const usersService = {
   },
 
   getAllById: async (businessUuid) => {
+    console.log('getallbyID');
     try {
       const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/users/`);
-      return data.users;
+      //el usuario solicitante no es owner, asi que no tengo que mostrar a los usuarios owners..      
+      console.log('users', data.users);
+      
+      const filteredUsersNotOwners = data.users.filter(user => !user?.businesses_roles?.some(br => br?.role == "Owner"));
+      return filteredUsersNotOwners;
     } catch (error) {
       console.error('Get assigned users error:', error);
       return null;

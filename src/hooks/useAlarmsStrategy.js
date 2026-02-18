@@ -65,7 +65,7 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
   // 3. Efecto para cargar los datos según la estrategia
   useEffect(() => {
     // console.log('businessUuid', businessUuid);
-    //console.log('user', user);
+    //console.log('strategy', strategy);
     
     
     if (!businessUuid) return;
@@ -81,8 +81,8 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
         fetchAlarmsByDatalogger(businessUuid, dataloggerId); 
         break;
       case 'USER':
-        fetchAlarmsByUser(user?.uuid, businessUuid);
-        //fetchAlarms(user);
+        fetchAlarmsByUser(userId, businessUuid);
+        //fetchAlarms(user);        
         break;
       case 'LOCATION':
         //console.log('case location', businessUuid);        
@@ -90,6 +90,8 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
         break;
     }
   }, [strategy, businessUuid, userId, dataloggerId, channelId]);
+
+
 
   return {
     alarms, // Las alarmas ya filtradas por el store

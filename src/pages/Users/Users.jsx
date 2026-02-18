@@ -19,9 +19,9 @@ const Users = () => {
   const user = useAuthStore(state => state.user);
   const { 
     users, 
-    loadingStates,
+    loadingStates: {fetchUsers : isLoadingUsers},
+    fetchUsers,
     error,
-    fetchUsers 
   } = useUsersStore();
   const { 
     selectedLocation,
@@ -29,7 +29,7 @@ const Users = () => {
     loadingStates: { fetchLocation: isLoadingLocation}
   } = useLocationsStore();
 
-  const isLoading = loadingStates?.fetchUsers || isLoadingLocation;  
+  
   const { businessUuid } = useParams();
 
   // ACTUALIZACIÓN: Lógica de rol unificada
@@ -50,7 +50,7 @@ const Users = () => {
     }
   }, [user, businessUuid]);
 
-  if (isLoading || !users ) {
+  if (isLoadingUsers || isLoadingLocation || !user ) {
     return <LoadingSpinner message="Cargando usuarios..." />;
   } 
 

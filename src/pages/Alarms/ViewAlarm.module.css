@@ -18,12 +18,15 @@
 
 .tableContainer {
   margin-top: 1rem;
+  width: 80%;
 }
 
 
 .chartContainer {
-  margin: 2rem 0;
-  width: 90%;
+  width: 100%;
+  height: 600px; /* O el alto que prefieras */
+  min-height: 300px; 
+  position: relative; /* Ayuda a ResponsiveContainer a calcular mejor */
 }
 
 /* Estilos para los botones de canales */
@@ -31,4 +34,11 @@
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
+}
+
+.separator {
+  height: 1px;
+  background-color: #ccc;
+  margin: 2rem 0;
+  width: 80%;
 }

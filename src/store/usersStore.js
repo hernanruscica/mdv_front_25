@@ -32,10 +32,13 @@ export const useUsersStore = create((set, get) => ({
   },
   
   fetchUsers: async (currentUser, businessUuid) => {
+    console.log('currentUSer', currentUser);
+    
     if (!currentUser) return;
     set(state => ({ loadingStates: { ...state.loadingStates, fetchUsers: true }, error: null }));
     try {
-      const users = currentUser.isOwner == 1
+      const currentUserIsOwner = currentUser?.businesses_roles?.some(br => br?.role === "Owner" );
+      const users = currentUserIsOwner
         ? await usersService.getAll(businessUuid)
         : await usersService.getAllById(businessUuid);
       set({ users, error: null });

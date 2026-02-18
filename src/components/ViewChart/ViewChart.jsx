@@ -32,13 +32,14 @@ const ViewChart = ({
   const nowRef = useRef(new Date());
 
   // --- DEBUG ---
+  /*
   useEffect(() => {
     console.log(`%c[ViewChart] Init`, 'color: orange; font-weight: bold;', {
         offset: timezoneOffset,
         range: activeRange
     });
   }, [timezoneOffset, activeRange]);
-
+*/
   // --- 1. PROCESAMIENTO DE ALARMAS ---
   const processedAlarms = useMemo(() => {
     const combinedAlarms = [];
@@ -547,7 +548,7 @@ const getXAxisFormatter = (tickItem) => {
     const s = new Date(sTs).toISOString();
     const e = new Date(eTs).toISOString();
 
-    console.log(`🌐 [Fetch] ${rangeKey}: ${s} -> ${e}`);
+    //console.log(`🌐 [Fetch] ${rangeKey}: ${s} -> ${e}`);
 
     try {
       if (rangeKey === 'CUSTOM_DAY_ZOOM') {
