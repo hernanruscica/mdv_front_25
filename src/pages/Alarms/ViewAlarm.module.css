@@ -24,6 +24,7 @@
 
 .chartContainer {
   width: 100%;
+  max-width: 1000px;
   height: 600px; /* O el alto que prefieras */
   min-height: 300px; 
   position: relative; /* Ayuda a ResponsiveContainer a calcular mejor */
