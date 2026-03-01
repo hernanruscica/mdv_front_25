@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
-import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
+import toast from 'react-hot-toast';
 
 import AlarmMonitorCard from '../../components/AlarmMonitorCard/AlarmMonitorCard';
 import Table from '../../components/Table/Table';
@@ -26,6 +27,8 @@ import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
 import { GetUserCurrentRole } from '../../utils/userRoles';
 
 import ModalConfirmation from '../../components/ModalConfirmation/ModalConfirmation'; 
+import ModalSubscribeUserAlarm from '../../components/ModalSubscribeUserAlarm/ModalSubscribeUserAlarm';
+import { useUsersStore } from '../../store/usersStore';
 
 
 
@@ -56,9 +59,10 @@ const ViewAlarm = () => {
 
   const {
     users: usersByAlarmId,
-    fetchUsersByAlarmId,
-    loadingStates: { fetchUsersByAlarmId: isLoadingUsersByAlarmId },
-  } = useUsersAlarmsStore();
+    fetchUsersByAlarmId,    
+    unsubscribeUserFromAlarm,
+    loadingStates: { fetchUsersByAlarmId: isLoadingUsersByAlarmId, unsubscribeUserFromAlarm: isUnsubscribingUser },
+  } = useUsersAlarmsStore();  
 
   const {
     alarmLogs,
@@ -78,12 +82,16 @@ const ViewAlarm = () => {
 
   const { user } = useAuthStore();
 
+  const { users: allBusinessUsers, fetchUsers } = useUsersStore();
+
   // 1. NUEVOS ESTADOS para la desuscripción
   const [modalUnsubscribeOpen, setModalUnsubscribeOpen] = useState(false);
   const [selectedUserToUnsubscribe, setSelectedUserToUnsubscribe] = useState(null);
 
-  // 2. Traer la función para desuscribir del store (asumiendo que existe)
-  const { unsubscribeUserFromAlarm } = useUsersAlarmsStore();
+  // Estado para suscripción de usuarios
+  const [modalSubscribeOpen, setModalSubscribeOpen] = useState(false);
+
+ 
 
   
   const userCurrentRole = GetUserCurrentRole(user, businessUuid);
@@ -94,6 +102,7 @@ useEffect(() => {
   if (!businessUuid || !alarmId) return;
   fetchAlarmById(businessUuid, alarmId);
   fetchUsersByAlarmId(businessUuid, alarmId);
+  fetchUsers(user, businessUuid);
 }, [businessUuid, alarmId, dataloggerId, channelId]);
 
 // 2) Cuando la alarma ya está, cargar lo demás en paralelo
@@ -137,7 +146,8 @@ useEffect(() => {
 }, [businessUuid, selectedAlarm]);
 
 
-if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAlarmLogsByDataloggerId || isLoadingDataloggerUsage || isLoadingUsersByAlarmId) {
+if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAlarmLogsByDataloggerId 
+    || isLoadingDataloggerUsage || isLoadingUsersByAlarmId || isUnsubscribingUser) {
   return <LoadingSpinner message="Cargando datos..." />;
 }
 
@@ -182,6 +192,14 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
         type="success"
         onClick={scrollToUsuarios}
       />
+      {(userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator') && (
+        <BtnCallToAction
+          text="Suscribir usuario"
+          icon="user-regular.svg"
+          type="primary"
+          onClick={() => setModalSubscribeOpen(true)}
+        />
+      )}
     </>) :
     (<>
       <BtnCallToAction
@@ -213,6 +231,7 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
 
   // 3. HANDLERS para el nuevo modal
   const handleOpenUnsubscribeModal = (user) => {
+    console.log('Selected user to unsubscribe:', user);
     setSelectedUserToUnsubscribe(user);
     setModalUnsubscribeOpen(true);
   };
@@ -223,11 +242,19 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
   };
 
   const handleConfirmUnsubscribe = async () => {
-    // Aquí llamarías a tu API a través del store
-    // await unsubscribeUserFromAlarm(businessUuid, selectedAlarm.uuid, selectedUserToUnsubscribe.user_uuid);
-    console.log("Desuscribiendo a:", selectedUserToUnsubscribe.user_uuid);
+    console.log('Confirming unsubscribe for user:', selectedUserToUnsubscribe);
+    const response = await unsubscribeUserFromAlarm(
+      businessUuid,
+      selectedAlarm.uuid,
+      selectedUserToUnsubscribe.user_alarm_uuid
+    );
+    if (response?.success) {
+      toast.success('Usuario desuscrito de la alarma correctamente');
+      fetchUsersByAlarmId(businessUuid, alarmId);
+    } else {
+      toast.error('Error al desuscribir usuario');
+    }
     handleCloseUnsubscribeModal();
-    // Tip: Deberías refrescar la lista después: fetchUsersByAlarmId(businessUuid, alarmId);
   };
 
   // 4. CONFIGURACIÓN DE COLUMNAS DE USUARIOS
@@ -284,6 +311,17 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
         />
       )}
 
+      <ModalSubscribeUserAlarm
+        isOpen={modalSubscribeOpen}
+        onRequestClose={() => setModalSubscribeOpen(false)}
+        businessUuid={businessUuid}
+        alarmUuid={selectedAlarm?.uuid}
+        allUsers={allBusinessUsers}
+        subscribedUserIds={usersByAlarmId?.map(u => u.user_uuid) || []}
+        currentUserRole={userCurrentRole?.name}
+        onSuccess={() => fetchUsersByAlarmId(businessUuid, selectedAlarm?.uuid)}
+      />
+
       <Title1
         type="alarmas"
         text={`Alarma: ${selectedAlarm?.name}`}
@@ -292,13 +330,7 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
       {/* REEMPLAZO: Acordeón centralizado */}
       <InfoAccordion data={infoData} />
 
-      <Breadcrumb
-        // usuario={`${selectedUser?.nombre_1} ${selectedUser?.apellido_1}`}
-        ubicacion={selectedAlarm?.business.name}
-        datalogger={channelUsage?.datalogger.name || dataloggerUsage?.name}
-        canal={channelUsage?.name}
-        alarma={selectedAlarm?.name}
-      />   
+       <BreadcrumbAuto />   
 
     <AlarmMonitorCard
         alarm={selectedAlarm}

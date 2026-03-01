@@ -4,18 +4,16 @@ import { useDataloggersStore } from '../store/dataloggersStore';
 import { useChannelsStore } from '../store/channelsStore';
 import { useAuthStore } from '../store/authStore';
 
-export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelId }) => {
+export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelId, userUuid }) => {
   const { 
     alarms, 
     loadingStates, 
-    // Asumimos que tu store tiene estas acciones distintas:
     fetchAlarms,    
     fetchAlarmsByLocation, 
     fetchAlarmsByDatalogger,
     fetchAlarmsByChannel,
     fetchAlarmsByUser, 
-    // fetchAlarmsByDatalogger, 
-    // fetchAlarmsByChannel 
+    fetchAlarmsByUserUuid,
   } = useAlarmsStore();
 
   // Stores auxiliares para obtener nombres (Breadcrumbs)
@@ -28,9 +26,10 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
     if (channelId) return 'CHANNEL';
     if (dataloggerId) return 'DATALOGGER';
     if (userId) return 'USER';
+    if (userUuid) return 'USER_UUID';
     if (businessUuid) return 'LOCATION';
     return 'UNKNOWN';
-  }, [channelId, dataloggerId, userId, businessUuid]);
+  }, [channelId, dataloggerId, userId, userUuid, businessUuid]);
 
   // 2. Títulos y Datos derivados (Sin useState)
   const viewInfo = useMemo(() => {
@@ -50,6 +49,11 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
           title: 'Alarmas del Usuario actual',
           context: 'usuario'
         };
+      case 'USER_UUID':
+        return { 
+          title: 'Alarmas asignadas al usuario',
+          context: 'usuario_uuid'
+        };
       case 'LOCATION':
         return { 
           title: 'Alarmas de la Ubicación actual',
@@ -64,39 +68,35 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
 
   // 3. Efecto para cargar los datos según la estrategia
   useEffect(() => {
-    // console.log('businessUuid', businessUuid);
-    //console.log('strategy', strategy);
-    
-    
+    if (userUuid) {
+      fetchAlarmsByUserUuid(userUuid);
+      return;
+    }
+
     if (!businessUuid) return;
 
     switch (strategy) {
       case 'CHANNEL':
-        //fetchAlarmsByChannel(businessUuid, channelId);
-        //console.log('fetch alarms by channel');     
         fetchAlarmsByChannel(businessUuid, channelId);
         break;
       case 'DATALOGGER':
-        //fetchAlarmsByDatalogger(businessUuid, dataloggerId);           
         fetchAlarmsByDatalogger(businessUuid, dataloggerId); 
         break;
       case 'USER':
         fetchAlarmsByUser(userId, businessUuid);
-        //fetchAlarms(user);        
         break;
       case 'LOCATION':
-        //console.log('case location', businessUuid);        
         fetchAlarmsByLocation(businessUuid);        
         break;
     }
-  }, [strategy, businessUuid, userId, dataloggerId, channelId]);
+  }, [strategy, businessUuid, userId, dataloggerId, channelId, userUuid]);
 
 
 
   return {
-    alarms, // Las alarmas ya filtradas por el store
+    alarms,
     title: viewInfo.title,
     context: viewInfo.context,
-    isLoading: loadingStates.fetchAlarms || loadingStates.fetchAlarmsByChannel || loadingStates.fetchAlarmsByDatalogger, 
+    isLoading: loadingStates.fetchAlarms || loadingStates.fetchAlarmsByChannel || loadingStates.fetchAlarmsByDatalogger || loadingStates.fetchAlarmsByUserUuid, 
   };
 };

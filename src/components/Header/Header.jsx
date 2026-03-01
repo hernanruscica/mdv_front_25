@@ -42,8 +42,8 @@ const Header = () => {
             <Link to="/panel" className={`${styles.headerLink} ${location.pathname === '/panel' ? styles.headerLinkSelected : ''}`} id='panel' onClick={menuBtnHandler}>
               PANEL DE CONTROL
             </Link>
-            <Link to={`/panel/ubicaciones/${user?.businesses_roles[0]?.uuid}/usuarios/${user.uuid}/alarmas`} className={`${styles.headerLink} ${location.pathname.split('/').pop() === 'alarmas' ? styles.headerLinkSelected : ''}`} id='alarmas' onClick={menuBtnHandler}>
-              ALARMAS
+            <Link to={`/panel/alarmas/${user.uuid}`} className={`${styles.headerLink} ${location.pathname.startsWith('/panel/alarmas') ? styles.headerLinkSelected : ''}`} id='misAlarmas' onClick={menuBtnHandler}>
+              MIS ALARMAS
             </Link>
             {/* panel/ubicaciones/:businessUuid/usuarios/:userId */}
             <Link to={`/panel/ubicaciones/${user?.businesses_roles[0]?.uuid}/usuarios/${user?.uuid}`} 

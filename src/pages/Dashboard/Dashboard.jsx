@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Title1 } from "../../components/Title1/Title1";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
+import BreadcrumbAuto from "../../components/Breadcrumb/BreadcrumbAuto";
 import { useAuthStore } from "../../store/authStore";
 import { useLocationsStore } from "../../store/locationsStore";
 import { useUsersStore } from '../../store/usersStore';
@@ -65,7 +66,7 @@ const Dashboard = () => {
       {/* REEMPLAZO: Acordeón centralizado en lugar de las descripciones estáticas */}
       <InfoAccordion data={infoData} />
 
-      <Breadcrumb />     
+      <BreadcrumbAuto />     
      
       <Title2 text="Administración" type='panel'/>
       

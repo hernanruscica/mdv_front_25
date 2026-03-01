@@ -4,7 +4,9 @@ import { usersAlarmsService } from '../services/usersAlarmsService';
 export const useUsersAlarmsStore = create((set) => ({
   users: [],
   loadingStates: {
-    fetchUsersByAlarmId: false
+    fetchUsersByAlarmId: false,
+    subscribeUserToAlarm: false,
+    unsubscribeUserFromAlarm: false
   },
   error: null,
    
@@ -111,6 +113,64 @@ export const useUsersAlarmsStore = create((set) => ({
         error: 'Error fetching users by alarm id',
         loadingStates: { ...state.loadingStates, fetchUsersByAlarmId: false }
       }));
+    }
+  },
+  subscribeUserToAlarm: async (businessUuid, alarmUuid, userUuid) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, subscribeUserToAlarm: true },
+      error: null
+    }));
+
+    try {
+      const response = await usersAlarmsService.subscribeUserToAlarm(businessUuid, alarmUuid, userUuid);
+      if (response?.success) {
+        const users = await usersAlarmsService.getAllUsersByAlarmId(businessUuid, alarmUuid);
+        set(state => ({
+          users,
+          loadingStates: { ...state.loadingStates, subscribeUserToAlarm: false }
+        }));
+      } else {
+        set(state => ({
+          loadingStates: { ...state.loadingStates, subscribeUserToAlarm: false }
+        }));
+      }
+      return response;
+    } catch (error) {
+      set(state => ({
+        error: 'Error subscribing user to alarm',
+        loadingStates: { ...state.loadingStates, subscribeUserToAlarm: false }
+      }));
+      return null;
+    }
+  },
+  unsubscribeUserFromAlarm: async (businessUuid, alarmUuid, userAlarmUuid) => {
+    console.log('unsubscribe store');
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, unsubscribeUserFromAlarm: true },
+      error: null
+    }));
+
+    try {
+      const response = await usersAlarmsService.unsubscribeUserFromAlarm(businessUuid, userAlarmUuid);
+      if (response?.success) {
+        const users = await usersAlarmsService.getAllUsersByAlarmId(businessUuid, alarmUuid);
+        set(state => ({
+          users,
+          loadingStates: { ...state.loadingStates, unsubscribeUserFromAlarm: false }
+        }));
+      } else {
+        set(state => ({
+          loadingStates: { ...state.loadingStates, unsubscribeUserFromAlarm: false }
+        }));
+      }
+      return response;
+    } catch (error) {
+      set(state => ({
+        error: 'Error unsubscribing user from alarm',
+        loadingStates: { ...state.loadingStates, unsubscribeUserFromAlarm: false }
+      }));
+      return null;
     }
   }
 }));

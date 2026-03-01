@@ -35,6 +35,8 @@ export const alarmsService = {
   },
   //{{api}}/businesses/{{business_mdvsrl}}/alarms/user/{{user_norberto}}
   getAllByUser: async (userId, locationId) => {
+    console.log('getAllByUser');
+    
     try {
       const { data } = await axiosClient.get(`/api/businesses/${locationId}/alarms/user/${userId}`);
       
@@ -83,6 +85,17 @@ export const alarmsService = {
     } catch (error) {
       console.error('Update alarm error:', error);
       throw error;
+    }
+  },
+
+  getAllAlarmsByUserUuid: async (userUuid) => {
+    //console.log('getAllAlarmsByUserUuid');    
+    try {
+      const { data } = await axiosClient.get(`/api/users/alarms/${userUuid}`);
+      return data.items;
+    } catch (error) {
+      console.error('Get alarms by user UUID error:', error);
+      return null;
     }
   }
 };

@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
-import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+// import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { useAuthStore } from '../../store/authStore';
 import { useUsersStore } from '../../store/usersStore';
 import { useLocationsStore } from '../../store/locationsStore';
@@ -95,7 +96,8 @@ const Users = () => {
       {/* REEMPLAZO: Acordeón centralizado en lugar de párrafos condicionales */}
       <InfoAccordion data={infoData} />
 
-      <Breadcrumb ubicacion={selectedLocation?.name || 'Desconocida'} />
+      {/* <Breadcrumb ubicacion={selectedLocation?.name || 'Desconocida'} /> */}
+      <BreadcrumbAuto />
       
       <div className={styles.tableContainer}>      
         <Table 

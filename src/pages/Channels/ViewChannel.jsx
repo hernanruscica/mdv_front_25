@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
-import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+// import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import CardImage from '../../components/CardImage/CardImage';
@@ -147,11 +148,12 @@ const ViewChannel = () => {
       
       <InfoAccordion data={infoData} />
 
-      <Breadcrumb 
+      {/* <Breadcrumb 
         ubicacion={selectedChannel?.business.name}
         datalogger={selectedChannel?.datalogger.name}
         canal={selectedChannel?.name}
-      />
+      /> */}
+      <BreadcrumbAuto />
       
       <div className={styles.cardsContainer}>
           <CardImage

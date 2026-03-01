@@ -2,7 +2,8 @@ import {useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import {Title1} from '../../components/Title1/Title1';
-import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+// import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import ShowChannelsCards from '../../components/ShowChannelsCards/ShowChannelsCards';
 import { useDataStore } from '../../store/dataStore';
@@ -70,11 +71,12 @@ const Channels = () => {
       />
 
       <InfoAccordion data={infoData} />
-     
+{/*      
       <Breadcrumb 
         datalogger={datalogger?.name || 'datalogger generico'}
         ubicacion={datalogger?.business.name}
-      />   
+      />    */}
+      <BreadcrumbAuto />
 
       { datalogger?.channels.length > 0 &&
         <ShowChannelsCards

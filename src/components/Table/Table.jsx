@@ -6,7 +6,7 @@ import styles from './Table.module.css';
 import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
 //import { useAuthStore } from '../../store/authStore';
 
-const Table = ({ columns, data, onRowClick, showAddButton, addUrl = '/' }) => {
+const Table = ({ columns, data, onRowClick, showAddButton, addUrl = '/', onAddClick = null }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -152,8 +152,8 @@ const Table = ({ columns, data, onRowClick, showAddButton, addUrl = '/' }) => {
           <>          
             <BtnCallToAction 
               text="Agregar" 
-              icon="plus-circle-solid.svg" 
-              url={addUrl}
+              icon="plus-circle-solid.svg"               
+              onClick={onAddClick}
             />
              <label className={styles.checkboxContainer}>
                 <input

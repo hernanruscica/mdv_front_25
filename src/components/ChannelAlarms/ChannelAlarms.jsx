@@ -3,7 +3,17 @@ import Table from '../Table/Table';
 import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
 import styles from './ChannelAlarms.module.css';
 
-const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin identificar', dataloggerId, onAlarmClick, showAddButton = false }) => {
+const ChannelAlarms = ({ 
+  businessUuid, 
+  alarms, 
+  channelId, 
+  channelName = 'sin identificar', 
+  dataloggerId, 
+  onAlarmClick, 
+  showAddButton = false,
+  isMisAlarmasRoute = false,
+  onSubscribeClick = () => console.log('Subscribe click')
+}) => {
   const columns = useMemo(() => [
     { 
       label: 'NOMBRE ALARMA', 
@@ -28,8 +38,8 @@ const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin ide
       tipo: alarm.alarm_type,  
       condicion_mostrar: `${alarm.condition_show} ` || 'Sin condición',      
       url: alarm?.alarm_type == 'porcentage_on' 
-              ? `/panel/ubicaciones/${businessUuid}/dataloggers/${alarm?.datalogger_uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`
-              : `/panel/ubicaciones/${businessUuid}/dataloggers/${alarm?.datalogger_uuid}/alarmas/${alarm.uuid}`,  
+              ? `/panel/ubicaciones/${alarm?.business_uuid}/dataloggers/${alarm?.datalogger_uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid || alarm.alarm_uuid}`
+              : `/panel/ubicaciones/${alarm?.business_uuid}/dataloggers/${alarm?.datalogger_uuid}/alarmas/${alarm.uuid || alarm.alarm_uuid}`,  
       id: alarm.uuid,
       estado: alarm.is_active
     })), 
@@ -37,8 +47,9 @@ const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin ide
   );
 
   //console.log('showAddButton', showAddButton);
-  //console.log('alarm example', alarms[0]);
-  
+  //console.log('alarm example', alarms[4]);
+//console.log('onsuscribClick', onSubscribeClick);
+
   return (
 
     <div className={styles.alarmsContainer}>      
@@ -50,16 +61,17 @@ const ChannelAlarms = ({ businessUuid, alarms, channelId, channelName = 'sin ide
             data={preparedAlarms}
             onRowClick={onAlarmClick}
             showAddButton={showAddButton}
-            addUrl={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
+            addUrl={isMisAlarmasRoute ? null : `/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
+            onAddClick={onSubscribeClick}
           />
         </div>
       ) : (
         <>
           <BtnCallToAction 
               text="Agregar" 
-              icon="plus-circle-solid.svg" 
-              url={`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${channelId}/alarmas/agregar`}
-            />
+              icon="plus-circle-solid.svg"              
+              onClick={onSubscribeClick}
+            />                    
           <p className={styles.noAlarms}>No se encontraron alarmas activas para la entidad solicitada.</p>
         </>
       )}

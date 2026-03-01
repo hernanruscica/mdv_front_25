@@ -8,7 +8,9 @@ export const useAlarmsStore = create((set) => ({
     fetchAlarms: false,
     fetchAlarm: false,
     fetchAlarmsByUser: false,
-    fetchAlarmsByChannel: false
+    fetchAlarmsByChannel: false,
+    fetchAlarmsByUserUuid: false,
+    fetchAlarmsForSubscription: false
   },
   error: null,
 
@@ -217,4 +219,52 @@ export const useAlarmsStore = create((set) => ({
       }));
     }
   },
+
+  fetchAlarmsByUserUuid: async (userUuid) => {
+    if (!userUuid) return;
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchAlarmsByUserUuid: true },
+      error: null
+    }));
+
+    try {
+      const alarms = await alarmsService.getAllAlarmsByUserUuid(userUuid);
+      set(state => ({
+        alarms: Array.isArray(alarms) ? alarms : [],
+        loadingStates: { ...state.loadingStates, fetchAlarmsByUserUuid: false }
+      }));
+      return alarms;
+    } catch (error) {
+      set(state => ({
+        error: 'Error fetching alarms by user UUID',
+        loadingStates: { ...state.loadingStates, fetchAlarmsByUserUuid: false }
+      }));
+      return null;
+    }
+  },
+
+  // Función para obtener alarmas del negocio sin modificar el estado (para modal de suscripción)
+  fetchAlarmsForSubscription: async (businessUuid) => {
+    if (!businessUuid) return [];
+    
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchAlarmsForSubscription: true },
+      error: null
+    }));
+
+    try {
+      const alarms = await alarmsService.getAll(businessUuid);
+      set(state => ({
+        loadingStates: { ...state.loadingStates, fetchAlarmsForSubscription: false }
+      }));
+      return alarms || [];
+    } catch (error) {
+      set(state => ({
+        error: 'Error fetching alarms for subscription',
+        loadingStates: { ...state.loadingStates, fetchAlarmsForSubscription: false }
+      }));
+      return [];
+    }
+  }
 }));

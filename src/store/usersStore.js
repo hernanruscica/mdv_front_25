@@ -32,7 +32,7 @@ export const useUsersStore = create((set, get) => ({
   },
   
   fetchUsers: async (currentUser, businessUuid) => {
-    console.log('currentUSer', currentUser);
+    //console.log('currentUSer', currentUser);
     
     if (!currentUser) return;
     set(state => ({ loadingStates: { ...state.loadingStates, fetchUsers: true }, error: null }));

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { useAuthStore } from '../../store/authStore';
 import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
@@ -113,7 +114,8 @@ const ViewLocation = () => {
       {/* REEMPLAZO: Acordeón informativo con la nueva lógica */}
       <InfoAccordion data={infoData} />
 
-      <Breadcrumb ubicacion={selectedLocation?.name}/>
+      {/* <Breadcrumb ubicacion={selectedLocation?.name}/> */}
+      <BreadcrumbAuto />
       
       <CardImage
         image={selectedLocation?.logo_url !== null ? `${selectedLocation?.logo_url}` : '/images/default_location.png'}

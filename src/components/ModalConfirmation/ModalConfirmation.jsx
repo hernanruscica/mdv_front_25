@@ -6,7 +6,7 @@ const ModalConfirmation = ({
     mesagge='Realmente quiere eliminar el elemento?',
     isOpen,
     onRequestClose,
-    handleAccept = () => null
+    onConfirm = () => null    
     }) => {
     return(
         <ModalTemplate
@@ -15,7 +15,7 @@ const ModalConfirmation = ({
             title={title}
             buttons={[
                 { title: 'Cancelar', onClick: onRequestClose },
-                { title: 'Aceptar', onClick: handleAccept }
+                { title: 'Aceptar', onClick: onConfirm }
             ]}
             customStyles={{
                 overlay: { zIndex: 2000 },

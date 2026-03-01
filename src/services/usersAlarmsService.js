@@ -70,5 +70,32 @@ export const usersAlarmsService = {
       console.error('Get user locations error:', error);
       return null;
     }
+  },
+
+  subscribeUserToAlarm: async (businessUuid, alarmUuid, userUuid) => {
+    try {
+      const { data } = await axiosClient.post(
+        `/api/businesses/${businessUuid}/users-alarms`,
+        { alarm_uuid: alarmUuid, user_uuid: userUuid, business_uuid: businessUuid }
+      );
+      return data;
+    } catch (error) {
+      console.error('Subscribe user to alarm error:', error);
+      return null;
+    }
+  },
+
+  unsubscribeUserFromAlarm: async (businessUuid, userAlarmUuid) => {
+    console.log('unsubscribe service');
+    try {
+      const { data } = await axiosClient.delete(
+        `/api/businesses/${businessUuid}/users-alarms/${userAlarmUuid}/hard`
+      );
+      console.log('Unsubscribe response data:', data);
+      return data;
+    } catch (error) {
+      console.error('Unsubscribe user from alarm error:', error);
+      return null;
+    }
   }
 };

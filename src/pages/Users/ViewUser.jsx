@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { useUsersStore } from '../../store/usersStore';
 import { useAuthStore } from '../../store/authStore';
 import { useLocationsStore } from '../../store/locationsStore';
@@ -199,13 +200,10 @@ const ViewUser = () => {
             type="usuarios"
           />
 
-          <InfoAccordion data={infoData} />
+          <InfoAccordion data={infoData} />                  
           
-          <Breadcrumb 
-            usuario={selectedUser ? `${selectedUser.first_name} ${selectedUser.last_name}` : '' }
-            ubicacion={selectedUser?.businesses_roles.find(br => br.uuid === businessUuid)?.name}
-          />
-      
+          <BreadcrumbAuto />
+
           <CardImage
             image={selectedUser?.avatar_url ? `${selectedUser?.avatar_url}` : '/images/default_avatar.png'}
             title={`${selectedUser?.first_name} ${selectedUser?.last_name}`}

@@ -4,10 +4,12 @@ import styles from './BtnCallToAction.module.css';
 
 const BtnCallToAction = (props) => {
     const { text, icon, type, url, onClick } = props;
+    
+    
     return (
       <Link
         to={url ? url : '#'}   
-        onClick={onClick ? onClick : ''}     
+        onClick={onClick}     
         className={`${styles.navbarBtn} ${styles[`navbarBtn--${type}`]}`}
       >
         <img

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom'; // Unificado Link aquí
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
-import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+// import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import CardImage from '../../components/CardImage/CardImage';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
@@ -110,7 +111,8 @@ const ViewDatalogger = () => {
       {/* REEMPLAZO: Acordeón informativo centralizado */}
       <InfoAccordion data={infoData} />
 
-      <Breadcrumb datalogger={datalogger?.name} ubicacion={datalogger?.business.name}/>     
+      {/* <Breadcrumb datalogger={datalogger?.name} ubicacion={datalogger?.business.name}/>      */}
+      <BreadcrumbAuto />
      
       <div className={styles.sectionRow}>
         {(dataloggerUsage) ? (

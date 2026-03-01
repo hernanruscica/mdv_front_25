@@ -2,7 +2,7 @@ import axiosClient from '../utils/axiosClient';
 
 export const usersService = {
   getAll: async (businessUuid) => {
-    console.log('getall');
+    //console.log('getall');
     
     try {
       const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/users/`);
@@ -14,11 +14,11 @@ export const usersService = {
   },
 
   getAllById: async (businessUuid) => {
-    console.log('getallbyID');
+    //console.log('getallbyID');
     try {
       const { data } = await axiosClient.get(`/api/businesses/${businessUuid}/users/`);
       //el usuario solicitante no es owner, asi que no tengo que mostrar a los usuarios owners..      
-      console.log('users', data.users);
+      //console.log('users', data.users);
       
       const filteredUsersNotOwners = data.users.filter(user => !user?.businesses_roles?.some(br => br?.role == "Owner"));
       return filteredUsersNotOwners;
@@ -59,7 +59,7 @@ export const usersService = {
     
     try {
       const { data } = await axiosClient.uploadFilePUT(`/api/businesses/${businessUuid}/users/${uuid}`, userData);
-      console.log(' from usrs service data', data);
+      //console.log(' from usrs service data', data);
       return data;
     } catch (error) {
       console.error('Update user error:', error);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Title1 } from '../../components/Title1/Title1';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { useAuthStore } from '../../store/authStore';
 import { useLocationsStore } from '../../store/locationsStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
@@ -56,7 +57,7 @@ const Locations = () => {
       {/* REEMPLAZO: Acordeón informativo */}
       <InfoAccordion data={infoData} />
 
-      <Breadcrumb />
+      <BreadcrumbAuto />
       
       <ShowLocationsCards
         user={user}
