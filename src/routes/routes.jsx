@@ -23,7 +23,7 @@ export const routes = [
   { path: "/panel/ubicaciones/:businessUuid/usuarios", element: <Users />, private: true },  //nuevo breadcrumb
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId", element: <ViewUser />, private: true },  //nuevo breadcrumb
   { path: "/panel/ubicaciones/:businessUuid/usuarios/activar/:token", element: <ActivateUser /> }, //sin breadcumb
-  { path: "/panel/ubicaciones/:businessUuid/usuarios/agregar", element: <CreatePage />, private: true }, 
+  { path: "/panel/usuarios/agregar", element: <CreatePage />, private: true }, 
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/editar", element: <CreatePage />, private: true },  
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/eliminar", element: <UnderConstruction />, private: true }, //sin breadcumb
 

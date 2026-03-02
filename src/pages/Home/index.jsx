@@ -2,7 +2,8 @@ import { useAuthStore } from '../../store/authStore';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
 import {Title1} from '../../components/Title1/Title1';
 import styles from './Home.module.css';
-import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+//import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 
 import { HOME_INFO } from '../../utils/infoContent';
 import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
@@ -25,7 +26,7 @@ const Home = () => {
 
       <InfoAccordion data={infoData} />
         
-        <Breadcrumb />
+        <BreadcrumbAuto />
       <main className={styles.pageMaincontent}>
         <div className={styles.actionButtons}>
           <BtnCallToAction

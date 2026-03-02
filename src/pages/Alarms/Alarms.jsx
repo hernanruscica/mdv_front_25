@@ -102,14 +102,7 @@ const ViewAlarms = () => {
       <Title1 type="alarmas" text={`${title} ${isMisAlarmasRoute ? `${user.first_name} ${user.last_name}` : ''}`} />
 
       <InfoAccordion data={infoData} />
-
-      {/* <Breadcrumb 
-        usuario={isMisAlarmasRoute ? null : (selectedUser ? `${selectedUser.first_name} ${selectedUser.last_name}` : 'Desconocido')}
-        ubicacion={selectedLocation?.name || 'Desconocida'}
-        datalogger={selectedDatalogger?.name || 'Desconocido'}
-        canal={selectedDatalogger?.channels?.find(ch => ch.uuid === params.channelId)?.name || 'Desconocido'}
-        alarma={isMisAlarmasRoute ? `${user.first_name} ${user.last_name}` : null}
-      />    */}
+     
       <BreadcrumbAuto />
 
       <ChannelAlarms 
@@ -118,7 +111,7 @@ const ViewAlarms = () => {
         channelId={params.channelId}
         dataloggerId={params.dataloggerId || selectedDatalogger?.uuid}
         onAlarmClick={handleAlarmClick}        
-        showAddButton={isMisAlarmasRoute || userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
+        showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
         isMisAlarmasRoute={isMisAlarmasRoute}
         onSubscribeClick={handleOpenSubscribeModal }
       />      

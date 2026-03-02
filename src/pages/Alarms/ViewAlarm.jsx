@@ -174,18 +174,7 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
   const alarmButtons = (
     selectedAlarm?.is_active == '1' ?
     (<>
-      <BtnCallToAction
-        text="Editar"
-        icon="edit-regular.svg"
-        type="warning"
-        url={`${location.pathname}/editar`}
-      />
-      <BtnCallToAction
-        text="Archivar"
-        icon="archive-solid.svg"
-        type="danger"
-        onClick={() => setModalArchiveOpen(true)}
-      />
+      
       <BtnCallToAction
         text={`Ver ${usersByAlarmId?.length || 0} usuarios suscriptos`}
         icon="eye-regular.svg"
@@ -193,12 +182,26 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
         onClick={scrollToUsuarios}
       />
       {(userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator') && (
+        <>
+        <BtnCallToAction
+          text="Editar"
+          icon="edit-regular.svg"
+          type="warning"
+          url={`${location.pathname}/editar`}
+        />
+        <BtnCallToAction
+          text="Archivar"
+          icon="archive-solid.svg"
+          type="danger"
+          onClick={() => setModalArchiveOpen(true)}
+        />
         <BtnCallToAction
           text="Suscribir usuario"
           icon="user-regular.svg"
           type="primary"
           onClick={() => setModalSubscribeOpen(true)}
         />
+        </>
       )}
     </>) :
     (<>
@@ -269,7 +272,7 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
   const preparedUsers = usersByAlarmId?.map(u => ({
     ...u,
     fullName: `${u.first_name} ${u.last_name}`,
-    actionLabel: 'Click para desuscribir' // O podrías usar un componente de Icono aquí
+    actionLabel: (userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator') ? 'Click para desuscribir' : 'No disponible'
   })) || [];
 
 //console.log('alarmLogs', alarmLogs[0]);
@@ -395,7 +398,11 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
           <Table
             columns={userColumns}
             data={preparedUsers}
-            onRowClick={(row) => handleOpenUnsubscribeModal(row)}
+            onRowClick={(row) => {
+              if (userCurrentRole?.name === 'Administrator' || userCurrentRole?.name === 'Owner') {
+                handleOpenUnsubscribeModal(row);
+              }
+            }}
           />
         </div>
       )}

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
-import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+//import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { useAuthStore } from '../../store/authStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
@@ -58,7 +59,8 @@ const Dataloggers = () => {
       {/* REEMPLAZO: Acordeón informativo centralizado */}
       <InfoAccordion data={infoData} />
 
-      <Breadcrumb ubicacion={currentBusinessName} />
+      {/* <Breadcrumb ubicacion={currentBusinessName} /> */}
+      <BreadcrumbAuto />
       
       <ShowDataloggersCards
         dataloggers={dataloggers.filter(dl => dl.business.uuid === businessUuid)}              

@@ -1,6 +1,6 @@
 .breadcrumbContainer {
   width: 100%;
-  border-bottom: 1px solid #1a1a1a;
+  z-index: 1;
 }
 
 .breadcrumb {
@@ -9,7 +9,8 @@
   flex-direction: row;   
   align-items: center;    
   justify-content: flex-start;
-  padding-left: 1em;
+  padding-left: 1rem;
+  padding-top: 1rem;
   flex-wrap: wrap;
   background-color: #EDEFF0;    
 }
@@ -19,7 +20,7 @@
   display: flex;
   align-items: center;
   text-transform: uppercase;
-  gap: 10px;    
+  gap: 16px;    
   height: 100%;
 }
 
@@ -40,7 +41,7 @@
   gap: 5px;
   min-width: 100px;
   text-decoration: none;
-  padding: 16px 8px;
+  padding: 8px;
   color: #1a1a1a;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -55,19 +56,92 @@
   color: #757575;
 }
 
+.accordionToggle {
+  display: none;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 16px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: #dfa410;
+  text-transform: uppercase;
+}
+
+.accordionContent {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  padding: 8px 16px 16px;
+  background-color: #EDEFF0;
+}
+
+.accordionContent.open {
+  display: flex;
+}
+
+.accordionItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  text-decoration: none;
+  color: #1a1a1a;
+}
+
+.accordionItem:last-child {
+  border-bottom: none;
+}
+
+.accordionItemCurrent {
+  composes: accordionItem;
+  color: #F6B510;
+  font-weight: 700;
+}
+
 @media (max-width: 600px) {
+  .breadcrumb {
+    padding-left: 0em;
+    padding-right: 0em;
+    width: 100%;
+    background-color: transparent;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
   .breadcrumbItem {
-    padding: 0.4em;
+    display: none;
+  }
+
+  .breadcrumbItemCurrent {
+    display: none;
   }
 
   .breadcrumbBtn {
-    border: 1px solid #757575;
-    border-radius: 20px;
-    padding: 8px;
-    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
   }
 
   .separator {
     display: none;
+  }
+
+  .accordionToggle {
+    display: flex;
+  }
+
+  .accordionContent {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid #1a1a1a;
   }
 }

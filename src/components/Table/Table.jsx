@@ -6,7 +6,7 @@ import styles from './Table.module.css';
 import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
 //import { useAuthStore } from '../../store/authStore';
 
-const Table = ({ columns, data, onRowClick, showAddButton, addUrl = '/', onAddClick = null }) => {
+const Table = ({ columns, data, onRowClick, showAddButton, onAddClick = null, addUrl }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -141,6 +141,7 @@ const Table = ({ columns, data, onRowClick, showAddButton, addUrl = '/', onAddCl
 
   //console.log('data', data);
   //console.log('showAddButton', showAddButton);
+  //console.log('onAddClick', onAddClick);
   
   
 
@@ -152,7 +153,8 @@ const Table = ({ columns, data, onRowClick, showAddButton, addUrl = '/', onAddCl
           <>          
             <BtnCallToAction 
               text="Agregar" 
-              icon="plus-circle-solid.svg"               
+              icon="plus-circle-solid.svg"     
+              url={addUrl}          
               onClick={onAddClick}
             />
              <label className={styles.checkboxContainer}>

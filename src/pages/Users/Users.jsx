@@ -70,6 +70,10 @@ const Users = () => {
     navigate(`/panel/ubicaciones/${row.businessUuid}/usuarios/${row.id}`);
   };
 
+  const handleAddUserClick = () => {        
+    navigate('/panel/usuarios/agregar');    
+  }
+
   const filterUsersByOwner = (userCurrentRole?.name === 'Owner' && businessUuid)
     ? users?.filter(us => us?.businesses_roles.some(br => br.uuid == businessUuid))
     : users;
@@ -103,9 +107,10 @@ const Users = () => {
         <Table 
           columns={columns} 
           data={preparedData} 
-          onRowClick={handleRowClick}
-          showAddButton={ userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
-          addUrl={`/panel/ubicaciones/${businessUuid}/usuarios/agregar`}
+          onRowClick={handleRowClick}          
+          showAddButton={ userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}          
+          onAddClick={handleAddUserClick}
+          addUrl="/panel/usuarios/agregar"
         />       
       </div>
     </>

@@ -1,6 +1,7 @@
 import {useState, useEffect} from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.jsx";
+// import Breadcrumb from "../../components/Breadcrumb/Breadcrumb.jsx";
+import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto.jsx';
 import { Title1 } from "../../components/Title1/Title1.jsx";
 import { useChannelsStore } from '../../store/channelsStore.js';
 import { useDataloggersStore } from '../../store/dataloggersStore.js';
@@ -120,13 +121,14 @@ const CreatePage = () => {
         type={(currentAction === 'editar') ? "edicion" : "construccion"}
         text={`Página de ${currentAction === 'editar' ? 'edición' : 'creación'} de ${currentEntityName}`}
       />
-      <Breadcrumb 
+      {/* <Breadcrumb 
         usuario={ selectedUser ? `${selectedUser?.first_name} ${selectedUser?.last_name}` : ''}
         ubicacion={ currentAction !== 'agregar' ? selectedLocation?.name : 'Agregar'}
         datalogger={selectedLocation?.dataloggers.find(dl => dl.uuid === dataloggerId)?.name || ''}
         canal={selectedChannel?.name || ''}
         alarma={selectedAlarm?.name || ''}
-      />      
+      />       */}
+      <BreadcrumbAuto />
       <FormComponent 
         businessUuid={businessUuid}
         userId={userId}        

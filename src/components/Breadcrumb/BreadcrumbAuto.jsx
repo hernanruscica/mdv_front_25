@@ -90,6 +90,7 @@ const BreadcrumbAuto = ({ overrides = {} }) => {
   const params = useParams();
   const [breadcrumbs, setBreadcrumbs] = useState([]);
   const [entityNames, setEntityNames] = useState({});
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
   
   const paramsRef = useRef(params);
   const locationRef = useRef(location);
@@ -289,6 +290,8 @@ const BreadcrumbAuto = ({ overrides = {} }) => {
   
   
 
+  const currentItem = breadcrumbs[breadcrumbs.length - 1];
+
   return (
     <div className={styles.breadcrumbContainer}>
       <nav className={styles.breadcrumb}>
@@ -315,7 +318,38 @@ const BreadcrumbAuto = ({ overrides = {} }) => {
             </div>
           </React.Fragment>
         ))}
+
+        <button 
+          className={styles.accordionToggle}
+          onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+          aria-label="Navegación"
+        >
+          {Icons.chevronRight}
+          <span>Navegación</span>
+        </button>
       </nav>
+
+      <div className={`${styles.accordionContent} ${isAccordionOpen ? styles.open : ''}`}>
+        <Link to="/" className={styles.accordionItem}>
+          {Icons.home}
+          <span>Inicio</span>
+        </Link>
+        {breadcrumbs.map((item, index) => (
+          <React.Fragment key={index}>
+            {item.isLast ? (
+              <div className={styles.accordionItemCurrent}>
+                {Icons[item.icon]}
+                <span>{item.label}</span>
+              </div>
+            ) : (
+              <Link to={item.path} className={styles.accordionItem}>
+                {Icons[item.icon]}
+                <span>{item.label}</span>
+              </Link>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   );
 };
