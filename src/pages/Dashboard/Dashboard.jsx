@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Title1 } from "../../components/Title1/Title1";
-import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
+//import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import BreadcrumbAuto from "../../components/Breadcrumb/BreadcrumbAuto";
 import { useAuthStore } from "../../store/authStore";
 import { useLocationsStore } from "../../store/locationsStore";

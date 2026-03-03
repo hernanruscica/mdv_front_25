@@ -2,11 +2,12 @@ import { useState, useEffect} from 'react'
 import { useParams } from 'react-router-dom';
 import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
-//import { useLocationUsersStore } from '../../store/locationUsersStore';
+import { useLocationsStore } from "../../store/locationsStore";
 import { useUsersStore } from '../../store/usersStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import {mappedCurrentRole} from '../../utils/userRoles.js';
 
 
 export const UserCreateForm = ({ userId, userData, locationData, isEditing }) => {
@@ -14,14 +15,14 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
     const [profileImage, setProfileImage] = useState("default_avatar.png");
     const [newImage, setNewImage] = useState("");
     const { businessUuid } = useParams();
-    /*
-    const { 
-        locationUsers, 
-        fetchLocationUsers,
-        loadingStates: { fetchLocationUsers: loadingLocationUsers },
-        error 
-    } = useLocationUsersStore();
-    */
+    /**/
+ const {
+    locations,
+    loadingStates: { fetchLocations: isLoadingLocations },
+    error: locationsError,
+    fetchLocations
+  } = useLocationsStore();
+    
    //console.log(userData)
    
     const [user, setUser] = useState({
@@ -68,6 +69,14 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
             });
             setProfileImage(userData?.avatar_url || "default_avatar.png");
         }
+        const loadUserLocationUsers = async () => {
+          if (userStore) {
+            const currentUserLocations = await fetchLocations(userStore);
+            console.log('currentUserLocations', currentUserLocations);
+          }
+
+        }
+        loadUserLocationUsers();
     }, [isEditing, userData]);
     
     useEffect(() => {
@@ -83,6 +92,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
 
     const [selectedLocationRol, setSelectedLocationRol] = useState('');
     const [filteredRoles, setFilteredRoles] = useState([]);
+    const [selectedBusinessUuid, setSelectedBusinessUuid] = useState('');
     
     const handleChange = (e) => {
     setUser({
@@ -162,12 +172,12 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
         formData.append("state", user.state);
         formData.append("country", user.country);
         formData.append("zipCode", user.zipCode);
-        formData.append("business_uuid", locationData?.uuid);
+        formData.append("business_uuid", selectedBusinessUuid || locationData?.uuid);
         formData.append("role", selectedLocationRol);
         formData.append("is_active", user.is_active || "0");
     
         try {
-            const {success, message, user} = await createUser(formData, locationData?.uuid);
+            const {success, message, user} = await createUser(formData, selectedBusinessUuid || locationData?.uuid);
             if (success) {               
                 toast.success('Usuario creado con éxito');
                 navigate(`/panel/ubicaciones/${businessUuid}/usuarios/${user.uuid}`);
@@ -176,7 +186,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
             }
         } catch (error) {            
             console.error("Error al procesar el usuario:", error);
-            navigate(`/panel/ubicaciones/${locationData?.uuid}/usuarios/`);
+            navigate(`/panel/ubicaciones/${selectedBusinessUuid || locationData?.uuid}/usuarios/`);
         } finally {
                 setIsSubmitting(false);
             }
@@ -186,7 +196,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
         return <div>Guardando cambios...</div>;
     }
 
-   // console.log('userData', userData);
+   //console.log('locations', locations);
     
     
     return (        
@@ -195,6 +205,49 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
               imageFileName={profileImage}
               setNewImageHandler={setNewImage}
             /> 
+            {!isEditing && (
+              <>
+                <h3>Ubicación y Rol del usuario:</h3>
+                <div className={stylesForms.formInputGroup}>  
+                  <div className={stylesForms.formInput}>
+                    <label htmlFor="businessUuid">Ubicación:</label>
+                    <select
+                      name="businessUuid"
+                      id="businessUuid"
+                      value={selectedBusinessUuid}
+                      onChange={e => setSelectedBusinessUuid(e.target.value)}
+                      required
+                    >
+                      <option value="" disabled>Seleccione una ubicación</option>
+                      {locations.map((loc) => (
+                        <option value={loc.uuid} key={loc.uuid}>
+                          {loc.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div> 
+                  <div className={stylesForms.formInput}>
+                      <label htmlFor="role">Rol:</label>
+                      <select 
+                          name="role" 
+                          id="role" 
+                          value={selectedLocationRol} 
+                          onChange={e => setSelectedLocationRol(e.target.value)}
+                          required
+                      >
+                          <option value="" disabled>Seleccione un rol para el usuario</option>
+                          {filteredRoles.map((rol) => (
+                              <option value={rol.name} key={rol.id}>
+                                  {mappedCurrentRole[rol.name]}
+                              </option>
+                          ))}
+                      </select>
+                  </div>      
+                </div>
+              </>
+             
+            )}
+            <h3>Datos del usuario:</h3>
             <div className={stylesForms.formInputGroup}>
               <div className={stylesForms.formInput}>
                 <label htmlFor="firstName">Nombre:</label>
@@ -256,7 +309,8 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   disabled={isEditing}
                 />
               </div>
-            </div>
+            </div>       
+            
             <div className={stylesForms.formInputGroup}>
               <div className={stylesForms.formInput}>
                 <label htmlFor="street">Calle:</label>
@@ -321,26 +375,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
             
             {!isEditing && (
                 <>
-                    <h3>Rol del usuario en esta ubicación:</h3>
-                    <div className={stylesForms.formInputGroup}>   
-                        <div className={stylesForms.formInput}>
-                            <label htmlFor="role">Rol:</label>
-                            <select 
-                                name="role" 
-                                id="role" 
-                                value={selectedLocationRol} 
-                                onChange={e => setSelectedLocationRol(e.target.value)}
-                                required
-                            >
-                                <option value="" disabled>Seleccione un rol para el usuario</option>
-                                {filteredRoles.map((rol) => (
-                                    <option value={rol.name} key={rol.id}>
-                                        {rol.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>      
-                    </div>
+                   
                 </>
             )}
 

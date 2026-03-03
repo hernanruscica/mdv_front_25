@@ -159,6 +159,7 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
 //console.log('Users by Alarm', usersByAlarmId);
 
   
+
   
  
   const handleOpenLogModal = (log) => {
@@ -279,6 +280,8 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
 //console.log('harcodeada formateada 2026-01-20T15:40:01.000Z', FormatearFechaCompleta('2026-01-20T15:40:01.000Z'));
 //console.log('selectedAlarm', selectedAlarm);
 
+const isUserAssociated = usersByAlarmId?.some(u => u.user_uuid === user?.uuid);
+
 
 
   return (
@@ -343,48 +346,49 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
     />
 
     
-
-      <div className={styles.chartContainer}>
-        <ViewChart 
-          businessUuid = {businessUuid}
-          channelUuid = {channelId || selectedAlarm?.channel_uuid}
-          title={selectedAlarm?.alarm_type == 'porcentage_on' 
-                  ? `Datos del canal '${channelUsage?.name}'` 
-                  : `Fallos de transmision de datos del datalogger '${dataloggerUsage?.name}'`}
-          subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${channelUsage?.averaging_period } minutos.`}
-          average_period={channelUsage?.averaging_period}
-          availablePresets={[
-            RANGE_KEYS.LAST_HOUR,
-            RANGE_KEYS.LAST_12H,
-            RANGE_KEYS.LAST_24H,
-            RANGE_KEYS.LAST_WEEK,
-            RANGE_KEYS.LAST_MONTH,
-            RANGE_KEYS.LAST_6_MONTHS,
-            RANGE_KEYS.LAST_YEAR
-          ]}
-          onRangeChange={null} //(range) => fetchCpuData(range.start, range.end)}
-          alarmLogs={currentAlarmsLogs}
-          alarmLogsComunicationFailure={alarmLogsComunicationFailure}
-        />
-      </div>
-
-      <Title2 type="historial" text={`Historial de disparos para alarma ${selectedAlarm?.name}`} />      
-      {isLoadingAlarm ? (
-        <LoadingSpinner message="Cargando historial de alarmas..." />
-      ) : error ? (
-        <div className={styles.error}>{error}</div>
-      ) : alarmLogs.length === 0 ? (
-        <div className={styles.noData}>No hay registros de disparos para esta alarma</div>
-      ) : (
-        <div className={styles.tableContainer}>
-          <Table
-            columns={columns}
-            data={preparedLogs}
-            onRowClick={(row) => handleOpenLogModal(row)}
+      {isUserAssociated && (
+        <div className={styles.chartContainer}>
+          <ViewChart 
+            businessUuid = {businessUuid}
+            channelUuid = {channelId || selectedAlarm?.channel_uuid}
+            title={selectedAlarm?.alarm_type == 'porcentage_on' 
+                    ? `Datos del canal '${channelUsage?.name}'` 
+                    : `Fallos de transmision de datos del datalogger '${dataloggerUsage?.name}'`}
+            subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${channelUsage?.averaging_period } minutos.`}
+            average_period={channelUsage?.averaging_period}
+            availablePresets={[
+              RANGE_KEYS.LAST_HOUR,
+              RANGE_KEYS.LAST_12H,
+              RANGE_KEYS.LAST_24H,
+              RANGE_KEYS.LAST_WEEK,
+              RANGE_KEYS.LAST_MONTH,
+              RANGE_KEYS.LAST_6_MONTHS,
+              RANGE_KEYS.LAST_YEAR
+            ]}
+            onRangeChange={null} //(range) => fetchCpuData(range.start, range.end)}
+            alarmLogs={currentAlarmsLogs}
+            alarmLogsComunicationFailure={alarmLogsComunicationFailure}
           />
         </div>
-      )}
+        )}
 
+      <Title2 type="historial" text={`Historial de disparos para alarma ${selectedAlarm?.name}`} />      
+        {isLoadingAlarm ? (
+          <LoadingSpinner message="Cargando historial de alarmas..." />
+        ) : error ? (
+          <div className={styles.error}>{(isUserAssociated) ? error : "Usted no esta Suscripto a la alarma"}</div>
+        ) : alarmLogs.length === 0 ? (
+          <div className={styles.noData}>(isUserAssociated) ? "No hay registros de disparos para esta alarma" : "Usted no esta Suscripto a la alarma"</div>
+        ) : (
+          <div className={styles.tableContainer}>
+            <Table
+              columns={columns}
+              data={preparedLogs}
+              onRowClick={(row) => handleOpenLogModal(row)}
+            />
+          </div>
+        )}
+     
       <hr className={styles.separator}  />
 
       {/* 7. NUEVA SECCIÓN: TABLA DE USUARIOS SUSCRIPTOS */}
