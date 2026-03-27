@@ -63,4 +63,22 @@ export const dataService = {
       return null;
     }
   },
+
+  // /data/totalontime/businesses/:businessUuid/:channelUuid?start='...'&end='...'
+  getTotalOnTime: async (businessUuid, channelUuid, start, end) => {
+    try {
+      const params = [];
+      if (start) params.push(`start='${start}'`);
+      if (end) params.push(`end='${end}'`);
+      const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+      
+      const response = await axiosClient.get(
+        `/api/data/totalontime/businesses/${businessUuid}/${channelUuid}${queryString}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener total on time:', error);
+      return { success: false, data: null };
+    }
+  },
 };

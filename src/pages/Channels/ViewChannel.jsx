@@ -17,8 +17,11 @@ import { useChannelsStore } from '../../store/channelsStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
 import { useDataStore } from '../../store/dataStore';
 import { useAlarmLogsStore } from '../../store/alarmLogsStore';
+import { useMaintenanceLogsStore } from '../../store/maintenanceLogsStore';
 import ViewChart from '../../components/ViewChart/ViewChart';
 import { RANGE_KEYS } from '../../components/ViewChart/constants/chartRanges';
+import ChannelMaintenanceLogs from '../../components/ChannelMaintenanceLogs/ChannelMaintenanceLogs';
+import ModalViewMaintenanceLog from '../../components/ModalViewMaintenanceLog/ModalViewMaintenanceLog';
 
 // NUEVOS IMPORTS
 import { CHANNEL_VIEW_INFO } from '../../utils/infoContent';
@@ -32,6 +35,8 @@ const ViewChannel = () => {
   const [modalOpen, setModalOpen] = useState(false);  
   const [currentAlarmsLogs, setCurrentAlarmsLogs] = useState([]);
   const [alarmLogsComunicationFailure, setAlarmLogsComunicationFailure] = useState([]);
+  const [maintenanceLogModalOpen, setMaintenanceLogModalOpen] = useState(false);
+  const [selectedMaintenanceLog, setSelectedMaintenanceLog] = useState(null);
 
   const { fetchChannelById, 
           selectedChannel, 
@@ -52,6 +57,10 @@ const ViewChannel = () => {
   const { fetchAlarmLogsByAlarmId, fetchAlarmLogsByDataloggerId,
           loadingStates: { fetchAlarmLogs: isLoadingAlarmLogs, fetchAlarmLogsByDataloggerId: isLoadingAlarmLogsByDataloggerId }
         } = useAlarmLogsStore();
+
+  const { maintenanceLogs, fetchMaintenanceLogs,
+          loadingStates: { fetchMaintenanceLogs: isLoadingMaintenanceLogs }
+        } = useMaintenanceLogsStore();
 
   // ACTUALIZACIÓN: Lógica de rol unificada
   const userCurrentRole = GetUserCurrentRole(user, businessUuid);
@@ -81,6 +90,8 @@ const ViewChannel = () => {
           const alarmsWithLogs = await Promise.all(promises);
           setCurrentAlarmsLogs(alarmsWithLogs);
 
+          await fetchMaintenanceLogs(businessUuid, currentChannel?.datalogger.uuid, channelId);
+
         } catch (error) {
           console.error("Error cargando datos:", error);
         }
@@ -90,7 +101,8 @@ const ViewChannel = () => {
   }, [businessUuid, channelId]);
 
   if (isLoadingChannel || isUpdatingChannel || isLoadingAlarmsByChannel      
-      || isLoadingChannelUsage || isLoadingAlarmLogs || isLoadingAlarmLogsByDataloggerId) {
+      || isLoadingChannelUsage || isLoadingAlarmLogs || isLoadingAlarmLogsByDataloggerId
+      || isLoadingMaintenanceLogs) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
     
@@ -102,10 +114,21 @@ const ViewChannel = () => {
     navigate(`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger.uuid}/canales/${selectedChannel?.uuid}/alarmas/${row.id}`);
   }; 
 
+  const handleViewMaintenanceLog = (log) => {
+    setSelectedMaintenanceLog(log);
+    setMaintenanceLogModalOpen(true);
+  }; 
+
   const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedChannel?.uuid);
       
   const channelButtons = (selectedChannel?.is_active == '1') ? (
     <>
+      <BtnCallToAction
+        text="Generar Informe"
+        icon="chart-line-solid.svg"
+        type="normal"
+        url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
+      />
       <BtnCallToAction
         text="Editar"
         icon="edit-regular.svg"
@@ -122,6 +145,12 @@ const ViewChannel = () => {
   ) : (
     <>
       <BtnCallToAction
+        text="Generar Informe"
+        icon="chart-line-solid.svg"
+        type="normal"
+        url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
+      />
+      <BtnCallToAction
         text="Desarchivar"
         icon="archive-solid.svg"
         type="normal"
@@ -129,6 +158,9 @@ const ViewChannel = () => {
       />
     </>
   );
+
+  //onsole.log("maintenanceLogs:", maintenanceLogs);
+  //console.log("currentChannel?.datalogger.uuid", selectedChannel?.datalogger.uuid);
   
   return (
     <>
@@ -147,12 +179,7 @@ const ViewChannel = () => {
 
       
       <InfoAccordion data={infoData} />
-
-      {/* <Breadcrumb 
-        ubicacion={selectedChannel?.business.name}
-        datalogger={selectedChannel?.datalogger.name}
-        canal={selectedChannel?.name}
-      /> */}
+      
       <BreadcrumbAuto />
       
       <div className={styles.cardsContainer}>
@@ -210,6 +237,36 @@ const ViewChannel = () => {
           showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
         />
       )}
+
+      <Title2 text="Mantenimiento" type="mantenimiento"/>
+
+      <ChannelMaintenanceLogs
+        businessUuid={businessUuid}
+        dataloggerUuid={selectedChannel?.datalogger.uuid}
+        channelUuid={channelId}
+        totalTime={channelUsage?.totalData?.total_time_on_hours}
+        maintenanceLogs={maintenanceLogs}
+        onViewLog={handleViewMaintenanceLog}
+        showAddButton= {userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
+        onCreateSuccess={() => {
+          fetchMaintenanceLogs(businessUuid, selectedChannel?.datalogger.uuid, channelId);
+        }}
+      />
+
+      <ModalViewMaintenanceLog
+        isOpen={maintenanceLogModalOpen}
+        onRequestClose={() => {
+          setMaintenanceLogModalOpen(false);
+          setSelectedMaintenanceLog(null);
+        }}
+        log={selectedMaintenanceLog}
+        businessUuid={businessUuid}
+        dataloggerUuid={selectedChannel?.datalogger.uuid}
+        channelUuid={channelId}
+        onUpdateSuccess={() => {
+          fetchMaintenanceLogs(businessUuid, selectedChannel?.datalogger.uuid, channelId);
+        }}
+      />
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { UnderConstruction, Home, Contact, Login, Dashboard, Users, Dataloggers, 
-  Channels, ViewChannel, ViewUser, ActivateUser, Locations, ViewLocation, 
+  Channels, ViewChannel, CreateReport, ViewUser, ActivateUser, Locations, ViewLocation, 
   ViewDatalogger, Alarms, ViewAlarm, CreatePage, SendActivationEmail, 
   ViewStateAlarm } from '../pages';
 
@@ -37,6 +37,7 @@ export const routes = [
   // Channels routes
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales", element: <Channels />, private: true }, //nuevo breadcrumb
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId", element: <ViewChannel />, private: true },  //nuevo breadcrumb
+  { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/informe", element: <CreateReport />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/agregar", element: <CreatePage />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/editar", element: <CreatePage />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId/canales/:channelId/eliminar", element: <UnderConstruction />, private: true }, //sin breadcumb

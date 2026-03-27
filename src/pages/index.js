@@ -12,6 +12,7 @@ export { default as Dataloggers } from './Dataloggers/Dataloggers';
 export { default as ViewDatalogger } from './Dataloggers/ViewDatalogger';
 export { default as Channels } from './Channels/Channels';
 export { default as ViewChannel } from './Channels/ViewChannel';
+export { default as CreateReport } from './Channels/CreateReport/CreateReport';
 export { default as Alarms } from './Alarms/Alarms';
 export { default as ViewAlarm } from './Alarms/ViewAlarm';
 export { default as CreatePage } from './CreatePage/CreatePage';

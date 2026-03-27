@@ -1,0 +1,91 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.selectWrapper {
+  position: relative;
+}
+
+.selectedOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 2px solid;
+  cursor: pointer;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.selectedOption:hover {
+  opacity: 0.9;
+}
+
+.selectedText {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.chevron {
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.selectedOption:active .chevron {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-left: 4px solid;
+  transition: background 0.15s ease;
+}
+
+.option:hover {
+  background-color: #f5f5f5;
+}
+
+.optionSelected {
+  background-color: #f0f0f0;
+}
+
+.optionDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.optionLabel {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1rem;
+  color: #333;
+}

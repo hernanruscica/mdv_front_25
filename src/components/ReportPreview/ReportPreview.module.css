@@ -1,0 +1,317 @@
+.reportPreview {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.reportHeader {
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.reportHeaderTop {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.reportLogo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.reportHeaderInfo {
+  flex: 1;
+}
+
+.reportBusinessName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.reportBusinessDescription {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.reportBusinessLocation {
+  font-size: 12px;
+  color: #999;
+  margin: 4px 0 0 0;
+}
+
+.reportHeaderBottom {
+  text-align: center;
+}
+
+.reportTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1976d2;
+  margin: 0 0 4px 0;
+}
+
+.reportChannelName {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.reportMeta {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 12px;
+  color: #666;
+}
+
+.reportMetaItem {
+  display: flex;
+  gap: 4px;
+}
+
+.reportSection {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.sectionPlaceholder {
+  background: #fff3e0;
+  border: 1px dashed #ff9800;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sectionIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.placeholderBadge {
+  font-size: 10px;
+  background: #ff9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.placeholderText {
+  color: #e65100;
+  font-style: italic;
+  margin: 0;
+}
+
+.sectionContent {
+  background: white;
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.summaryItem {
+  text-align: center;
+  padding: 12px;
+  background: #f0f4f8;
+  border-radius: 6px;
+}
+
+.summaryLabel {
+  display: block;
+  font-size: 11px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.summaryValue {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.comparisonWrapper {
+  overflow-x: auto;
+}
+
+.comparisonTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 600px;
+}
+
+.comparisonHeader {
+  background: #e3f2fd;
+  color: #1565c0;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px 12px;
+  border-bottom: 2px solid #bbdefb;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.comparisonRow:nth-child(even) {
+  background: #fafafa;
+}
+
+.comparisonRow:hover {
+  background: #f5f5f5;
+}
+
+.comparisonLabel {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  font-weight: 500;
+}
+
+.comparisonValue {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.noData {
+  color: #999;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.countBadge {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.tableHeader {
+  background: #e3f2fd;
+  color: #1565c0;
+  font-weight: 600;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 2px solid #bbdefb;
+}
+
+.tableRow:nth-child(even) {
+  background: #fafafa;
+}
+
+.tableRow:hover {
+  background: #f5f5f5;
+}
+
+.tableCell {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.emptyMessage {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 20px;
+  margin: 0;
+}
+
+.reportFooter {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 24px;
+}
+
+.reportFooter p {
+  font-size: 11px;
+  color: #999;
+  margin: 0;
+}
+
+.exportButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.exportButton:hover {
+  background: #c62828;
+}
+
+.exportButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.exportIcon {
+  width: 20px;
+  height: 20px;
+}
+
+@media print {
+  .reportPreview {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .tableWrapper {
+    overflow-x: visible;
+  }
+}
