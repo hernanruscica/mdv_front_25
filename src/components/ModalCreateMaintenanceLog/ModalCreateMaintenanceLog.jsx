@@ -13,12 +13,15 @@ const ModalCreateMaintenanceLog = ({
   businessUuid,
   dataloggerUuid,
   channelUuid,
+  totalTime,
   onCreateSuccess
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('pending');
   const [priority, setPriority] = useState('medium');
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [hoursUsage, setHoursUsage] = useState('');
 
   const {
     createMaintenanceLog,
@@ -31,6 +34,9 @@ const ModalCreateMaintenanceLog = ({
       setDescription('');
       setStatus('pending');
       setPriority('medium');
+      const today = new Date().toISOString().split('T')[0];
+      setScheduledDate(today);
+      setHoursUsage('');
     }
   }, [isOpen]);
 
@@ -40,13 +46,25 @@ const ModalCreateMaintenanceLog = ({
       return;
     }
 
+    if (scheduledDate && scheduledDate < new Date().toISOString().split('T')[0]) {
+      toast.error('La fecha no puede ser menor a hoy');
+      return;
+    }
+
+    if (hoursUsage && parseFloat(hoursUsage) < totalTime) {
+      toast.error(`Las horas de uso deben ser al menos ${totalTime} hs`);
+      return;
+    }
+
     try {
       const logData = {
         title: title.trim(),
         description: description.trim(),
         type: logType,
         status: logType === 'task' ? status : undefined,
-        priority: priority
+        priority: priority,
+        time_usage: hoursUsage ? parseFloat(hoursUsage) : totalTime,
+        scheduled_date: scheduledDate
       };
 
       const response = await createMaintenanceLog(
@@ -74,6 +92,8 @@ const ModalCreateMaintenanceLog = ({
     setDescription('');
     setStatus('pending');
     setPriority('medium');
+    setScheduledDate('');
+    setHoursUsage('');
     onRequestClose();
   };
 
@@ -119,6 +139,21 @@ const ModalCreateMaintenanceLog = ({
           />
         </div>
 
+        {isTask && (
+          <div className={styles.fieldGroup}>
+            <label className={styles.label}>
+              <img src="/icons/calendar-solid.svg" alt="" className={styles.icon} /> Fecha
+            </label>
+            <input
+              type="date"
+              value={scheduledDate}
+              onChange={(e) => setScheduledDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              className={styles.dateInput}
+            />
+          </div>
+        )}
+
         {(isObservation) &&
           <SelectWithColor
             label="Prioridad"
@@ -129,6 +164,22 @@ const ModalCreateMaintenanceLog = ({
 
         {isTask && (
           <>
+            <div className={styles.fieldGroup}>
+              <label className={styles.label}>
+                <img src="/icons/clock-regular.svg" alt="" className={styles.icon} /> Hs de Uso (actual: {totalTime} hs)
+              </label>
+              <input
+                type="number"
+                value={hoursUsage}
+                onChange={(e) => setHoursUsage(e.target.value)}
+                min={totalTime}
+                step="0.1"
+                placeholder={totalTime}
+                className={styles.input}
+              />
+              <small className={styles.hint}>Ingrese un valor mayor para indicar mantenimiento</small>
+            </div>
+
             <SelectWithColor
               label="Estado"
               options={STATUS_OPTIONS}

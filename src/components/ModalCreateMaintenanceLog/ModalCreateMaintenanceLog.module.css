@@ -46,3 +46,32 @@
   background-color: white;
   cursor: pointer;
 }
+
+.dateInput {
+  font-family: "Montserrat", sans-serif;
+  font-size: 1rem;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: #F6B510;
+  box-shadow: 0 0 0 2px rgba(246, 181, 16, 0.2);
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
+}

@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import Table from '../Table/Table';
 import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
-import CustomTag from '../CustomTag/CustomTag';
 import ModalCreateMaintenanceLog from '../ModalCreateMaintenanceLog/ModalCreateMaintenanceLog';
 import styles from './ChannelMaintenanceLogs.module.css';
 
@@ -60,7 +59,7 @@ const ChannelMaintenanceLogs = ({
       .filter(log => log.type === 'task')
       .map(log => ({
         ...log,
-        fechaFormateada: formatDate(log.created_at),
+        fechaFormateada: formatDate(log.scheduled_date),
         estadoTag: STATUS_MAP[log.status] || log.status,
         onClick: () => onViewLog(log)
       }));

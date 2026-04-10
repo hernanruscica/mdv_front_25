@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useMemo} from 'react';
 import CardInfo from '../CardInfo/CardInfo';
 import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import ButtonsBar from '../ButtonsBar/ButtonsBar';
@@ -15,14 +15,15 @@ const ShowChannelsCards = ({
   alarms, 
   searchTerm,
   onSearchChange,
-  showAddButton = false 
+  showAddButton = false,
+  maintenanceLogs = [] 
 }) => {
 
   const [showArchived, setShowArchived] = useState(false);  
 
- if (!channels) {
-  return <LoadingSpinner message="Cargando datos..." />;
-}
+  if (!channels) {
+   return <LoadingSpinner message="Cargando datos..." />;
+ }
 
   // Determine the base list of channels (active only, or all)
   const sourceChannels = showArchived && channels ? channels : channels.filter(channel => channel.is_active == 1);
@@ -36,6 +37,27 @@ const ShowChannelsCards = ({
     );
   })
   : [];
+
+  // Filtrar tareas pendientes por canal
+  const pendingTasksByChannel = useMemo(() => {
+    if (!maintenanceLogs || maintenanceLogs.length === 0) return {};
+    
+    const today = new Date().toISOString().split('T')[0];
+    const result = {};
+    
+    maintenanceLogs.forEach(log => {
+      if (log.type !== 'task') return;
+      
+      const isPending = log.status === 'pending' || 
+                       (log.scheduled_date && log.scheduled_date > today);
+      
+      if (isPending && log.channel_uuid) {
+        result[log.channel_uuid] = (result[log.channel_uuid] || 0) + 1;
+      }
+    });
+    
+    return result;
+  }, [maintenanceLogs]);
 
 
   const oneChannel = channels ? channels[0] : undefined;
@@ -66,9 +88,6 @@ const ShowChannelsCards = ({
             alarm => alarm.channel_id == channel.uuid
           );
 
-          //console.log('channel 0', channels[0]);
-          
-
           return (
             <CardInfo
               key={channel.uuid}
@@ -95,7 +114,7 @@ const ShowChannelsCards = ({
                       icon="/icons/archive-solid.svg"
                     />
                   )
-                }
+                }                
                 <p className={cardInfoStyles.paragraph}>                 
                   {channel.description}                  
                 </p>
@@ -128,6 +147,12 @@ const ShowChannelsCards = ({
               </div>
             </div>
             <div >
+              {pendingTasksByChannel[channel.uuid] > 0 && (
+                  <div className={styles.pendingTasksBadge}>
+                    <img src="/icons/person-digging-solid.svg" alt="" />
+                    <span>{pendingTasksByChannel[channel.uuid]} tareas pendientes</span>
+                  </div>
+                )}
               {/*
               <div >               
                 {channel.data && channel.data.length > 0 ? (

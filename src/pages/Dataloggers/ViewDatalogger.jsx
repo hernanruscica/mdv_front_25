@@ -16,6 +16,7 @@ import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
 import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 import { useFetchDatalogger } from '../../hooks/useFetchDatalogger';
 import { useDataStore } from '../../store/dataStore';
+import { useMaintenanceLogsStore } from '../../store/maintenanceLogsStore';
 //import GaugeLinear from '../../components/GaugeLinear/GaugeLinear';
 import AlarmLinkCard from '../../components/AlarmLinkCard/AlarmLinkCard';
 
@@ -37,6 +38,12 @@ const ViewDatalogger = () => {
     loadingStates: { fetchDataloggerUsage: isLoadingDataloggerUsage }
   } = useDataStore();
 
+  const {
+    maintenanceLogs,
+    fetchMaintenanceLogs,
+    loadingStates: { fetchMaintenanceLogs: isLoadingMaintenanceLogs }
+  } = useMaintenanceLogsStore();
+
   const { 
     datalogger, 
     isLoadingDatalogger,
@@ -53,6 +60,13 @@ const ViewDatalogger = () => {
     ? DATALOGGER_VIEW_INFO.Owner 
     : DATALOGGER_VIEW_INFO.General;
 
+  // Contar tareas pendientes totales del datalogger
+  const totalPendingTasks = maintenanceLogs?.filter(log => {
+    if (log.type !== 'task') return false;
+    const today = new Date().toISOString().split('T')[0];
+    return log.status === 'pending' || (log.scheduled_date && log.scheduled_date > today);
+  }).length || 0;
+
   useEffect(() => {
     const loadDataloggerUsage = async () => {       
       if (dataloggerId && businessUuid) {
@@ -60,7 +74,13 @@ const ViewDatalogger = () => {
       }
     };
     loadDataloggerUsage();
-  }, [dataloggerId, businessUuid]);  
+  }, [dataloggerId, businessUuid]);
+
+  useEffect(() => {
+    if (businessUuid && dataloggerId) {
+      fetchMaintenanceLogs(businessUuid, dataloggerId);
+    }
+  }, [businessUuid, dataloggerId]);  
 
   if (isLoadingDatalogger || isCreatingDatalogger || isUpdattingDatalogger || isLoadingDataloggerUsage) {
     return <LoadingSpinner message="Cargando datos..." />;
@@ -196,6 +216,12 @@ const ViewDatalogger = () => {
               ) : 'No hay alarmas programadas'
               }
             </p>
+            {totalPendingTasks > 0 && (
+              <div className={styles.pendingTasksBadge}>
+                <img src="/icons/person-digging-solid.svg" alt="" />
+                <span>{totalPendingTasks} tareas pendientes en total</span>
+              </div>
+            )}
           </div>
         </CardImage>
       </div>
@@ -212,6 +238,7 @@ const ViewDatalogger = () => {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
+          maintenanceLogs={maintenanceLogs}
         />
       ) : 
       (<>

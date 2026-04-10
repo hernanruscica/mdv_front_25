@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
@@ -37,6 +37,11 @@ const ViewChannel = () => {
   const [alarmLogsComunicationFailure, setAlarmLogsComunicationFailure] = useState([]);
   const [maintenanceLogModalOpen, setMaintenanceLogModalOpen] = useState(false);
   const [selectedMaintenanceLog, setSelectedMaintenanceLog] = useState(null);
+  const maintenanceRef = useRef(null);
+
+  const scrollToMaintenance = () => {
+    maintenanceRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const { fetchChannelById, 
           selectedChannel, 
@@ -130,6 +135,12 @@ const ViewChannel = () => {
         url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
       />
       <BtnCallToAction
+        text="Ver Mantenimiento"
+        icon="person-digging-solid.svg"
+        type="normal"
+        onClick={scrollToMaintenance}
+      />
+      <BtnCallToAction
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
@@ -149,6 +160,12 @@ const ViewChannel = () => {
         icon="chart-line-solid.svg"
         type="normal"
         url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
+      />
+      <BtnCallToAction
+        text="Ver Mantenimiento"
+        icon="person-digging-solid.svg"
+        type="normal"
+        onClick={scrollToMaintenance}
       />
       <BtnCallToAction
         text="Desarchivar"
@@ -238,20 +255,22 @@ const ViewChannel = () => {
         />
       )}
 
-      <Title2 text="Mantenimiento" type="mantenimiento"/>
+      <div ref={maintenanceRef}>
+        <Title2 text="Mantenimiento" type="mantenimiento"/>
 
-      <ChannelMaintenanceLogs
-        businessUuid={businessUuid}
-        dataloggerUuid={selectedChannel?.datalogger.uuid}
-        channelUuid={channelId}
-        totalTime={channelUsage?.totalData?.total_time_on_hours}
-        maintenanceLogs={maintenanceLogs}
-        onViewLog={handleViewMaintenanceLog}
-        showAddButton= {userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
-        onCreateSuccess={() => {
-          fetchMaintenanceLogs(businessUuid, selectedChannel?.datalogger.uuid, channelId);
-        }}
-      />
+        <ChannelMaintenanceLogs
+          businessUuid={businessUuid}
+          dataloggerUuid={selectedChannel?.datalogger.uuid}
+          channelUuid={channelId}
+          totalTime={channelUsage?.totalData?.total_time_on_hours}
+          maintenanceLogs={maintenanceLogs}
+          onViewLog={handleViewMaintenanceLog}
+          showAddButton= {userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
+          onCreateSuccess={() => {
+            fetchMaintenanceLogs(businessUuid, selectedChannel?.datalogger.uuid, channelId);
+          }}
+        />
+      </div>
 
       <ModalViewMaintenanceLog
         isOpen={maintenanceLogModalOpen}
