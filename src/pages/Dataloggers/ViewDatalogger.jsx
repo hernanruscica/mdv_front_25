@@ -159,6 +159,7 @@ const ViewDatalogger = () => {
                   <AlarmLinkCard 
                     to={`/panel/ubicaciones/${alarm.business_uuid}/dataloggers/${alarm.datalogger_uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`} 
                     alarm={alarm}
+                    key={alarm.uuid}
                     currentValue={currentValue}
                     currentMin={currentMin} 
                     currentMax={currentMax}               

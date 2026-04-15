@@ -14,11 +14,21 @@ const getPriorityLabel = (priority) => {
   return option ? option.label : priority;
 };
 
-const ReportPreview = ({ reportData, selectedSections, dateRange }) => {
+const getTipoCorte = (energia) => {
+  return energia === 1 ? 'Corte de 1 fase' : 'Corte de las 3 fases';
+};
+
+const ReportPreview = ({ reportData, selectedSections, dateRange, admins }) => {
   if (!reportData) return null;
 
-  const { channelData, summary, alarmLogs, maintenanceLogs, hasPeriodData } = reportData;
+  const { channelData, summary, alarmLogs, maintenanceLogs, hasPeriodData, energyIncidents } = reportData;
   const hasDateRange = dateRange.start || dateRange.end;
+
+  const dateRangeInfo = {
+    ...dateRange,
+    firstDate: summary.firstDate,
+    lastDate: summary.lastDate
+  };
 
   const maintenanceTasks = maintenanceLogs.filter(log => log.type === 'task');
   const maintenanceObservations = maintenanceLogs.filter(log => log.type === 'observation');
@@ -37,6 +47,12 @@ const ReportPreview = ({ reportData, selectedSections, dateRange }) => {
       minute: '2-digit'
     });
   };
+
+  const energyIncidentsFormatted = (energyIncidents || []).map(incident => ({
+    ...incident,
+    tipoCorte: getTipoCorte(incident.energia),
+    fechaFormateada: incident.fecha ? formatDate(incident.fecha) : '-'
+  }));
 
   const formatNumber = (num) => {
     if (num === null || num === undefined) return '-';
@@ -94,9 +110,29 @@ const ReportPreview = ({ reportData, selectedSections, dateRange }) => {
     }
   ];
 
+  const energyColumns = [
+    {
+      header: 'Fecha',
+      accessor: 'fechaFormateada'
+    },
+    {
+      header: 'Tipo de corte',
+      accessor: 'tipoCorte'
+    },
+    {
+      header: 'Descripción',
+      accessor: 'texto'
+    },
+    {
+      header: 'Energía',
+      accessor: 'energia',
+      render: (row) => row.energia === 1 ? '1' : '0'
+    }
+  ];
+
   return (
     <div className={styles.reportPreview}>
-      <ReportHeader channelData={channelData} dateRange={dateRange} />
+      <ReportHeader channelData={channelData} dateRange={dateRangeInfo} admins={admins} />
 
       {selectedSections.totalUsageHours && (
         <ReportSection title="Resumen de Uso">
@@ -132,6 +168,12 @@ const ReportPreview = ({ reportData, selectedSections, dateRange }) => {
                   {porcentageOnAlarms.length}
                 </span>
               </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Fallos de energía</span>
+                <span className={styles.summaryValue}>
+                  {summary.energyFailuresCount || 0}
+                </span>
+              </div>
             </div>
           ) : (
             <div className={styles.summaryGrid}>
@@ -165,6 +207,12 @@ const ReportPreview = ({ reportData, selectedSections, dateRange }) => {
                   {porcentageOnAlarms.length}
                 </span>
               </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Fallos de energía</span>
+                <span className={styles.summaryValue}>
+                  {summary.energyFailuresCount || 0}
+                </span>
+              </div>
             </div>
           )}
         </ReportSection>
@@ -196,45 +244,6 @@ const ReportPreview = ({ reportData, selectedSections, dateRange }) => {
         </ReportSection>
       )}
 
-      {selectedSections.comunicationFailures && (
-        <ReportSection title="Fallas de Comunicación">
-          <div className={styles.countBadge}>
-            Total: {comunicationFailures.length} eventos
-          </div>
-          <ReportDataTable
-            columns={[
-              {
-                header: 'Fecha',
-                accessor: 'triggered_at',
-                render: (row) => formatDate(row.triggered_at)
-              },
-              {
-                header: 'Mensaje',
-                accessor: 'message'
-              },
-              {
-                header: 'Duración',
-                accessor: 'triggered_value',
-                render: (row) => row.triggered_value ? `${row.triggered_value.toFixed(2)} min` : '-'
-              }
-            ]}
-            data={comunicationFailures}
-            emptyMessage="No hay fallas de comunicación en el período seleccionado"
-          />
-        </ReportSection>
-      )}
-
-      {/* PENDIENTE: Implementar Fallos de Energía */}
-      {/* {selectedSections.energyFailures && (
-        <ReportSection title="Fallos de Energía" isPlaceholder={summary.energyFailuresPlaceholder}>
-          {summary.energyFailuresPlaceholder ? (
-            <p className={styles.placeholderText}>
-              Este módulo se encuentra en desarrollo. Próximamente se integrará la detección de fallos de energía.
-            </p>
-          ) : null}
-        </ReportSection>
-      )} */}
-
       {selectedSections.alarmTriggers && (
         <ReportSection title="Funcionamientos fuera de rango">
           <div className={styles.countBadge}>
@@ -244,6 +253,19 @@ const ReportPreview = ({ reportData, selectedSections, dateRange }) => {
             columns={porcentageOnColumns}
             data={porcentageOnAlarms}
             emptyMessage="No hay funcionamientos fuera de rango en el período seleccionado"
+          />
+        </ReportSection>
+      )}
+
+      {selectedSections.energyFailures && (
+        <ReportSection title="Fallos de Energía">
+          <div className={styles.countBadge}>
+            Total: {summary.energyFailuresCount || 0} eventos
+          </div>
+          <ReportDataTable
+            columns={energyColumns}
+            data={energyIncidentsFormatted}
+            emptyMessage="No hay incidentes de energía en el período seleccionado"
           />
         </ReportSection>
       )}

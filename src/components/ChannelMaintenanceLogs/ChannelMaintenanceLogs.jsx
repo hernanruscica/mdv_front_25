@@ -26,6 +26,20 @@ const formatDate = (dateString) => {
   });
 };
 
+const formatNotificacionEnviada = (dateString) => {
+  if (!dateString || dateString === null) {
+    return 'No enviada todavía';
+  }
+  const date = new Date(dateString);
+  return `enviada el ${date.toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })}`;
+};
+
 const ChannelMaintenanceLogs = ({ 
   businessUuid, 
   dataloggerUuid, 
@@ -44,7 +58,8 @@ const ChannelMaintenanceLogs = ({
     { label: 'TITULO', accessor: 'title' },
     { label: 'FECHA', accessor: 'fechaFormateada' },
     { label: 'HS DE USO', accessor: 'time_usage' },
-    { label: 'ESTADO', accessor: 'estadoTag' }
+    { label: 'ESTADO', accessor: 'estadoTag' },
+    { label: 'NOTIFICACIÓN', accessor: 'notificacionEnviada' }
   ], []);
 
   const observationColumns = useMemo(() => [
@@ -61,6 +76,7 @@ const ChannelMaintenanceLogs = ({
         ...log,
         fechaFormateada: formatDate(log.scheduled_date),
         estadoTag: STATUS_MAP[log.status] || log.status,
+        notificacionEnviada: formatNotificacionEnviada(log.last_notification_sent_at),
         onClick: () => onViewLog(log)
       }));
   }, [maintenanceLogs, onViewLog]);

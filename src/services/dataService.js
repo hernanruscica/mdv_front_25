@@ -81,4 +81,22 @@ export const dataService = {
       return { success: false, data: null };
     }
   },
+
+  // /data/energyincidents/businesses/:businessUuid/:dataloggerUuid?start='...'&end='...'
+  getEnergyIncidents: async (businessUuid, dataloggerUuid, start, end) => {
+    try {
+      const params = [];
+      if (start) params.push(`start='${start}'`);
+      if (end) params.push(`end='${end}'`);
+      const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+      
+      const response = await axiosClient.get(
+        `/api/data/energyincidents/businesses/${businessUuid}/${dataloggerUuid}${queryString}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener incidentes de energía:', error);
+      return { success: false, data: [], count: 0 };
+    }
+  },
 };

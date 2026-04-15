@@ -1,8 +1,9 @@
 import styles from './ReportPreview.module.css';
 
-const ReportHeader = ({ channelData, dateRange }) => {
+const ReportHeader = ({ channelData, dateRange, admins }) => {
   const business = channelData?.business;
   const channelName = channelData?.name;
+  const dataloggerName = channelData?.datalogger?.name;
   const generatedDate = new Date().toLocaleDateString('es-AR', {
     day: '2-digit',
     month: '2-digit',
@@ -11,6 +12,13 @@ const ReportHeader = ({ channelData, dateRange }) => {
 
   const formatDateRange = () => {
     if (!dateRange.start && !dateRange.end) {
+      if (dateRange.firstDate) {
+        const first = new Date(dateRange.firstDate).toLocaleDateString('es-AR');
+        const last = dateRange.lastDate 
+          ? new Date(dateRange.lastDate).toLocaleDateString('es-AR')
+          : 'Ahora';
+        return `Desde el inicio de toma de datos (${first}) al ${last}`;
+      }
       return 'Desde el inicio de toma de datos';
     }
     const start = dateRange.start
@@ -39,6 +47,16 @@ const ReportHeader = ({ channelData, dateRange }) => {
             <p className={styles.reportBusinessLocation}>
               {business.street && `${business.street}, `}
               {business.city}
+            </p>
+          )}
+          {dataloggerName && (
+            <p className={styles.reportDatalogger}>
+              <strong>Datalogger:</strong> {dataloggerName}
+            </p>
+          )}
+          {admins && admins.length > 0 && (
+            <p className={styles.reportAdmins}>
+              <strong>Administradores:</strong> {admins.join(', ')}
             </p>
           )}
         </div>

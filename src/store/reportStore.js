@@ -9,7 +9,6 @@ export const useReportStore = create((set) => ({
   selectedSections: {
     totalUsageHours: true,
     maintenance: true,
-    comunicationFailures: true,
     alarmTriggers: true,
     energyFailures: true
   },

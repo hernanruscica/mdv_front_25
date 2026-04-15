@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../../../store/authStore';
 import { useReportStore } from '../../../store/reportStore';
 import { useChannelsStore } from '../../../store/channelsStore';
+import { useUsersStore } from '../../../store/usersStore';
 import { LoadingSpinner } from '../../../components/LoadingSpinner/LoadingSpinner';
 import BreadcrumbAuto from '../../../components/Breadcrumb/BreadcrumbAuto';
 import { Title1 } from '../../../components/Title1/Title1';
@@ -23,9 +24,8 @@ const DATE_PRESETS = [
 const SECTIONS = [
   { key: 'totalUsageHours', label: 'Resumen de Uso' },
   { key: 'maintenance', label: 'Mantenimientos (tareas y observaciones)' },
-  { key: 'comunicationFailures', label: 'Fallas de comunicación' },
   { key: 'alarmTriggers', label: 'Funcionamientos fuera de rango' },
-  { key: 'energyFailures', label: 'Fallos de energía (pendiente)' }
+  { key: 'energyFailures', label: 'Fallos de energía' }
 ];
 
 const CreateReport = () => {
@@ -52,6 +52,11 @@ const CreateReport = () => {
     loadingStates: { fetchChannel: isLoadingChannel }
   } = useChannelsStore();
 
+  const {
+    users,
+    fetchUsers
+  } = useUsersStore();
+
   const channelFirstDate = selectedChannel?.totalData?.first_date;
   
   const getMinDate = () => {
@@ -70,6 +75,7 @@ const CreateReport = () => {
   useEffect(() => {
     if (businessUuid && channelId) {
       fetchChannelById(channelId, businessUuid);
+      fetchUsers(user, businessUuid);
     }
     return () => clearReport();
   }, [businessUuid, channelId]);
@@ -166,6 +172,12 @@ const CreateReport = () => {
   if (isLoadingChannel) {
     return <LoadingSpinner message="Cargando datos del canal..." />;
   }
+
+  const admins = users
+    ?.filter(us => us?.businesses_roles?.some(
+      br => br.uuid === businessUuid && (br.role === 'Administrator' || br.role === 'Owner')
+    ))
+    ?.map(us => `${us.first_name} ${us.last_name}`);
 
   return (
     <div className={styles.container}>
@@ -264,6 +276,7 @@ const CreateReport = () => {
                   reportData={reportData}
                   selectedSections={selectedSections}
                   dateRange={dateRange}
+                  admins={admins}
                 />
               </div>
             </div>

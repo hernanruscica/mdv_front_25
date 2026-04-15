@@ -19,11 +19,16 @@ const filterByDateRange = (items, start, end) => {
 export const reportService = {
   getReportData: async (businessUuid, channelUuid, dataloggerUuid, start, end) => {
     try {
-      const [channelData, maintenanceResponse, alarmLogs, periodResponse] = await Promise.all([
-        dataService.getChannelUsage(businessUuid, dataloggerUuid, channelUuid),
+      const channelData = await dataService.getChannelUsage(businessUuid, dataloggerUuid, channelUuid);
+      
+      const energyStartDate = start || channelData?.totalData?.first_date;
+      const energyEndDate = end || new Date().toISOString();
+
+      const [maintenanceResponse, alarmLogs, periodResponse, energyIncidentsResponse] = await Promise.all([
         maintenanceLogsService.getAllByChannel(businessUuid, dataloggerUuid, channelUuid),
         alarmLogsService.getByDataloggerId(businessUuid, dataloggerUuid),
-        dataService.getTotalOnTime(businessUuid, channelUuid, start, end)
+        dataService.getTotalOnTime(businessUuid, channelUuid, start, end),
+        dataService.getEnergyIncidents(businessUuid, dataloggerUuid, energyStartDate, energyEndDate)
       ]);
 
       const filteredMaintenanceLogs = filterByDateRange(
@@ -47,6 +52,9 @@ export const reportService = {
       const hasPeriodData = periodResponse?.success && periodResponse.data !== null;
       const periodData = hasPeriodData ? periodResponse.data : null;
 
+      const energyIncidents = energyIncidentsResponse?.data || [];
+      const energyFailuresCount = energyIncidentsResponse?.count || 0;
+
       return {
         channelData,
         maintenanceLogs: filteredMaintenanceLogs,
@@ -54,6 +62,7 @@ export const reportService = {
         alarmLogs: filteredAlarmLogs,
         periodData,
         hasPeriodData,
+        energyIncidents,
         summary: {
           totalUsageHours: channelData?.totalData?.total_time_on_hours || 0,
           avgFunctioning: channelData?.totalData?.average_usage_percentage || 0,
@@ -66,8 +75,7 @@ export const reportService = {
           periodRegistersQuantity: periodData?.registers_quantity || 0,
           comunicationFailuresCount: comunicationFailures.length,
           alarmTriggersCount: alarmTriggers.length,
-          energyFailuresCount: null,
-          energyFailuresPlaceholder: true
+          energyFailuresCount: energyFailuresCount
         },
         details: {
           comunicationFailures,
