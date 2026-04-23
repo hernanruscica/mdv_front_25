@@ -3,7 +3,7 @@
   padding: 24px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-width: 800px;
+  /* max-width: 900px; */
   margin: 0 auto;
 }
 
@@ -314,4 +314,41 @@
   .tableWrapper {
     overflow-x: visible;
   }
+
+  .reportChartWrapper {
+    width: 297mm;
+    height: 180mm;
+    page-break-inside: avoid;
+    page-break-after: always;
+  }
+
+  .reportChartWrapper :global(.view-chart-footer) {
+    display: none !important;
+  }
+
+  .reportChartWrapper :global(.view-chart-body) {
+    height: 150mm !important;
+  }
+
+  .reportChartWrapper :global(.view_chart_actions) {
+    display: none !important;
+  }
+}
+
+.reportChartWrapper {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+}
+
+.reportDatalogger {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.reportAdmins {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
 }

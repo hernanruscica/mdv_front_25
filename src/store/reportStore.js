@@ -8,6 +8,7 @@ export const useReportStore = create((set) => ({
   dateRange: { start: null, end: null },
   selectedSections: {
     totalUsageHours: true,
+    chart: true,
     maintenance: true,
     alarmTriggers: true,
     energyFailures: true

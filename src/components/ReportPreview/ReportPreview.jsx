@@ -1,6 +1,8 @@
 import ReportHeader from './ReportHeader';
 import ReportSection from './ReportSection';
 import ReportDataTable from './ReportDataTable';
+import ViewChart from '../ViewChart/ViewChart';
+import { RANGE_KEYS } from '../ViewChart/constants/chartRanges';
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from '../../utils/maintenanceLogOptions';
 import styles from './ReportPreview.module.css';
 
@@ -18,7 +20,7 @@ const getTipoCorte = (energia) => {
   return energia === 1 ? 'Corte de 1 fase' : 'Corte de las 3 fases';
 };
 
-const ReportPreview = ({ reportData, selectedSections, dateRange, admins }) => {
+const ReportPreview = ({ reportData, selectedSections, dateRange, admins, showChart = true }) => {
   if (!reportData) return null;
 
   const { channelData, summary, alarmLogs, maintenanceLogs, hasPeriodData, energyIncidents } = reportData;
@@ -130,9 +132,39 @@ const ReportPreview = ({ reportData, selectedSections, dateRange, admins }) => {
     }
   ];
 
+  const currentAlarmsLogs = porcentageOnAlarms.map(log => ({
+    uuid: log.alarm_uuid,
+    logs: [log]
+  }));
+
   return (
     <div className={styles.reportPreview}>
       <ReportHeader channelData={channelData} dateRange={dateRangeInfo} admins={admins} />
+
+      {showChart && selectedSections.chart && (
+        <ReportSection title="Gráfico de Funcionamiento">
+          <div className={styles.reportChartWrapper}>
+            <ViewChart
+              businessUuid={channelData.business_uuid}
+              channelUuid={channelData.uuid}
+              title={`Datos del canal '${channelData.name}'`}
+              subtitle={`Integración: ${channelData.averaging_period} minutos`}
+              average_period={channelData.averaging_period}
+              availablePresets={[
+                RANGE_KEYS.LAST_HOUR,
+                RANGE_KEYS.LAST_12H,
+                RANGE_KEYS.LAST_24H,
+                RANGE_KEYS.LAST_WEEK,
+                RANGE_KEYS.LAST_MONTH,
+                RANGE_KEYS.LAST_6_MONTHS,
+                RANGE_KEYS.LAST_YEAR
+              ]}
+              alarmLogs={currentAlarmsLogs}
+              alarmLogsComunicationFailure={comunicationFailures}
+            />
+          </div>
+        </ReportSection>
+      )}
 
       {selectedSections.totalUsageHours && (
         <ReportSection title="Resumen de Uso">

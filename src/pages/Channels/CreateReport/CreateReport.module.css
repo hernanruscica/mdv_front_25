@@ -1,5 +1,6 @@
 .container {
-  max-width: 1200px;
+  /* max-width: 1200px; */
+  width: 100%;
   margin: 0 auto;
   padding: 20px;
 }
@@ -218,6 +219,10 @@
   background: #1565c0;
 }
 
+.chartSectionContainer{
+  padding: 24px;
+}
+
 @media print {
   .formSection {
     display: none;
@@ -231,4 +236,15 @@
   .previewHeader {
     display: none;
   }
+
+  .chartSectionContainer {
+    page-break-after: always;
+  }
+}
+
+.chartSectionContainer {
+  margin-top: 24px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
 }

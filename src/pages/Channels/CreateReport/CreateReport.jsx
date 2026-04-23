@@ -9,6 +9,8 @@ import BreadcrumbAuto from '../../../components/Breadcrumb/BreadcrumbAuto';
 import { Title1 } from '../../../components/Title1/Title1';
 import ReportPreview from '../../../components/ReportPreview/ReportPreview';
 import ReportExportButton from '../../../components/ReportPreview/ReportExportButton';
+import ViewChart from '../../../components/ViewChart/ViewChart';
+import { RANGE_KEYS } from '../../../components/ViewChart/constants/chartRanges';
 import { GetUserCurrentRole } from '../../../utils/userRoles';
 import styles from './CreateReport.module.css';
 
@@ -23,6 +25,7 @@ const DATE_PRESETS = [
 
 const SECTIONS = [
   { key: 'totalUsageHours', label: 'Resumen de Uso' },
+  { key: 'chart', label: 'Gráfico de funcionamiento' },
   { key: 'maintenance', label: 'Mantenimientos (tareas y observaciones)' },
   { key: 'alarmTriggers', label: 'Funcionamientos fuera de rango' },
   { key: 'energyFailures', label: 'Fallos de energía' }
@@ -30,7 +33,8 @@ const SECTIONS = [
 
 const CreateReport = () => {
   const { businessUuid, dataloggerId, channelId } = useParams();
-  const reportRef = useRef(null);
+  const reportContentRef = useRef(null);
+  const chartSectionRef = useRef(null);
 
   const user = useAuthStore(state => state.user);
   const userCurrentRole = GetUserCurrentRole(user, businessUuid);
@@ -179,6 +183,16 @@ const CreateReport = () => {
     ))
     ?.map(us => `${us.first_name} ${us.last_name}`);
 
+  const currentAlarmsLogs = (reportData?.alarmLogs || [])
+    .filter(log => log.alarm_type === 'porcentage_on' && log.channel_uuid === channelId && log.triggered === 1)
+    .map(log => ({
+      uuid: log.alarm_uuid,
+      logs: [log]
+    }));
+
+  const alarmLogsComunicationFailure = (reportData?.alarmLogs || [])
+    .filter(log => log.alarm_type === 'comunication_failure' && log.triggered === 1);
+
   return (
     <div className={styles.container}>
       <BreadcrumbAuto />
@@ -268,17 +282,43 @@ const CreateReport = () => {
           <div className={styles.previewSection}>
             <div className={styles.previewHeader}>
               <h2 className={styles.sectionTitle}>Previsualización</h2>
-              <ReportExportButton reportRef={reportRef} />
+              <ReportExportButton 
+                reportContentRef={reportContentRef} 
+                chartSectionRef={chartSectionRef} 
+              />
             </div>
             <div className={styles.previewContainer}>
-              <div ref={reportRef}>
+              <div ref={reportContentRef}>
                 <ReportPreview
                   reportData={reportData}
                   selectedSections={selectedSections}
                   dateRange={dateRange}
                   admins={admins}
+                  showChart={false}
                 />
               </div>
+              {selectedSections.chart && (
+                <div ref={chartSectionRef} className={styles.chartSectionContainer}>
+                  <ViewChart
+                    businessUuid={businessUuid}
+                    channelUuid={channelId}
+                    title={`Datos del canal '${selectedChannel?.name}'`}
+                    subtitle={`Integración: ${selectedChannel?.averaging_period} minutos`}
+                    average_period={selectedChannel?.averaging_period}
+                    availablePresets={[
+                      RANGE_KEYS.LAST_HOUR,
+                      RANGE_KEYS.LAST_12H,
+                      RANGE_KEYS.LAST_24H,
+                      RANGE_KEYS.LAST_WEEK,
+                      RANGE_KEYS.LAST_MONTH,
+                      RANGE_KEYS.LAST_6_MONTHS,
+                      RANGE_KEYS.LAST_YEAR
+                    ]}
+                    alarmLogs={currentAlarmsLogs}
+                    alarmLogsComunicationFailure={alarmLogsComunicationFailure}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
