@@ -235,7 +235,7 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
 
   // 3. HANDLERS para el nuevo modal
   const handleOpenUnsubscribeModal = (user) => {
-    console.log('Selected user to unsubscribe:', user);
+    // console.log('Selected user to unsubscribe:', user);
     setSelectedUserToUnsubscribe(user);
     setModalUnsubscribeOpen(true);
   };
@@ -246,7 +246,7 @@ if (isLoadingAlarm || isLoadingAlarmLogs || isLoadingChannelUsage || isLoadingAl
   };
 
   const handleConfirmUnsubscribe = async () => {
-    console.log('Confirming unsubscribe for user:', selectedUserToUnsubscribe);
+    // console.log('Confirming unsubscribe for user:', selectedUserToUnsubscribe);
     const response = await unsubscribeUserFromAlarm(
       businessUuid,
       selectedAlarm.uuid,

@@ -42,7 +42,7 @@ const ModalViewAlarmLog = ({ isOpen, onRequestClose, evento, businessUuid, solut
   }, [solutions, isCreatingSolution]); 
     //console.log('solutions', solutions);
     //console.log('user', user);
-    console.log('evento', evento);
+    // console.log('evento', evento);
 
 
  
@@ -96,8 +96,8 @@ const ModalViewAlarmLog = ({ isOpen, onRequestClose, evento, businessUuid, solut
 
   // Verificamos si el texto está vacío o solo tiene espacios
   const isTextEmpty = !solutionText || !solutionText.trim();
-//console.log('evento', evento);
-console.log('user', user);
+// console.log('evento', evento);
+// console.log('user', user);
 
 
   return (

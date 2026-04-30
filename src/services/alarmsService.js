@@ -35,7 +35,7 @@ export const alarmsService = {
   },
   //{{api}}/businesses/{{business_mdvsrl}}/alarms/user/{{user_norberto}}
   getAllByUser: async (userId, locationId) => {
-    console.log('getAllByUser');
+    // console.log('getAllByUser');
     
     try {
       const { data } = await axiosClient.get(`/api/businesses/${locationId}/alarms/user/${userId}`);

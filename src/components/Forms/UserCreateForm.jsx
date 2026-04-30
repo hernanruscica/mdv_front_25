@@ -72,7 +72,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
         const loadUserLocationUsers = async () => {
           if (userStore) {
             const currentUserLocations = await fetchLocations(userStore);
-            console.log('currentUserLocations', currentUserLocations);
+            // console.log('currentUserLocations', currentUserLocations);
           }
 
         }

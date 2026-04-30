@@ -134,12 +134,12 @@ const ViewChart = ({
     const targetDate = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
     const endDate = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
     
-    console.log('📅 [handleDayClick]', {
-      clicked: clickedDate.toISOString(),
-      day: day,
-      start: targetDate.toISOString(),
-      end: endDate.toISOString()
-    });
+    // console.log('📅 [handleDayClick]', {
+    //   clicked: clickedDate.toISOString(),
+    //   day: day,
+    //   start: targetDate.toISOString(),
+    //   end: endDate.toISOString()
+    // });
     
     setZoomedDay(targetDate);
     fetchDataForRange('CUSTOM_DAY_ZOOM', targetDate, endDate);
@@ -385,11 +385,11 @@ const ViewChart = ({
           if (dataType === 'daily') {
             // Para datos diarios, interpretar como medianoche UTC
             finalDate = Date.UTC(y, m - 1, d, 0, 0, 0, 0);
-            console.log('📊 [Daily Data Sample]', {
-                  original: rawData[0],
-                  mapped: mappedData[0],
-                  timezone: timezoneOffset
-                });
+            // console.log('📊 [Daily Data Sample]', {
+            //       original: rawData[0],
+            //       mapped: mappedData[0],
+            //       timezone: timezoneOffset
+            //     });
           } else {
             // Para otros tipos, usar Date normal
             finalDate = new Date(y, m - 1, d).getTime();

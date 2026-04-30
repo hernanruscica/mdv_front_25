@@ -121,7 +121,7 @@ export const maintenanceLogsService = {
   
   getAllByChannel: async (businessUuid, dataloggerUuid, channelUuid) => {
     try {
-      console.log(`SERVICE ${BASE_URL}/${businessUuid}/dataloggers/${dataloggerUuid}/channels/${channelUuid}/maintenance-logs`)
+      // console.log(`SERVICE ${BASE_URL}/${businessUuid}/dataloggers/${dataloggerUuid}/channels/${channelUuid}/maintenance-logs`)
       const { data } = await axiosClient.get(
         `${BASE_URL}/${businessUuid}/dataloggers/${dataloggerUuid}/channels/${channelUuid}/maintenance-logs`
       );

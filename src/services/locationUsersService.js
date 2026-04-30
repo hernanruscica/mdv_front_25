@@ -11,7 +11,7 @@ export const locationUsersService = {
     
     try {
       const { data } = await axiosClient.post(`/api/businesses/${businessUuid}/user-businesses`, formData)
-      console.log('locationsUserResponseData',data);
+      // console.log('locationsUserResponseData',data);
       return data;
     } catch (error) {
         console.error('Create locationUser error', error);
@@ -30,7 +30,7 @@ export const locationUsersService = {
     
     try {
       const { data } = await axiosClient.put(`/api/businesses/${businessUuid}/user-businesses/${businessUserUuid}`, formData);
-      console.log('locationsUserResponseData',data);
+      // console.log('locationsUserResponseData',data);
       return data;
     } catch (error) {
         console.error('update locationUser error', error);

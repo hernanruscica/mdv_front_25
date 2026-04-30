@@ -70,11 +70,11 @@ export const useUsersStore = create((set, get) => ({
   updateUser: async (uuid, userData) => {    
     set(state => ({ loadingStates: { ...state.loadingStates, updateUser: true }, error: null }));
     try {
-      console.log('users Store update');      
-      console.log(uuid, userData) ;
+      // console.log('users Store update');      
+      // console.log(uuid, userData);
       
       const response = await usersService.update(uuid, userData);
-      console.log('Response from usersService.update in usersStore:', response); // Added log
+      // console.log('Response from usersService.update in usersStore:', response);
       
       return response;
       

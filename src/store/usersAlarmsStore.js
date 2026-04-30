@@ -144,7 +144,7 @@ export const useUsersAlarmsStore = create((set) => ({
     }
   },
   unsubscribeUserFromAlarm: async (businessUuid, alarmUuid, userAlarmUuid) => {
-    console.log('unsubscribe store');
+    // console.log('unsubscribe store');
     
     set(state => ({
       loadingStates: { ...state.loadingStates, unsubscribeUserFromAlarm: true },

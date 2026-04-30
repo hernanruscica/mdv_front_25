@@ -16,7 +16,7 @@ export const useMaintenanceLogsStore = create((set) => ({
   error: null,
 
   fetchMaintenanceLogs: async (businessUuid, dataloggerUuid, channelUuid = null) => {
-    console.log("businessUuid, dataloggerUuid, channelUuid --- STORE", businessUuid, dataloggerUuid, channelUuid)
+    // console.log("businessUuid, dataloggerUuid, channelUuid --- STORE", businessUuid, dataloggerUuid, channelUuid)
     set(state => ({
       loadingStates: { ...state.loadingStates, fetchMaintenanceLogs: true },
       error: null

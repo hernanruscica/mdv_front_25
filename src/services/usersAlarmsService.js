@@ -11,7 +11,7 @@ export const usersAlarmsService = {
     
     try {
       const { data } = await axiosClient.post(`/api/businesses/${businessUuid}/user-businesses`, formData)
-      console.log('locationsUserResponseData',data);
+      // console.log('locationsUserResponseData',data);
       return data;
     } catch (error) {
         console.error('Create locationUser error', error);
@@ -30,7 +30,7 @@ export const usersAlarmsService = {
     
     try {
       const { data } = await axiosClient.put(`/api/businesses/${businessUuid}/user-businesses/${businessUserUuid}`, formData);
-      console.log('locationsUserResponseData',data);
+      // console.log('locationsUserResponseData',data);
       return data;
     } catch (error) {
         console.error('update locationUser error', error);
@@ -86,12 +86,12 @@ export const usersAlarmsService = {
   },
 
   unsubscribeUserFromAlarm: async (businessUuid, userAlarmUuid) => {
-    console.log('unsubscribe service');
+    // console.log('unsubscribe service');
     try {
       const { data } = await axiosClient.delete(
         `/api/businesses/${businessUuid}/users-alarms/${userAlarmUuid}/hard`
       );
-      console.log('Unsubscribe response data:', data);
+      // console.log('Unsubscribe response data:', data);
       return data;
     } catch (error) {
       console.error('Unsubscribe user from alarm error:', error);

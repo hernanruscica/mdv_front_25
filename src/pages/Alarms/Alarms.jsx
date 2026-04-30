@@ -71,18 +71,18 @@ const ViewAlarms = () => {
   const handleOpenSubscribeModal = async () => {
     // Obtener los UUIDs de las alarmas ya suscritas
     const subscribedAlarmIds = (alarms || []).map(a => a.alarm_uuid || a.uuid);
-    console.log('suscribedAlarmIds:', subscribedAlarmIds);
+    // console.log('suscribedAlarmIds:', subscribedAlarmIds);
     
     const alarmsData = await fetchAlarmsForSubscription(currentBusinessUuid);
-    console.log('total alarms from business:', alarmsData?.length);
-    console.log('subscribed alarms:', alarms?.length);
+    // console.log('total alarms from business:', alarmsData?.length);
+    // console.log('subscribed alarms:', alarms?.length);
     
     // Filtrar las alarmas que ya están suscritas
     const availableForSubscription = (alarmsData || []).filter(alarm => 
       !subscribedAlarmIds.includes(alarm.uuid) && 
       !subscribedAlarmIds.includes(alarm.alarm_uuid)
     );
-    console.log('available for subscription:', availableForSubscription?.length);
+    // console.log('available for subscription:', availableForSubscription?.length);
     
     setAvailableAlarmsForSubscription(availableForSubscription);
     setModalSubscribeOpen(true);
