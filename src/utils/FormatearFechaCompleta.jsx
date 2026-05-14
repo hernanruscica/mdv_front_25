@@ -16,9 +16,7 @@ export const FormatearFechaCompleta = (isoString) => {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-    // EL TRUCO: Usamos 'UTC' para que NO intente convertir/restar horas.
-    // Muestra la hora "cruda" tal como vino en el JSON.
-    timeZone: 'UTC' 
+    timeZone: 'UTC'
   };
 
   const formateador = new Intl.DateTimeFormat('es-AR', opciones);

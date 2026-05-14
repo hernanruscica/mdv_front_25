@@ -1,7 +1,7 @@
 import { UnderConstruction, Home, Contact, Login, Dashboard, Users, Dataloggers, 
   Channels, ViewChannel, CreateReport, ViewUser, ActivateUser, Locations, ViewLocation, 
   ViewDatalogger, Alarms, ViewAlarm, CreatePage, SendActivationEmail, 
-  ViewStateAlarm } from '../pages';
+  ViewStateAlarm, BackendLogs } from '../pages';
 
 export const routes = [
   { path: "/", element: <Home /> },//sin breadcumb
@@ -66,4 +66,7 @@ export const routes = [
 
   // Alarmas routes / userUuid (sin businessUuid)
   { path: "/panel/alarmas/:userUuid", element: <Alarms />, private: true },
+
+  // Backend logs route
+  { path: "/panel/historial", element: <BackendLogs />, private: true },
 ];

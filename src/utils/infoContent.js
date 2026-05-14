@@ -270,6 +270,23 @@ export const HOME_INFO = {
   }
 };
 
+export const BACKEND_LOGS_INFO = {
+  Owner: {
+    title: `${titlePrefix}"Historial del servidor"`,
+    paragraphs: [
+      "Usted se encuentra en el historial del servidor, donde puede consultar todos los eventos registrados por el backend.",
+      "Como propietario, tiene acceso completo para visualizar y filtrar la totalidad de los registros del sistema."
+    ],
+    actions: [
+      "Visualizar el listado completo de eventos del servidor.",
+      "Filtrar registros por tipo (usuario, sistema, autenticación).",
+      "Filtrar registros por nivel (info, advertencia, error).",
+      "Filtrar registros por acción realizada (crear, actualizar, eliminar, inicio de sesión).",
+      "Hacer [CLICK] en una fila para ver el detalle completo del evento, incluyendo datos adicionales."
+    ]
+  }
+};
+
 export const DASHBOARD_INFO = {
   Owner: {
     title: `${titlePrefix}"Panel de Control"`,

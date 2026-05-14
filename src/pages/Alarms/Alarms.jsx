@@ -110,8 +110,9 @@ const ViewAlarms = () => {
         alarms={alarms} 
         channelId={params.channelId}
         dataloggerId={params.dataloggerId || selectedDatalogger?.uuid}
-        onAlarmClick={handleAlarmClick}        
-        showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
+        onAlarmClick={handleAlarmClick}  
+        // lo de abajo esta comentado, porque si llamo al form para crear una alarma, aca todavia no tengo el uuid del channel, tendria que ser una alarma para el datalogger.      
+        showAddButton= {false} //{userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
         isMisAlarmasRoute={isMisAlarmasRoute}
         onSubscribeClick={handleOpenSubscribeModal }
       />      

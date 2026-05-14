@@ -69,6 +69,12 @@ const Dashboard = () => {
       <BreadcrumbAuto />     
      
       <Title2 text="Administración" type='panel'/>
+
+      {userCurrentRole?.name === 'Owner' && (
+        <div style={{ marginBottom: '1rem' }}>
+          <CardBtnSmall title="Historial del servidor" url="/panel/historial" />
+        </div>
+      )}
       
       <div className={styles.cardsContainer}>
 
