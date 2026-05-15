@@ -8,7 +8,7 @@ export const backendLogsService = {
         data.items = data.items.map(item => ({
           ...item,
           created_at: new Date(
-            new Date(item.created_at).getTime() - 6 * 60 * 60 * 1000
+            new Date(item.created_at).getTime() - 3 * 60 * 60 * 1000
           ).toISOString()
         }));
       }
@@ -24,7 +24,7 @@ export const backendLogsService = {
       const { data } = await axiosClient.get(`/api/backendlogs/${uuid}`);
       if (data?.item) {
         data.item.created_at = new Date(
-          new Date(data.item.created_at).getTime() - 6 * 60 * 60 * 1000
+          new Date(data.item.created_at).getTime() - 3 * 60 * 60 * 1000
         ).toISOString();
       }
       return data;
