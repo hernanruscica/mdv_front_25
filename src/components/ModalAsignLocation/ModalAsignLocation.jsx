@@ -135,7 +135,7 @@ const ModalAsignLocation = ({
     <ModalConfirmation 
       isOpen={modalConfirmationOpen}
       onRequestClose={() => setModalConfirmationOpen(false)}
-      handleAccept={deleteBusinessUser}
+      onConfirm={deleteBusinessUser}
       mesagge={`Realmente quiere sacarle los permisos de [${mappedCurrentRole[currentRole]}] en "${currentLocation?.name}" a "${user?.first_name} ${user?.last_name}" ?`}
     />
      
