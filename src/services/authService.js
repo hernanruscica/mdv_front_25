@@ -28,11 +28,7 @@ export const authService = {
     try {      
       const response = await axiosClient.post(`/api/auth/users/activate/${token}`, { password });
       const { success, message, user } = response.data;
-      // Guardamos el token en localStorage si la activación fue exitosa
-      if (success && token) {
-        localStorage.setItem('token', token);
-      }
-      
+
       return {
         success: success,
         message: message,

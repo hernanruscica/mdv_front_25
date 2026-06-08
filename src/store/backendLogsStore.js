@@ -14,6 +14,8 @@ export const useBackendLogsStore = create((set) => ({
     log_level: '',
     action: '',
     limit: 50,
+    start_date: '',
+    end_date: '',
   },
 
   fetchBackendLogs: async (filters = {}) => {

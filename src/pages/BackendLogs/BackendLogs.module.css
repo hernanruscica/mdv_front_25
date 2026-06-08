@@ -69,3 +69,62 @@
   color: #6c757d;
   font-size: 1.1rem;
 }
+
+.rowError {
+  background-color: #ffe0e0 !important;
+}
+
+.rowWarn {
+  background-color: #fff3b0 !important;
+}
+
+.dateRangeContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dateSeparator {
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.filterDate {
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background-color: white;
+  color: #212529;
+  transition: border-color 0.15s ease-in-out;
+  font-family: inherit;
+  flex: 1;
+  min-width: 0;
+}
+
+.filterDate:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.resetDatesBtn {
+  background: none;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease-in-out;
+}
+
+.resetDatesBtn:hover {
+  background-color: #e9ecef;
+  color: #dc3545;
+}

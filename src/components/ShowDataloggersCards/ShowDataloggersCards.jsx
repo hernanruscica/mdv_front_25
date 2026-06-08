@@ -142,26 +142,27 @@ const businessUuid = dataloggers[0]?.business.uuid;
                   />       
                 </p>
               
-              {/* (type, dataloggerId, itemsCount, dataloggerName) */}
-              <CardBtnSmall 
-                title={`Canales conectados (${datalogger?.channels.length  || 0})`}
+              
+              {(datalogger.channels) && (<CardBtnSmall 
+                title={`Canales conectados (${datalogger?.channels?.length  || 0})`}
                 onClick={() => openModal(
                   'channels', 
                   datalogger?.uuid,
                   datalogger?.channels.length || 0,
                   datalogger?.name
                 )}
-              />
+              />)}
               
-              <CardBtnSmall 
-                title={`Alarmas vigentes (${datalogger?.alarms.filter(alarm => alarm.is_active === 1).length})`}
+              {(datalogger.alarms) && (<CardBtnSmall 
+                title={`Alarmas vigentes (${datalogger?.alarms?.filter(alarm => alarm.is_active === 1).length})`}
                 onClick={() => openModal(
                   'alarms', 
                   datalogger?.uuid,
                   datalogger?.alarms.filter(alarm => alarm?.is_active == 1).length,
                   datalogger.name
                 )}
-              />
+              />)}
+
             </div>
           </CardInfo>
         ))}

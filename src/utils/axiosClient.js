@@ -18,6 +18,18 @@ class ApiClient {
         'Accept': 'application/json'
       }
     });
+
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          const { logout } = useAuthStore.getState();
+          logout();
+          window.location.href = '/ingresar';
+        }
+        return Promise.reject(error);
+      }
+    );
   }
   
   async request(config) {

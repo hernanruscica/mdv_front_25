@@ -6,7 +6,7 @@ import styles from './Table.module.css';
 import BtnCallToAction from '../BtnCallToAction/BtnCallToAction';
 //import { useAuthStore } from '../../store/authStore';
 
-const Table = ({ columns, data, onRowClick, showAddButton, onAddClick = null, addUrl }) => {
+const Table = ({ columns, data, onRowClick, showAddButton, onAddClick = null, addUrl, getRowClassName }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -195,7 +195,7 @@ const Table = ({ columns, data, onRowClick, showAddButton, onAddClick = null, ad
             <tr 
               key={index}
               onClick={() => handleRowClick(row)}
-              className={styles.clickableRow}
+              className={`${styles.clickableRow}${getRowClassName ? ' ' + getRowClassName(row) : ''}`}
             >
               {columns.map(column => (
                 <td key={column.accessor} data-label={column.label}>

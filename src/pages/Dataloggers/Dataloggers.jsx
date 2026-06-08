@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Title1 } from '../../components/Title1/Title1';
-//import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { useAuthStore } from '../../store/authStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
+import { useLocationsStore } from "../../store/locationsStore";
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import ShowDataloggersCards from '../../components/ShowDataloggersCards/ShowDataloggersCards';
 import styles from './Dataloggers.module.css';
-
-// NUEVOS IMPORTS
 import { DATALOGGERS_LIST_INFO } from '../../utils/infoContent';
 import InfoAccordion from '../../components/InfoAccordion/InfoAccordion';
 import { GetUserCurrentRole } from '../../utils/userRoles';
@@ -20,11 +18,19 @@ const Dataloggers = () => {
   const { 
     dataloggers, 
     loadingStates: { fetchDataloggers: isLoading }, 
-    error,
+    error: dataloggersError,
     fetchDataloggers 
   } = useDataloggersStore();  
 
+    const {
+    locations,
+    loadingStates: { fetchLocations: isLoadingLocations },
+    error: locationsError,
+    fetchLocations
+  } = useLocationsStore();
+
   const [searchTerm, setSearchTerm] = useState('');
+  const [dashboardRouteLocations, setDashboardRouteLocations] = useState([]);
 
   // ACTUALIZACIÓN: Lógica de rol unificada
   const userCurrentRole = GetUserCurrentRole(user, businessUuid);
@@ -32,22 +38,34 @@ const Dataloggers = () => {
   // Determinamos la data para el acordeón
   const infoData = userCurrentRole?.name === 'Owner' 
     ? DATALOGGERS_LIST_INFO.Owner 
-    : DATALOGGERS_LIST_INFO.General;
+    : DATALOGGERS_LIST_INFO.General;    
 
   useEffect(() => {    
-    fetchDataloggers(user, businessUuid);  
+    const loadDataloggers = async (businessUuid) => {
+    if (businessUuid) {
+      await fetchDataloggers(user, businessUuid);  
+    }else{
+      const currentResponseLocations = await fetchLocations(user);  
+      setDashboardRouteLocations(currentResponseLocations.flatMap(location => location.dataloggers));
+      //console.log('allDataloggers', allDataloggers);
+    }};
+    loadDataloggers(businessUuid);
   }, [user, businessUuid, fetchDataloggers]);
 
-  if (isLoading) {
+  if (isLoading || isLoadingLocations) {
     return <LoadingSpinner message="Cargando datos..." />;
   }
 
-  if (error) {
+  if (dataloggersError || locationsError) {
     return <div className={styles.error}>{error}</div>;
   }
 
   // Buscamos la ubicación actual para el Breadcrumb de forma segura
   const currentBusinessName = dataloggers.find(dl => dl.business.uuid === businessUuid)?.business.name;
+
+
+  //console.log('businessUuid', businessUuid);
+  //console.log('user', user);
 
   return (
     <>
@@ -63,7 +81,10 @@ const Dataloggers = () => {
       <BreadcrumbAuto />
       
       <ShowDataloggersCards
-        dataloggers={dataloggers.filter(dl => dl.business.uuid === businessUuid)}              
+        dataloggers={(businessUuid) 
+          ? dataloggers.filter(dl => dl.business.uuid === businessUuid)
+          : dashboardRouteLocations
+        }              
         // ACTUALIZACIÓN: Verificación de permisos con el nuevo objeto de rol
         showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}
         searchTerm={searchTerm}

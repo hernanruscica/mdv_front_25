@@ -15,7 +15,7 @@ import ModalViewBackendLog from '../../components/ModalViewBackendLog/ModalViewB
 
 const LOG_TYPE_LABELS = {
   cronjob: 'Cronjob',
-  user: 'Usuario',
+  user: 'Login',
   system: 'Sistema',
   data: 'Datos',
   users: 'Usuarios',
@@ -76,6 +76,10 @@ const BackendLogs = () => {
 
   const handleFilterChange = (field, value) => {
     setLocalFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleResetDates = () => {
+    setLocalFilters(prev => ({ ...prev, start_date: '', end_date: '' }));
   };
 
   const handleSearch = () => {
@@ -184,7 +188,7 @@ const BackendLogs = () => {
         </div>
 
         <div className={styles.filterGroup}>
-          <label className={styles.filterLabel}>Límite</label>
+          <label className={styles.filterLabel}>Resultados</label>
           <input
             type="number"
             className={styles.filterInput}
@@ -193,6 +197,33 @@ const BackendLogs = () => {
             min={1}
             max={500}
           />
+        </div>
+
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Entre fechas</label>
+          <div className={styles.dateRangeContainer}>
+            <input
+              type="date"
+              className={styles.filterDate}
+              value={localFilters.start_date}
+              onChange={(e) => handleFilterChange('start_date', e.target.value)}
+            />
+            <span className={styles.dateSeparator}>a</span>
+            <input
+              type="date"
+              className={styles.filterDate}
+              value={localFilters.end_date}
+              onChange={(e) => handleFilterChange('end_date', e.target.value)}
+            />
+            <button
+              type="button"
+              className={styles.resetDatesBtn}
+              onClick={handleResetDates}
+              title="Limpiar fechas"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className={styles.filterButtonContainer}>
@@ -213,6 +244,11 @@ const BackendLogs = () => {
             data={preparedData}
             onRowClick={handleRowClick}
             showAddButton={false}
+            getRowClassName={(row) => {
+              if (row.log_level === 'error') return styles.rowError;
+              if (row.log_level === 'warn') return styles.rowWarn;
+              return '';
+            }}
           />
         </div>
       )}

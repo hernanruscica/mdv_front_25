@@ -28,6 +28,7 @@ export const routes = [
   { path: "/panel/ubicaciones/:businessUuid/usuarios/:userId/eliminar", element: <UnderConstruction />, private: true }, //sin breadcumb
 
   // Dataloggers routes 
+  { path: "/panel/dataloggers", element: <Dataloggers />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers", element: <Dataloggers />, private: true },
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/:dataloggerId", element: <ViewDatalogger />, private: true }, //nuevo breadcrumb
   { path: "/panel/ubicaciones/:businessUuid/dataloggers/agregar", element: <CreatePage />, private: true },
