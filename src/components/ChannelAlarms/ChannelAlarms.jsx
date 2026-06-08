@@ -12,7 +12,7 @@ const ChannelAlarms = ({
   onAlarmClick, 
   showAddButton = false,
   isMisAlarmasRoute = false,
-  onSubscribeClick = () => console.log('Subscribe click')
+  onSubscribeClick = () => {}
 }) => {
   const columns = useMemo(() => [
     { 

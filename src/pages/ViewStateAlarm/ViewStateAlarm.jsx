@@ -38,8 +38,6 @@ const ViewStateAlarm = () => {
             seen_at: new Date().toISOString().replace('T', ' ').substring(0, 19), // YYYY-MM-DD HH:mm:ss
             updated_by: decodedToken.userId,
           };
-          console.log('decodedToken', decodedToken);
-          
           const response = await alarmLogsService.update(decodedToken.businessUuid, decodedToken.logId, dataToUpdate);
           
           if (response.success) {

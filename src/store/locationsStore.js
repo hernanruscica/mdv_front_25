@@ -21,7 +21,7 @@ export const useLocationsStore = create((set, get) => ({
     try {
       const response = await locationsService.create(locationData);
       set(state => ({
-        locations: [...state.locations, response.location],
+        locations: [...state.locations, response.business],
         error: null
       }));
       return response;
@@ -44,9 +44,9 @@ export const useLocationsStore = create((set, get) => ({
       const response = await locationsService.update(locationId, locationData);
       set(state => ({
         locations: state.locations.map(loc => 
-          loc.id === locationId ? response.location : loc
+          loc.id === locationId ? response.business : loc
         ),
-        selectedLocation: response.location,
+        selectedLocation: response.business,
         error: null
       }));
       return response;

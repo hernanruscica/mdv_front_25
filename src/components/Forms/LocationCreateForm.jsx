@@ -82,11 +82,8 @@ export const LocationCreateForm = ({ locationData, isEditing }) => {
 
         try {
             if (isEditing) {
-                console.log('editing', locationData?.uuid);
-                
                 formData.append("uuid", locationData?.uuid); // Assuming backend needs uuid for update
                 const response = await updateLocation(locationData?.uuid, formData);
-                console.log('formData enviada:', formData);
                 
                 navigate(`/panel/ubicaciones/${locationData.uuid}`);
                 toast.success('Ubicación actualizada exitosamente');

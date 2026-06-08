@@ -70,12 +70,10 @@ const ModalAsignLocation = ({
         locationUuid,
         roleUuid
       };
-    console.log(`Datos a ${isEditing ? 'Editar' : 'Crear'} : `, dataToSend);       
     
     if (!isEditing){
       try {
        const response = await createLocationUser(dataToSend);
-        //console.log('response on modalAsign', response);
         if (response?.success){          
           toast.success('Usuario agregado a la ubicacion con exito!');
         }else{
@@ -83,21 +81,20 @@ const ModalAsignLocation = ({
         }
         
       } catch (error) {
-       console.log(error); 
+        console.error(error);
       } finally {
         onRequestClose();
       }
     }else{
       try {
         const response = await updateLocationUser(dataToSend);
-        console.log('response on modalAsign', response);
         if (response?.success){          
           toast.success('Rol del usuario en la ubicacion, editado con exito!');
         }else{
           toast.error('Error al editar el rol del usuario en la ubicacion...');
         }        
       } catch (error) {
-        console.log(error); 
+        console.error(error);
       } finally {
         onRequestClose();
       }
@@ -106,7 +103,6 @@ const ModalAsignLocation = ({
   };
 
   const deleteBusinessUser = async  (data) => {
-    console.log('delete businessUser relationship', currentLocation?.business_user_uuid);    
     const businessUserUuid = currentLocation?.business_user_uuid || null;
     try {
       const response = await deleteLocationUser(businessUuid, businessUserUuid);

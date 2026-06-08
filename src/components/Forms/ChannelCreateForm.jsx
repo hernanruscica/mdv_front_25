@@ -66,7 +66,7 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                 const response = await createChannel(businessUuid, formData);                
                 if (response.success) {
                     toast.success('Canal creado exitosamente!');
-                    navigate(`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}`);
+                    navigate(`/panel/ubicaciones/${businessUuid}/dataloggers/${dataloggerId}/canales/${response?.item?.uuid}`);
                 } else {
                     toast.error(response.message || 'Error al crear el canal');
                 }

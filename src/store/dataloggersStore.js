@@ -21,7 +21,7 @@ export const useDataloggersStore = create((set) => ({
     try {
       const response = await dataloggersService.create(businessUuid, dataloggerData);
       set(state => ({
-        dataloggers: [...state.dataloggers, response.datalogger],
+        dataloggers: [...state.dataloggers, response.item],
         error: null
       }));
       return response;
@@ -117,7 +117,7 @@ export const useDataloggersStore = create((set) => ({
       const response = await dataloggersService.update(id, dataloggerData);
       set(state => ({
         dataloggers: state.dataloggers.map(d => 
-          d.id === id ? response.datalogger : d
+          d.id === id ? response.item : d
         ),
         error: null
       }));

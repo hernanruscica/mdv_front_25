@@ -35,7 +35,6 @@ const ModalSetArchive = ({
 
   const handleAccept = async () => {
     if (updateFn && entidadId) {
-      console.log('Updating entity:', entidad, 'ID:', entidadId, 'to new state:', nuevoEstado);
       const userData = new FormData;
       userData.append("is_active", nuevoEstado);
       const responseStore = await updateFn(entidadId, userData);

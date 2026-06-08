@@ -37,7 +37,6 @@ const ModalDelete = ({
     if (deleteFn && entidadId) {
       //console.log('Updating entity:', entidad, 'ID:', entidadId, 'to new state:', nuevoEstado);
       const responseStore = await deleteFn(businessUuid, entidadId);
-      console.log('Response from delete:', responseStore);
       onRequestClose();
       if (responseStore){
         toast.success(`${entidad.charAt(0).toUpperCase() + entidad.slice(1)} eliminado exitosamente.`);
