@@ -1,5 +1,10 @@
 import React, {useState} from 'react';
+import toast from 'react-hot-toast';
 import styles from './CardImageLoadingPreview.module.css';
+
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const CardImageLoadingPreview = (props) => {
     const { imageFileName, setNewImageHandler } = props;     
@@ -7,6 +12,27 @@ const CardImageLoadingPreview = (props) => {
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
+        if (!file) return;
+
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            toast.error('Formato no permitido. Usá JPG, PNG, WebP o GIF.');
+            e.target.value = '';
+            return;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            toast.error('La imagen supera los 5 MB permitidos.');
+            e.target.value = '';
+            return;
+        }
+
+        const ext = '.' + file.name.split('.').pop().toLowerCase();
+        if (!ALLOWED_EXTENSIONS.includes(ext)) {
+            toast.error('Extensión de archivo no permitida.');
+            e.target.value = '';
+            return;
+        }
+
         setNewImage(file);
         setNewImageHandler(file);
     };
