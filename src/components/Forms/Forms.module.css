@@ -122,6 +122,18 @@
     
 }
 
+.formInputError {
+    border-color: #dc3545 !important;
+    background-color: #fff8f8;
+}
+
+.formErrorMessage {
+    color: #dc3545;
+    font-size: 0.75rem;
+    min-height: 1em;
+    margin-top: 2px;
+}
+
 .loadingContainer {
     display: flex;
     justify-content: center;

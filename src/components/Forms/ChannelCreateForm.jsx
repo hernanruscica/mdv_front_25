@@ -5,6 +5,7 @@ import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
 import { useChannelsStore } from '../../store/channelsStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
+import { PATTERNS, validateField, sanitizeInput } from '../../utils/validation';
 
 export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
     const { dataloggerId, channelId, businessUuid } = useParams();
@@ -12,6 +13,8 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
     const [profileImage, setProfileImage] = useState("default_channel.png");
     const [newImage, setNewImage] = useState("");
     
+    const [errors, setErrors] = useState({});
+
     const [channel, setChannel] = useState({ 
         datalogger_id: dataloggerId, 
         name: "", 
@@ -25,6 +28,7 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
     
     const handleChange = (e) => {
         const { name, value } = e.target;
+        setErrors(prev => ({ ...prev, [name]: '' }));
         setChannel({
             ...channel,
             [name]:  value,
@@ -35,15 +39,39 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
     const { createChannel, updateChannel } = useChannelsStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const validate = () => {
+        const errs = {};
+        const fields = [
+            { name: 'name', rules: [{ required: true, message: 'El nombre es obligatorio' }, { minLength: 2, message: 'Mínimo 2 caracteres' }] },
+            { name: 'averaging_period', rules: [{ required: true, message: 'El período es obligatorio' }, { min: 1, message: 'Mínimo 1 minuto' }, { max: 1440, message: 'Máximo 1440 minutos' }] },
+            { name: 'factor', rules: [{ required: true, message: 'El factor es obligatorio' }, { min: 0.01, message: 'Mínimo 0.01' }] },
+            { name: 'description', rules: [{ required: true, message: 'La descripción es obligatoria' }, { minLength: 3, message: 'Mínimo 3 caracteres' }] },
+        ];
+        fields.forEach(({ name, rules }) => {
+            const error = validateField(channel[name], rules);
+            if (error) errs[name] = error;
+        });
+        if (!isEditing) {
+            const colError = validateField(channel.column_name, [
+                { required: true, message: 'El nombre de columna es obligatorio' },
+                { pattern: PATTERNS.alphanumeric, message: 'Solo letras, números y guión bajo' },
+            ]);
+            if (colError) errs.column_name = colError;
+        }
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
     const handleSubmit = async (e) => {
-        e.preventDefault();    
+        e.preventDefault();
+        if (!validate()) return;
         setIsSubmitting(true);
         const formData = new FormData();
 
-        formData.append("name", channel.name || "");
-        formData.append("description", channel.description || "");
-        formData.append("averaging_period", channel.averaging_period || "");
-        formData.append("factor", channel.factor || "");
+        formData.append("name", sanitizeInput(channel.name || ""));
+        formData.append("description", sanitizeInput(channel.description || ""));
+        formData.append("averaging_period", sanitizeInput(channel.averaging_period || ""));
+        formData.append("factor", sanitizeInput(channel.factor || ""));
         formData.append("is_active", channel.is_active);
         formData.append("businessUuid", businessUuid || "");
 
@@ -120,8 +148,10 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                         id="name"
                         value={channel.name}
                         onChange={handleChange}
+                        className={errors.name ? stylesForms.formInputError : ''}
                         required
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.name || ''}</span>
                 </div>            
                 <div className={stylesForms.formInput}>
                     <label htmlFor="column_name">Nombre de Columna:</label>
@@ -131,9 +161,11 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                         id="column_name"
                         value={channel.column_name}
                         onChange={handleChange}
+                        className={errors.column_name ? stylesForms.formInputError : ''}
                         required
                         disabled={isEditing}
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.column_name || ''}</span>
                 </div>
                 <div className={stylesForms.formInput}>
                     <label htmlFor="averaging_period">Tiempo a Promediar (Minutos):</label>
@@ -143,8 +175,10 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                         id="averaging_period"
                         value={channel.averaging_period}
                         onChange={handleChange}
+                        className={errors.averaging_period ? stylesForms.formInputError : ''}
                         required
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.averaging_period || ''}</span>
                 </div>
                 <div className={stylesForms.formInput}>
                     <label htmlFor="factor">Factor:</label>
@@ -155,8 +189,10 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                         id="factor"
                         value={channel.factor}
                         onChange={handleChange}
+                        className={errors.factor ? stylesForms.formInputError : ''}
                         required
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.factor || ''}</span>
                 </div>
 
             </div>
@@ -164,13 +200,14 @@ export const ChannelCreateForm = ({ locationData, channelData, isEditing }) => {
                 <div className={stylesForms.formInput}>
                     <label htmlFor="description">Descripción:</label>
                     <textarea
-                        className={stylesForms.formInputTextarea}
+                        className={`${stylesForms.formInputTextarea}${errors.description ? ` ${stylesForms.formInputError}` : ''}`}
                         name="description"
                         id="description"
                         value={channel.description}
                         onChange={handleChange}
                         required
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.description || ''}</span>
                 </div>
             </div>
 

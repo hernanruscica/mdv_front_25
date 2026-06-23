@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useLocationUsersStore } from '../../store/locationUsersStore';
 import { useDataloggersStore } from '../../store/dataloggersStore';
 import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/CardImageLoadingPreview.jsx';
+import { PATTERNS, validateField, sanitizeInput } from '../../utils/validation';
 
 export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }) => {
     const [newImage, setNewImage] = useState(null); // Changed to null to properly check for file
@@ -18,6 +19,8 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
         error 
     } = useLocationUsersStore();
     
+    const [errors, setErrors] = useState({});
+
     const [datalogger, setDatalogger] = useState({ 
         mac_address: "", 
         name: "", 
@@ -52,22 +55,40 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
     
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        setErrors(prev => ({ ...prev, [name]: '' }));
         setDatalogger({
             ...datalogger,
             [name]:  value,
         });
     };
 
+    const validate = () => {
+        const errs = {};
+        const fields = [
+            { name: 'name', rules: [{ required: true, message: 'El nombre es obligatorio' }, { minLength: 2, message: 'Mínimo 2 caracteres' }] },
+            { name: 'mac_address', rules: [{ required: true, message: 'La MAC es obligatoria' }, { pattern: PATTERNS.macAddress, message: 'Formato inválido (ej: AA:BB:CC:DD:EE:FF)' }] },
+            { name: 'table_name', rules: [{ required: true, message: 'El nombre de tabla es obligatorio' }, { pattern: PATTERNS.alphanumeric, message: 'Solo letras, números y guión bajo' }] },
+            { name: 'description', rules: [{ required: true, message: 'La descripción es obligatoria' }, { minLength: 3, message: 'Mínimo 3 caracteres' }] },
+        ];
+        fields.forEach(({ name, rules }) => {
+            const error = validateField(datalogger[name], rules);
+            if (error) errs[name] = error;
+        });
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
     const navigate = useNavigate();
     const { createDatalogger, updateDatalogger } = useDataloggersStore();
 
     const handleSubmit = async (e) => {
-        e.preventDefault();    
+        e.preventDefault();
+        if (!validate()) return;    
         const formData = new FormData();
-        formData.append("name", datalogger.name || "");
-        formData.append("description", datalogger.description || "");
-        formData.append("mac_address", datalogger.mac_address || "");
-        formData.append("table_name", datalogger.table_name || "");
+        formData.append("name", sanitizeInput(datalogger.name || ""));
+        formData.append("description", sanitizeInput(datalogger.description || ""));
+        formData.append("mac_address", sanitizeInput(datalogger.mac_address || ""));
+        formData.append("table_name", sanitizeInput(datalogger.table_name || ""));
         formData.append("is_active", datalogger.is_active); // Boolean value
         formData.append("businessUuid", datalogger.business_uuid);
 
@@ -127,8 +148,10 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
                         id="name"
                         value={datalogger.name}
                         onChange={handleChange}
+                        className={errors.name ? stylesForms.formInputError : ''}
                         required
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.name || ''}</span>
                 </div>
                 <div className={stylesForms.formInput}>
                     <label htmlFor="table_name">Nombre de Tabla:</label>
@@ -138,8 +161,10 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
                         id="table_name"
                         value={datalogger.table_name}
                         onChange={handleChange}
+                        className={errors.table_name ? stylesForms.formInputError : ''}
                         required
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.table_name || ''}</span>
                 </div>
                 <div className={stylesForms.formInput}>
                     <label htmlFor="mac_address">Dirección MAC:</label>
@@ -149,8 +174,10 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
                         id="mac_address"
                         value={datalogger.mac_address}
                         onChange={handleChange}
+                        className={errors.mac_address ? stylesForms.formInputError : ''}
                         required
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.mac_address || ''}</span>
                 </div>
 
             </div>
@@ -158,13 +185,14 @@ export const DataloggerCreateForm = ({ locationData, dataloggerData, isEditing }
                 <div className={stylesForms.formInput}>
                     <label htmlFor="description">Descripción:</label>
                     <textarea
-                        className={stylesForms.formInputTextarea}
+                        className={`${stylesForms.formInputTextarea}${errors.description ? ` ${stylesForms.formInputError}` : ''}`}
                         name="description"
                         id="description"
                         value={datalogger.description}
                         onChange={handleChange}
                         required
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.description || ''}</span>
                 </div>
             </div>
             <div className={stylesForms.formInputGroup}>

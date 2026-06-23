@@ -8,6 +8,7 @@ import CardImageLoadingPreview from '../../components/CardImageLoadingPreview/Ca
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import {mappedCurrentRole} from '../../utils/userRoles.js';
+import { PATTERNS, validateField, sanitizeInput } from '../../utils/validation';
 
 
 export const UserCreateForm = ({ userId, userData, locationData, isEditing }) => {
@@ -90,11 +91,14 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
         }
     }, [businessUuid, userStore]);    
 
+    const [errors, setErrors] = useState({});
+
     const [selectedLocationRol, setSelectedLocationRol] = useState('');
     const [filteredRoles, setFilteredRoles] = useState([]);
     const [selectedBusinessUuid, setSelectedBusinessUuid] = useState('');
     
     const handleChange = (e) => {
+    setErrors(prev => ({ ...prev, [e.target.name]: '' }));
     setUser({
         ...user,
         [e.target.name]: e.target.value,        
@@ -105,8 +109,39 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const validate = () => {
+        const errs = {};
+        const fields = [
+            { name: 'firstName', rules: [{ required: true, message: 'El nombre es obligatorio' }, { pattern: PATTERNS.letters, message: 'Solo letras' }, { minLength: 2, message: 'Mínimo 2 caracteres' }] },
+            { name: 'lastName', rules: [{ required: true, message: 'El apellido es obligatorio' }, { pattern: PATTERNS.letters, message: 'Solo letras' }, { minLength: 2, message: 'Mínimo 2 caracteres' }] },
+            { name: 'email', rules: [{ required: true, message: 'El email es obligatorio' }, { pattern: PATTERNS.email, message: 'Email inválido' }] },
+            { name: 'phone', rules: [{ required: true, message: 'El teléfono es obligatorio' }, { pattern: PATTERNS.phone, message: 'Formato inválido' }] },
+            { name: 'street', rules: [{ required: true, message: 'La calle es obligatoria' }, { minLength: 3, message: 'Mínimo 3 caracteres' }] },
+            { name: 'city', rules: [{ required: true, message: 'La ciudad es obligatoria' }, { minLength: 2, message: 'Mínimo 2 caracteres' }] },
+            { name: 'state', rules: [{ required: true, message: 'La provincia es obligatoria' }, { minLength: 2, message: 'Mínimo 2 caracteres' }] },
+            { name: 'country', rules: [{ required: true, message: 'El país es obligatorio' }, { minLength: 2, message: 'Mínimo 2 caracteres' }] },
+            { name: 'zipCode', rules: [{ required: true, message: 'El código postal es obligatorio' }, { pattern: PATTERNS.zipCode, message: 'Código postal inválido' }] },
+        ];
+        fields.forEach(({ name, rules }) => {
+            const error = validateField(user[name], rules);
+            if (error) errs[name] = error;
+        });
+        if (!isEditing) {
+            const dniError = validateField(user.dni, [
+                { required: true, message: 'El DNI es obligatorio' },
+                { pattern: PATTERNS.dni, message: 'Debe tener entre 7 y 9 dígitos' },
+            ]);
+            if (dniError) errs.dni = dniError;
+            if (!selectedBusinessUuid) errs.businessUuid = 'Debe seleccionar una ubicación';
+            if (!selectedLocationRol) errs.role = 'Debe seleccionar un rol';
+        }
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
     const handleSubmit = async (e) => {
-        e.preventDefault();    
+        e.preventDefault();
+        if (!validate()) return;
         setIsSubmitting(true);
         
         if (isEditing) {
@@ -114,16 +149,16 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
           
             const formData = new FormData();
             formData.append("uuid", user.uuid); 
-            formData.append("firstName", user.firstName);
-            formData.append("lastName", user.lastName);
-            formData.append("email", user.email);
-            formData.append("phone", user.phone);
-            formData.append("dni", user.dni);
-            formData.append("street", user.street);
-            formData.append("city", user.city);
-            formData.append("state", user.state);
-            formData.append("country", user.country);
-            formData.append("zipCode", user.zipCode);
+            formData.append("firstName", sanitizeInput(user.firstName));
+            formData.append("lastName", sanitizeInput(user.lastName));
+            formData.append("email", sanitizeInput(user.email));
+            formData.append("phone", sanitizeInput(user.phone));
+            formData.append("dni", sanitizeInput(user.dni));
+            formData.append("street", sanitizeInput(user.street));
+            formData.append("city", sanitizeInput(user.city));
+            formData.append("state", sanitizeInput(user.state));
+            formData.append("country", sanitizeInput(user.country));
+            formData.append("zipCode", sanitizeInput(user.zipCode));
             formData.append("business_uuid", businessUuid);
             formData.append("role", selectedLocationRol); // Assuming role can be updated
             //formData.append("image", newImage || profileImage); // Always send image, even if default
@@ -161,17 +196,17 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
         // Código existente para creación
         const formData = new FormData();
         formData.append("image", newImage || profileImage);
-        formData.append("firstName", user.firstName);
-        formData.append("lastName", user.lastName);
-        formData.append("email", user.email);
-        formData.append("phone", user.phone);
-        formData.append("dni", user.dni);
-        formData.append("password", user.password || "P4s5_W0rD*joD1d4+joD1d4_W0rD.P4s5");
-        formData.append("street", user.street);
-        formData.append("city", user.city);
-        formData.append("state", user.state);
-        formData.append("country", user.country);
-        formData.append("zipCode", user.zipCode);
+        formData.append("firstName", sanitizeInput(user.firstName));
+        formData.append("lastName", sanitizeInput(user.lastName));
+        formData.append("email", sanitizeInput(user.email));
+        formData.append("phone", sanitizeInput(user.phone));
+        formData.append("dni", sanitizeInput(user.dni));
+        formData.append("password", user.password || crypto.randomUUID());
+        formData.append("street", sanitizeInput(user.street));
+        formData.append("city", sanitizeInput(user.city));
+        formData.append("state", sanitizeInput(user.state));
+        formData.append("country", sanitizeInput(user.country));
+        formData.append("zipCode", sanitizeInput(user.zipCode));
         formData.append("business_uuid", selectedBusinessUuid || locationData?.uuid);
         formData.append("role", selectedLocationRol);
         formData.append("is_active", user.is_active || "0");
@@ -215,7 +250,8 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                       name="businessUuid"
                       id="businessUuid"
                       value={selectedBusinessUuid}
-                      onChange={e => setSelectedBusinessUuid(e.target.value)}
+                      onChange={e => { setErrors(prev => ({ ...prev, businessUuid: '' })); setSelectedBusinessUuid(e.target.value); }}
+                      className={errors.businessUuid ? stylesForms.formInputError : ''}
                       required
                     >
                       <option value="" disabled>Seleccione una ubicación</option>
@@ -225,6 +261,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                         </option>
                       ))}
                     </select>
+                    <span className={stylesForms.formErrorMessage}>{errors.businessUuid || ''}</span>
                   </div> 
                   <div className={stylesForms.formInput}>
                       <label htmlFor="role">Rol:</label>
@@ -232,7 +269,8 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                           name="role" 
                           id="role" 
                           value={selectedLocationRol} 
-                          onChange={e => setSelectedLocationRol(e.target.value)}
+                          onChange={e => { setErrors(prev => ({ ...prev, role: '' })); setSelectedLocationRol(e.target.value); }}
+                          className={errors.role ? stylesForms.formInputError : ''}
                           required
                       >
                           <option value="" disabled>Seleccione un rol para el usuario</option>
@@ -242,6 +280,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                               </option>
                           ))}
                       </select>
+                      <span className={stylesForms.formErrorMessage}>{errors.role || ''}</span>
                   </div>      
                 </div>
               </>
@@ -257,8 +296,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="firstName"
                   value={user.firstName}
                   onChange={handleChange}
+                  className={errors.firstName ? stylesForms.formInputError : ''}
                   required
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.firstName || ''}</span>
               </div>
               <div className={stylesForms.formInput}>
                 <label htmlFor="lastName">Apellido:</label>
@@ -268,8 +309,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="lastName"
                   value={user.lastName}
                   onChange={handleChange}
+                  className={errors.lastName ? stylesForms.formInputError : ''}
                   required
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.lastName || ''}</span>
               </div>
             </div>
             <div className={stylesForms.formInputGroup}>
@@ -281,8 +324,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="email"
                   value={user.email}
                   onChange={handleChange}
+                  className={errors.email ? stylesForms.formInputError : ''}
                   required
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.email || ''}</span>
               </div>
               <div className={stylesForms.formInput}>
                 <label htmlFor="phone">Telefono:</label>
@@ -292,8 +337,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="phone"
                   value={user.phone}
                   onChange={handleChange}
+                  className={errors.phone ? stylesForms.formInputError : ''}
                   required
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.phone || ''}</span>
               </div>          
             </div>
             <div className={stylesForms.formInputGroup}>
@@ -305,9 +352,11 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="dni"
                   value={user.dni}
                   onChange={handleChange}
+                  className={errors.dni ? stylesForms.formInputError : ''}
                   required
                   disabled={isEditing}
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.dni || ''}</span>
               </div>
             </div>       
             
@@ -320,8 +369,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="street"
                   value={user.street}
                   onChange={handleChange}
+                  className={errors.street ? stylesForms.formInputError : ''}
                   required
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.street || ''}</span>
               </div>
               <div className={stylesForms.formInput}>
                 <label htmlFor="city">Ciudad:</label>
@@ -331,8 +382,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="city"
                   value={user.city}
                   onChange={handleChange}
+                  className={errors.city ? stylesForms.formInputError : ''}
                   required
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.city || ''}</span>
               </div>
             </div>
             <div className={stylesForms.formInputGroup}>
@@ -344,8 +397,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="state"
                   value={user.state}
                   onChange={handleChange}
+                  className={errors.state ? stylesForms.formInputError : ''}
                   required
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.state || ''}</span>
               </div>
               <div className={stylesForms.formInput}>
                 <label htmlFor="country">País:</label>
@@ -355,8 +410,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="country"
                   value={user.country}
                   onChange={handleChange}
+                  className={errors.country ? stylesForms.formInputError : ''}
                   required
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.country || ''}</span>
               </div>
             </div>
             <div className={stylesForms.formInputGroup}>
@@ -368,8 +425,10 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
                   id="zipCode"
                   value={user.zipCode}
                   onChange={handleChange}
+                  className={errors.zipCode ? stylesForms.formInputError : ''}
                   required
                 />
+                <span className={stylesForms.formErrorMessage}>{errors.zipCode || ''}</span>
               </div>
             </div>
             

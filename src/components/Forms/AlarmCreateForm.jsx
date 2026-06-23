@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import stylesForms from './Forms.module.css';
 import { useAuthStore } from '../../store/authStore';
 import { useAlarmsStore } from '../../store/alarmsStore';
+import { validateField, sanitizeInput } from '../../utils/validation';
 
 export const AlarmCreateForm = ({ alarmData, isEditing, dataloggerData, channelData }) => {
     const { businessUuid, channelId, alarmId, dataloggerId } = useParams();
@@ -51,6 +52,7 @@ export const AlarmCreateForm = ({ alarmData, isEditing, dataloggerData, channelD
     ];
 
     // ESTADOS UI
+    const [errors, setErrors] = useState({});
     const [comparsionOperator, setComparsionOperator] = useState(">");
     const [comparsionValue, setComparsionValue] = useState(alarmTypes[0].defaultValue);
     
@@ -171,6 +173,7 @@ export const AlarmCreateForm = ({ alarmData, isEditing, dataloggerData, channelD
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        setErrors(prev => ({ ...prev, [name]: '' }));
         
         if (name === "alarm_type") {
             const typeFound = alarmTypes.find(a => a.type === value);
@@ -190,12 +193,31 @@ export const AlarmCreateForm = ({ alarmData, isEditing, dataloggerData, channelD
         if (name === "comparsion_value") setComparsionValue(value);
     };
 
+    const validate = () => {
+        const errs = {};
+        const nameError = validateField(alarm.name, [
+            { required: true, message: 'El nombre es obligatorio' },
+            { minLength: 2, message: 'Mínimo 2 caracteres' },
+        ]);
+        if (nameError) errs.name = nameError;
+        const descError = validateField(alarm.description, [
+            { required: true, message: 'La descripción es obligatoria' },
+            { minLength: 3, message: 'Mínimo 3 caracteres' },
+        ]);
+        if (descError) errs.description = descError;
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validate()) return;
         setIsSubmitting(true);
 
         const alarmPayload = {
             ...alarm,
+            name: sanitizeInput(alarm.name),
+            description: sanitizeInput(alarm.description),
             time_range: channelData?.time_range || alarm.time_range,
             var01: comparsionValue // Aseguramos envío del threshold
         };
@@ -243,9 +265,11 @@ export const AlarmCreateForm = ({ alarmData, isEditing, dataloggerData, channelD
                         id="name"
                         value={alarm.name}
                         onChange={handleChange}
+                        className={errors.name ? stylesForms.formInputError : ''}
                         required
                         placeholder="Ej: Alerta alta temperatura"
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.name || ''}</span>
                 </div>
                 <div className={stylesForms.formInput}>
                     <label htmlFor="alarm_type">Tipo de Alarma:</label>
@@ -271,7 +295,7 @@ export const AlarmCreateForm = ({ alarmData, isEditing, dataloggerData, channelD
                 <div className={stylesForms.formInput}>
                     <label htmlFor="description">Descripción:</label>
                     <textarea
-                        className={stylesForms.formInputTextarea}
+                        className={`${stylesForms.formInputTextarea}${errors.description ? ` ${stylesForms.formInputError}` : ''}`}
                         name="description"
                         id="description"
                         value={alarm.description}
@@ -279,6 +303,7 @@ export const AlarmCreateForm = ({ alarmData, isEditing, dataloggerData, channelD
                         required
                         placeholder="Breve descripción de cuándo se dispara esta alarma..."
                     />
+                    <span className={stylesForms.formErrorMessage}>{errors.description || ''}</span>
                 </div>
             </div>
 

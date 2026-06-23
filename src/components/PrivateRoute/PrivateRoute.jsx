@@ -53,12 +53,11 @@ export const PrivateRoute = ({ children }) => {
         : user?.businesses_roles.find(br => br.uuid === businessUuid)?.role;
 
   // Verificar permisos de propietario para rutas de agregar
-  if (path.endsWith('agregar') && (userCurrentRole === 'Owner' && userCurrentRole === 'Administrator')) {
+  if (path.endsWith('agregar') && userCurrentRole !== 'Owner' && userCurrentRole !== 'Administrator') {
     return <Navigate to="/panel" replace />;
   }  
 
-  // Verifica permisos de administrador para rutas de edición
-  if (path.endsWith('editar') && (userCurrentRole === 'Owner' && userCurrentRole === 'Administrator')) {
+  if (path.endsWith('editar') && userCurrentRole !== 'Owner' && userCurrentRole !== 'Administrator') {
     return <Navigate to="/panel" replace />;
   }
 
