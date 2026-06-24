@@ -351,6 +351,7 @@ const isUserAssociated = usersByAlarmId?.some(u => u.user_uuid === user?.uuid);
           <ViewChart 
             businessUuid = {businessUuid}
             channelUuid = {channelId || selectedAlarm?.channel_uuid}
+            dataloggerUuid={selectedAlarm?.datalogger_uuid}
             title={selectedAlarm?.alarm_type == 'porcentage_on' 
                     ? `Datos del canal '${channelUsage?.name}'` 
                     : `Fallos de transmision de datos del datalogger '${dataloggerUsage?.name}'`}

@@ -110,3 +110,104 @@
 
 
 /* agregados por chatgpt*/
+
+.locationSelector {
+  position: relative;
+  display: inline-block;
+}
+
+.locationBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #362702;
+  font-size: inherit;
+  padding: 0;
+}
+
+.chevronIcon {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+  line-height: 1;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.locationDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 240px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  z-index: 200;
+  padding: 6px 0;
+  overflow: hidden;
+}
+
+.locationItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.locationItem:hover {
+  background: #f5f5f5;
+}
+
+.locationItemActive {
+  background: #f0f4ff;
+  border-left: 3px solid #0052cc;
+}
+
+.locationItemName {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #222;
+}
+
+.locationItemRole {
+  font-family: "Montserrat", sans-serif;
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+@media (max-width: 600px) {
+  .locationSelector {
+    width: 100%;
+  }
+
+  .locationBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 0;
+  }
+
+  .locationDropdown {
+    position: static;
+    box-shadow: none;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-top: 4px;
+    width: 100%;
+  }
+}

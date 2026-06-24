@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import styles from './Login.module.css';
 import { Title1 } from '../../components/Title1/Title1.jsx';
@@ -14,10 +14,11 @@ const Login = () => {
   
   const login = useAuthStore(state => state.login);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuthStore();
 
   const urlParams = new URLSearchParams(window.location.search);
-  const redirect = urlParams.get('redirect') || null;
+  const redirect = location.state?.redirect || urlParams.get('redirect') || null;
 
   useEffect(() => {
     if (user) {    

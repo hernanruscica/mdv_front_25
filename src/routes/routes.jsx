@@ -9,7 +9,7 @@ export const routes = [
   { path: "/resetear", element: <SendActivationEmail /> },//sin breadcumb
   { path: "/contacto", element: <Contact /> },//sin breadcumb
   { path: "/panel", element: <Dashboard />, private: true },//nuevo breadcrumb
-  { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm /> },//sin breadcumb
+  { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm />, private: true },//sin breadcumb
   
   // Locations routes
   { path: "/panel/ubicaciones", element: <Locations />, private: true },//nuevo breadcrumb

@@ -126,14 +126,18 @@ const ViewChannel = () => {
 
   const seletedChannelAlarms = alarms.filter(al => al.channel_uuid === selectedChannel?.uuid);
       
+  const canGenerateReport = userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator';
+
   const channelButtons = (selectedChannel?.is_active == '1') ? (
     <>
-      <BtnCallToAction
-        text="Generar Informe"
-        icon="chart-line-solid.svg"
-        type="normal"
-        url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
-      />
+      {canGenerateReport && (
+        <BtnCallToAction
+          text="Generar Informe"
+          icon="chart-line-solid.svg"
+          type="normal"
+          url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
+        />
+      )}
       <BtnCallToAction
         text="Ver Mantenimiento"
         icon="person-digging-solid.svg"
@@ -155,12 +159,14 @@ const ViewChannel = () => {
     </>
   ) : (
     <>
-      <BtnCallToAction
-        text="Generar Informe"
-        icon="chart-line-solid.svg"
-        type="normal"
-        url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
-      />
+      {canGenerateReport && (
+        <BtnCallToAction
+          text="Generar Informe"
+          icon="chart-line-solid.svg"
+          type="normal"
+          url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
+        />
+      )}
       <BtnCallToAction
         text="Ver Mantenimiento"
         icon="person-digging-solid.svg"
@@ -224,6 +230,7 @@ const ViewChannel = () => {
         <ViewChart 
           businessUuid = {businessUuid}
           channelUuid = {channelId}
+          dataloggerUuid={selectedChannel?.datalogger?.uuid}
           title={`Datos del canal '${selectedChannel?.name}'`}
           subtitle={`Cada punto del gráfico integra los valores de las lecturas de los últimos ${selectedChannel?.averaging_period } minutos.`}
           average_period={selectedChannel?.averaging_period}

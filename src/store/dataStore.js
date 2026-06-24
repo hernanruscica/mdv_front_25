@@ -7,12 +7,14 @@ export const useDataStore = create((set) => ({
   channelAllRegistersData: null,  
   channelDailyData: null,
   channelWeeklyData: null,
+  energyIncidents: null,
   loadingStates: {
     fetchChannelUsage: false,
     fetchDataloggerUsage: false,
     fetchAllRegistersChannelData: false,   
     fetchDailyChannelData: false,
-    fetchWeeklyChannelData: false
+    fetchWeeklyChannelData: false,
+    fetchEnergyIncidents: false
   },
   error: null,
   
@@ -141,12 +143,28 @@ export const useDataStore = create((set) => ({
       return null;
     }
   },
-/*
-  clearChannelData: () => {
-    set({
-      dataChannel: null,
-      dataChannelSecondary: null
-    });
-  }*/
+
+  fetchEnergyIncidents: async (businessUuid, dataloggerUuid, start, end) => {
+    set(state => ({
+      loadingStates: { ...state.loadingStates, fetchEnergyIncidents: true },
+      error: null
+    }));
+    
+    try {    
+        const data = await dataService.getEnergyIncidents(businessUuid, dataloggerUuid, start, end);
+      set(state => ({
+        energyIncidents: data,
+        loadingStates: { ...state.loadingStates, fetchEnergyIncidents: false }
+      }));
+      return data;
+    } catch (error) {
+      console.error('Error en fetchEnergyIncidents:', error);
+      set(state => ({
+        error: 'Error al obtener incidentes de energía',
+        loadingStates: { ...state.loadingStates, fetchEnergyIncidents: false }
+      }));
+      return null;
+    }
+  },
 }));
 

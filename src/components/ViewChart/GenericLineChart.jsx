@@ -60,13 +60,14 @@ const GenericLineChart = ({
       const countTransm = parseInt(dataPoint.conection_failures || 0); 
       
       const rawText = dataPoint.texto;
-      const isPhaseEvent = dataPoint.energia === 1;
+      const isPhaseEvent = dataPoint.energia === 1 || dataPoint.isEnergyEvent === true;
       const isAlarmPoint = dataPoint.isAlarm === true; 
       const alarmType = dataPoint.alarmType;
 
       let eventColor = null;
       if (isAlarmPoint) {
-          if (alarmType === 'comunication_failure') eventColor = COLOR_ALARM_COMMS;
+          if (alarmType === 'energy_failure') eventColor = COLOR_PHASE;
+          else if (alarmType === 'comunication_failure') eventColor = COLOR_ALARM_COMMS;
           else eventColor = COLOR_ALARM_VIOLET;
       }
       else if (alarmCount > 0) eventColor = COLOR_ALARM_VIOLET; 
@@ -92,10 +93,11 @@ const GenericLineChart = ({
         <div style={containerStyle}>
           <p style={{ fontWeight: 'bold', margin: '0 0 5px' }}>{formattedDate}</p>
           
-          <p style={{ color: lineColor, margin: 0 }}>
-             {isAlarmPoint && alarmType !== 'comunication_failure' ? `Valor: ${dataPoint.value}%` : ``}
-              {!isAlarmPoint  && `Valor: ${dataPoint.value}%`}
-          </p>
+          {!isAlarmPoint && (
+            <p style={{ color: lineColor, margin: 0 }}>
+              Valor: {dataPoint.value}%
+            </p>
+          )}
           
           {alarmCount > 0 && !isAlarmPoint && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
@@ -105,24 +107,37 @@ const GenericLineChart = ({
              </div>
           )}
 
-          {isAlarmPoint && (
-             <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
-                
-                <p style={{ marginBottom: '8px', fontSize: '1.2em', fontWeight: 'bold', padding: '8px', backgroundColor: alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET }}>
-                   🚨 {alarmType === 'comunication_failure' ? 'Fallo Transmisión Datos' : alarmType === 'porcentage_on' ? 'Porcentaje de encendido excedido' : 'Alarma Disparada'}
-                </p>
-                 
-                <p style={{ margin: '2px 0 2px 0', fontSize: '1em', color: '#666', fontStyle: 'italic' }}>
-                  "{rawText}"
-                </p>
-             </div>
-          )}
+              {isAlarmPoint && (
+                 <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
+                    <p style={{
+                      marginBottom: '8px', fontSize: '1.2em', fontWeight: 'bold', padding: '8px',
+                      backgroundColor: alarmType === 'energy_failure' ? COLOR_PHASE
+                        : alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS
+                        : COLOR_ALARM_VIOLET,
+                      color: alarmType === 'energy_failure' ? '#fff' : '#000'
+                    }}>
+                       {alarmType === 'energy_failure' ? (dataPoint.energia === 1 ? '⚡ Corte de 1 fase' : '⚡ Corte de las 3 fases')
+                         : alarmType === 'comunication_failure' ? 'Fallo Transmisión Datos'
+                         : alarmType === 'porcentage_on' ? 'Porcentaje de encendido excedido'
+                         : 'Alarma Disparada'}
+                    </p>
+                     
+                    <p style={{ margin: '2px 0 2px 0', fontSize: '1em', color: '#666', fontStyle: 'italic' }}>
+                      "{rawText}"
+                    </p>
+                 </div>
+              )}
 
           {(isPhaseEvent || countPhase > 0) && (
              <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #eee' }}>
-                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: COLOR_PHASE }}>
-                   ⚠️ Corte de alguna fase {countPhase > 0 ? `(${countPhase})` : ''}
+                <p style={{ margin: '2px 0', fontSize: '0.85rem', fontWeight: 'bold', color: COLOR_PHASE }}>
+                   ⚠️ {dataPoint.energia === 1 ? 'Corte de 1 fase' : dataPoint.energia === 0 ? 'Corte de las 3 fases' : `Corte de fase${countPhase > 0 ? ` (${countPhase})` : ''}`}
                 </p>
+                {rawText && (
+                  <p style={{ margin: '2px 0', fontSize: '0.8rem', color: '#666', fontStyle: 'italic' }}>
+                    "{rawText}"
+                  </p>
+                )}
              </div>
           )}
 
@@ -159,23 +174,24 @@ const GenericLineChart = ({
     const texto = payload.texto || '';
 
     if (payload.isAlarm) {
-      
-        const fill = payload.alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET;
+        let fill;
+        if (payload.alarmType === 'energy_failure') {
+            fill = COLOR_PHASE;
+        } else if (payload.alarmType === 'comunication_failure') {
+            fill = COLOR_ALARM_COMMS;
+        } else {
+            fill = COLOR_ALARM_VIOLET;
+        }
         return  <g>
-                  {/* Área invisible grande para facilitar hover */}
                   <circle cx={cx} cy={cy} r={18} fill="transparent" stroke="none" />
-                  {/* Punto visible */}
                   <circle cx={cx} cy={cy} r={10} fill={fill} stroke="#fff" strokeWidth={2} />
                 </g>
     }
 
-    if (payload.energia === 1) {
-        const fill = payload.alarmType === 'comunication_failure' ? COLOR_ALARM_COMMS : COLOR_ALARM_VIOLET;
+    if (payload.energia === 1 || payload.isEnergyEvent) {
         return <g>
-                  {/* Área invisible grande para facilitar hover */}
                   <circle cx={cx} cy={cy} r={18} fill="transparent" stroke="none" />
-                  {/* Punto visible */}
-                  <circle cx={cx} cy={cy} r={10} fill={fill} stroke="#fff" strokeWidth={2} />
+                  <circle cx={cx} cy={cy} r={10} fill={COLOR_PHASE} stroke="#fff" strokeWidth={2} />
                 </g>
     }
     /*

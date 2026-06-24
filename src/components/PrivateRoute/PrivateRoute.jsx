@@ -22,7 +22,7 @@ export const PrivateRoute = ({ children }) => {
           //redigir toda la ruta completa que llega en la url
           const fullPath = location.pathname + location.search;      
           
-          return <Navigate to={`/ingresar?redirect=${fullPath}`} replace />;
+          return <Navigate to="/ingresar" state={{ redirect: fullPath }} replace />;
         }
         return <Navigate to="/ingresar" replace />;
       }
@@ -42,7 +42,7 @@ export const PrivateRoute = ({ children }) => {
       //redigir toda la ruta completa que llega en la url
       const fullPath = location.pathname + location.search;      
       
-      return <Navigate to={`/ingresar?redirect=${fullPath}`} replace />;
+      return <Navigate to="/ingresar" state={{ redirect: fullPath }} replace />;
     }
     return <Navigate to="/ingresar" replace />;
   }
@@ -58,6 +58,10 @@ export const PrivateRoute = ({ children }) => {
   }  
 
   if (path.endsWith('editar') && userCurrentRole !== 'Owner' && userCurrentRole !== 'Administrator') {
+    return <Navigate to="/panel" replace />;
+  }
+
+  if (path.includes('/informe') && userCurrentRole !== 'Owner' && userCurrentRole !== 'Administrator') {
     return <Navigate to="/panel" replace />;
   }
 

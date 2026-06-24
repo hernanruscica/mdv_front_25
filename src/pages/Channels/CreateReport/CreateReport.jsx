@@ -302,6 +302,7 @@ const CreateReport = () => {
                   <ViewChart
                     businessUuid={businessUuid}
                     channelUuid={channelId}
+                    dataloggerUuid={selectedChannel?.datalogger?.uuid}
                     title={`Datos del canal '${selectedChannel?.name}'`}
                     subtitle={`Integración: ${selectedChannel?.averaging_period} minutos`}
                     average_period={selectedChannel?.averaging_period}

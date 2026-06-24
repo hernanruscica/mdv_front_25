@@ -9,6 +9,7 @@ import viewChartStyles from './viewChartStyles.module.css';
 const ViewChart = ({ 
   businessUuid,
   channelUuid,
+  dataloggerUuid,
   title = "Gráfico de Datos", 
   subtitle = 'Evolución del porcentaje de uso',   
   average_period = 10,
@@ -23,8 +24,9 @@ const ViewChart = ({
     RANGE_KEYS.LAST_YEAR
   ],
   alarmLogs = [], 
-  alarmLogsComunicationFailure = [] 
+  alarmLogsComunicationFailure = []
 }) => {
+  const [energyIncidentsData, setEnergyIncidentsData] = useState([]);
   const [activeRange, setActiveRange] = useState(availablePresets[0]);
   const [zoomedWeek, setZoomedWeek] = useState(null); 
   const [zoomedDay, setZoomedDay] = useState(null); 
@@ -75,14 +77,32 @@ const ViewChart = ({
             }
         });
     }
-    
+
+    // C. Incidentes de Energía (Rojo)
+    if (energyIncidentsData && Array.isArray(energyIncidentsData)) {
+        energyIncidentsData.forEach(incident => {
+            const ts = new Date(incident.fecha).getTime();
+            if (isNaN(ts)) return;
+            const dateStr = new Date(ts).toISOString().split('T')[0];
+            combinedAlarms.push({
+                timestamp: ts,
+                originalValue: null,
+                message: incident.texto || '',
+                alarmType: 'energy_failure',
+                dateStr: dateStr,
+                energia: Number(incident.energia ?? 1)
+            });
+        });
+    }
+
     return combinedAlarms;
-  }, [alarmLogs, alarmLogsComunicationFailure]);
+  }, [alarmLogs, alarmLogsComunicationFailure, energyIncidentsData]);
 
   const { 
     fetchAllRegistersChannelData, 
     fetchDailyChannelData, 
-    fetchWeeklyChannelData,        
+    fetchWeeklyChannelData,
+    fetchEnergyIncidents,
     channelAllRegistersData, 
     channelDailyData, 
     channelWeeklyData,        
@@ -436,7 +456,6 @@ const ViewChart = ({
             let yValue = referenceAlarm.originalValue;
 
             if (referenceAlarm.alarmType === 'comunication_failure' || yValue === null) {
-                 // Si alguna del grupo tiene valor nulo o es fallo de com, buscamos vecino
                  if (mappedData.length > 0) {
                     const closest = mappedData.reduce((prev, curr) => {
                         return (Math.abs(curr.date - timestamp) < Math.abs(prev.date - timestamp) ? curr : prev);
@@ -450,11 +469,9 @@ const ViewChart = ({
             if (yValue === null || yValue === undefined) return null;
 
             // 2. Combinar Mensajes (para mostrar detalle de TODAS)
-            // Ejemplo: "Fallo comunicación | Porcentaje alto..."
             const combinedMessage = alarmsGroup.map(a => a.message).join(' | ');
 
             // 3. Determinar el Color (Tipo)
-            // Si hay mezcla, priorizamos 'porcentage_on' (Violeta) sobre 'comunication_failure' (Verde)
             const hasPorcentageAlarm = alarmsGroup.some(a => a.alarmType === 'porcentage_on');
             const finalAlarmType = hasPorcentageAlarm ? 'porcentage_on' : referenceAlarm.alarmType;
 
@@ -548,8 +565,6 @@ const getXAxisFormatter = (tickItem) => {
     const s = new Date(sTs).toISOString();
     const e = new Date(eTs).toISOString();
 
-    //console.log(`🌐 [Fetch] ${rangeKey}: ${s} -> ${e}`);
-
     try {
       if (rangeKey === 'CUSTOM_DAY_ZOOM') {
         await fetchAllRegistersChannelData(businessUuid, channelUuid, s, e);
@@ -571,6 +586,13 @@ const getXAxisFormatter = (tickItem) => {
             await fetchWeeklyChannelData(businessUuid, channelUuid, s, e); break;
           default: break;
         }
+      }
+
+      if (dataloggerUuid) {
+        const sDate = s.split('T')[0];
+        const eDate = e.split('T')[0];
+        const incidentResponse = await fetchEnergyIncidents(businessUuid, dataloggerUuid, sDate, eDate);
+        setEnergyIncidentsData(incidentResponse?.data || []);
       }
     } catch (err) { console.error(err); }
   };
