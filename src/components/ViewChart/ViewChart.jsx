@@ -81,7 +81,7 @@ const ViewChart = ({
     // C. Incidentes de Energía (Rojo)
     if (energyIncidentsData && Array.isArray(energyIncidentsData)) {
         energyIncidentsData.forEach(incident => {
-            const ts = new Date(incident.fecha).getTime();
+            const ts = new Date(incident.fecha).getTime() + (timezoneOffset * 60 * 60 * 1000);
             if (isNaN(ts)) return;
             const dateStr = new Date(ts).toISOString().split('T')[0];
             combinedAlarms.push({
@@ -96,7 +96,7 @@ const ViewChart = ({
     }
 
     return combinedAlarms;
-  }, [alarmLogs, alarmLogsComunicationFailure, energyIncidentsData]);
+  }, [alarmLogs, alarmLogsComunicationFailure, energyIncidentsData, timezoneOffset]);
 
   const { 
     fetchAllRegistersChannelData, 
