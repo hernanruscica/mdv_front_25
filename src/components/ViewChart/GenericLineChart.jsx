@@ -17,12 +17,25 @@ const GenericLineChart = ({
   onPointClick,
   isClickable = false,
   xDomain = null, 
-  ticks = null    
+  ticks = null,
+  containerClassName = ''    
 }) => {
     
   if ((!data || data.length === 0) && !xDomain) {
     return (
-      <div style={{ width: '100%', height: `${height}px`, display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#999', border: '1px dashed #ccc', borderRadius: '4px' }}>
+      <div
+        className={containerClassName || undefined}
+        style={{
+          width: '100%',
+          height: containerClassName ? undefined : `${height}px`,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          color: '#999',
+          border: '1px dashed #ccc',
+          borderRadius: '4px'
+        }}
+      >
         Sin datos para visualizar
       </div>
     );
@@ -212,7 +225,10 @@ const GenericLineChart = ({
   };
 
   return (
-    <div style={{ width: '100%', height: `${height}px` }}>
+    <div
+      className={containerClassName || undefined}
+      style={{ width: '100%', height: containerClassName ? undefined : `${height}px` }}
+    >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 10, right: 30, left: 10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e0e0e0" />

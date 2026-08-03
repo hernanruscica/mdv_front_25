@@ -5,8 +5,9 @@ import { Title2 } from '../../components/Title2/Title2';
 // import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
+import BtnSmall from '../../components/BtnSmall/BtnSmall';
 import CardImage from '../../components/CardImage/CardImage';
-import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
+// import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import { useAuthStore } from '../../store/authStore';
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import styles from './ViewDatalogger.module.css';
@@ -18,7 +19,6 @@ import { useFetchDatalogger } from '../../hooks/useFetchDatalogger';
 import { useDataStore } from '../../store/dataStore';
 import { useMaintenanceLogsStore } from '../../store/maintenanceLogsStore';
 //import GaugeLinear from '../../components/GaugeLinear/GaugeLinear';
-import AlarmLinkCard from '../../components/AlarmLinkCard/AlarmLinkCard';
 
 // NUEVOS IMPORTS
 import { DATALOGGER_VIEW_INFO } from '../../utils/infoContent';
@@ -61,11 +61,30 @@ const ViewDatalogger = () => {
     : DATALOGGER_VIEW_INFO.General;
 
   // Contar tareas pendientes totales del datalogger
-  const totalPendingTasks = maintenanceLogs?.filter(log => {
-    if (log.type !== 'task') return false;
-    const today = new Date().toISOString().split('T')[0];
-    return log.status === 'pending' || (log.scheduled_date && log.scheduled_date > today);
-  }).length || 0;
+  // const totalPendingTasks = maintenanceLogs?.filter(log => {
+  //   if (log.type !== 'task') return false;
+  //   const today = new Date().toISOString().split('T')[0];
+  //   return log.status === 'pending' || (log.scheduled_date && log.scheduled_date > today);
+  // }).length || 0;
+
+  // Estado del datalogger según la antigüedad de la última conexión
+  const ONLINE_THRESHOLD_MINUTES = 10;
+  const lastConection = dataloggerUsage?.lastConection;
+  let lastDataStatus = 'unknown';
+  let lastDataLabel = 'Sin datos aún';
+  if (lastConection) {
+    const lastDate = new Date(lastConection);
+    if (!isNaN(lastDate.getTime())) {
+      const diffMinutes = (Date.now() - lastDate.getTime()) / 60000;
+      if (diffMinutes <= ONLINE_THRESHOLD_MINUTES) {
+        lastDataStatus = 'online';
+        lastDataLabel = 'En línea';
+      } else {
+        lastDataStatus = 'offline';
+        lastDataLabel = 'Sin conexión';
+      }
+    }
+  }
 
   useEffect(() => {
     const loadDataloggerUsage = async () => {       
@@ -88,13 +107,13 @@ const ViewDatalogger = () => {
 
   const dataloggerButtons = datalogger?.is_active == '1' ? (
     <>
-      <BtnCallToAction
+      <BtnSmall
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
         url={`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${datalogger?.uuid}/editar`}
       />
-      <BtnCallToAction
+      <BtnSmall
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
@@ -103,7 +122,7 @@ const ViewDatalogger = () => {
     </>
   ) : (
     <>
-      <BtnCallToAction
+      <BtnSmall
         text="Desarchivar"
         icon="save-regular.svg"
         onClick={() => setModalOpen(true)}
@@ -134,98 +153,67 @@ const ViewDatalogger = () => {
       {/* <Breadcrumb datalogger={datalogger?.name} ubicacion={datalogger?.business.name}/>      */}
       <BreadcrumbAuto />
      
-      <div className={styles.sectionRow}>
-        {(dataloggerUsage) ? (
-        <div className={styles.gaugeContainer}>
-          <Title2 text="Datos en tiempo real" type='alarmas'/>
-          <div className={styles.cardsContainer}>
-            {datalogger?.alarms && datalogger?.alarms.length > 0 && (
-              datalogger?.alarms.map((alarm, index) => { 
-                if (alarm.is_active !== 1) return null;
-                if (alarm.alarm_type !== 'porcentage_on') return null;
-                const currentChannel = dataloggerUsage?.channels.find(ch => ch.uuid == alarm?.channel_uuid);
-                const currentValue =  currentChannel?.lastData?.porcentageUsagePeriod || '--';                
-                
-                let currentMin = null;                 
-                let currentMax = null;
-                if (alarm?.condition_logic.includes('>')){
-                  currentMin = 0;
-                  currentMax = alarm?.var01;
-                }else{
-                  currentMin = alarm?.var01;
-                  currentMax = 100
-                }
-                return (                  
-                  <AlarmLinkCard 
-                    to={`/panel/ubicaciones/${alarm.business_uuid}/dataloggers/${alarm.datalogger_uuid}/canales/${alarm.channel_uuid}/alarmas/${alarm.uuid}`} 
-                    alarm={alarm}
-                    key={alarm.uuid}
-                    currentValue={currentValue}
-                    currentMin={currentMin} 
-                    currentMax={currentMax}               
-                    >                         
-                    {/* <GaugeLinear currentValue={currentValue} alarmMin={currentMin} alarmMax={currentMax} /> */}
-                  </AlarmLinkCard>                                   
-                );
-              })
-            )}
+      <CardImage
+        image={datalogger?.img ? `${datalogger?.img}` : '/images/default_datalogger.webp'}
+        title={datalogger?.name}
+        buttons={dataloggerButtons}
+      >
+        {datalogger?.is_active == '0' && (
+          <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
+        )}
+
+        {/* BLOQUE DE ESTADO */}
+        <div className={styles.lastDataStatus}>
+          <img className={styles.lastDataIcon} src="/icons/clock-regular.svg" alt="Últimos datos" />
+          <div className={styles.lastDataText}>
+            <p className={styles.lastDataLabel}>Últimos datos recibidos</p>
+            <span className={`${styles.statusPill} ${styles[`status_${lastDataStatus}`]}`}>
+              <span className={styles.statusDot}></span>
+              {lastDataLabel}
+            </span>
+            <p className={styles.lastDataDate}>
+              {lastConection ? FormatearFechaCompleta(lastConection) : 'Aún no se recibieron datos'}
+            </p>
           </div>
         </div>
-        ):
-        (<p>No hay datos de uso del datalogger. Actualice en unos minutos.</p>)
-        }
-        <CardImage
-          image={datalogger?.img ? `${datalogger?.img}` : '/images/default_datalogger.webp'}
-          title={datalogger?.name}
-          buttons={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator' ? dataloggerButtons : null}
-        >
-          <div className={styles.dataloggerInfo}>
-            {datalogger?.is_active == '0' && (
-              <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
-            )}
-            <p className={styles.description}>{datalogger?.description}</p>
-            <p className={styles.highLightText}>
-              <strong>Últimos datos recibidos:</strong> 
-              {dataloggerUsage?.lastConection 
-                  ? FormatearFechaCompleta(dataloggerUsage?.lastConection) 
-                  : 'Sin datos aún'}
-            </p>
-            <p><strong>MAC:</strong> {datalogger?.mac_address}</p>
-            <p>
-              <strong>Ubicación:</strong> {
-                datalogger?.business ? (
-                  <CardBtnSmall
-                    title={datalogger?.business.name}
-                    url={`/panel/ubicaciones/${datalogger?.business.uuid}`}
-                  />
-                ) : 'No especificada'
-              }
-            </p>
-            <p><strong>Creado el:</strong> {FormatearFechaCompleta(datalogger?.created_at)}</p>
-            <p>
-              <strong>Canales conectados:</strong>{" "}
-              {datalogger?.channels.filter(ch=>ch.column_name[0] == 'a').length} analógicos 
-              y {datalogger?.channels.filter(ch=>ch.column_name[0] == 'd').length} digitales
-            </p>
-            <p>
-              <strong>Alarmas programadas:</strong>{" "}
-              {datalogger?.alarms.length > 0 ? (
-                <CardBtnSmall
-                  title={`Ver ${datalogger?.alarms.filter(alarm => alarm.is_active == '1').length} alarmas activas`}
-                  url={`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${datalogger?.uuid}/alarmas`}
-                />
-              ) : 'No hay alarmas programadas'
-              }
-            </p>
-            {totalPendingTasks > 0 && (
-              <div className={styles.pendingTasksBadge}>
-                <img src="/icons/person-digging-solid.svg" alt="" />
-                <span>{totalPendingTasks} tareas pendientes en total</span>
-              </div>
-            )}
+
+        {/* DATOS ADMINISTRATIVOS (comentados: no se muestran en la card)
+        <p className={styles.description}>{datalogger?.description}</p>
+        <p><strong>MAC:</strong> {datalogger?.mac_address}</p>
+        <p>
+          <strong>Ubicación:</strong> {
+            datalogger?.business ? (
+              <CardBtnSmall
+                title={datalogger?.business.name}
+                url={`/panel/ubicaciones/${datalogger?.business.uuid}`}
+              />
+            ) : 'No especificada'
+          }
+        </p>
+        <p><strong>Creado el:</strong> {FormatearFechaCompleta(datalogger?.created_at)}</p>
+        <p>
+          <strong>Canales conectados:</strong>{" "}
+          {datalogger?.channels.filter(ch=>ch.column_name[0] == 'a').length} analógicos 
+          y {datalogger?.channels.filter(ch=>ch.column_name[0] == 'd').length} digitales
+        </p>
+        <p>
+          <strong>Alarmas programadas:</strong>{" "}
+          {datalogger?.alarms.length > 0 ? (
+            <CardBtnSmall
+              title={`Ver ${datalogger?.alarms.filter(alarm => alarm.is_active == '1').length} alarmas activas`}
+              url={`/panel/ubicaciones/${datalogger?.business.uuid}/dataloggers/${datalogger?.uuid}/alarmas`}
+            />
+          ) : 'No hay alarmas programadas'
+          }
+        </p>
+        {totalPendingTasks > 0 && (
+          <div className={styles.pendingTasksBadge}>
+            <img src="/icons/person-digging-solid.svg" alt="" />
+            <span>{totalPendingTasks} tareas pendientes en total</span>
           </div>
-        </CardImage>
-      </div>
+        )}
+        */}
+      </CardImage>
  
       <Title2 
         text={`Canales del datalogger ${datalogger?.name}`}
@@ -236,6 +224,7 @@ const ViewDatalogger = () => {
         <ShowChannelsCards
           channels={datalogger ? datalogger?.channels : []}
           alarms={datalogger?.alarms}
+          dataloggerUsage={dataloggerUsage}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}

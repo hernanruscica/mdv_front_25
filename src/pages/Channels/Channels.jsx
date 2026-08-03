@@ -82,6 +82,7 @@ const Channels = () => {
         <ShowChannelsCards
         channels={datalogger?.channels}
         alarms={datalogger?.alarms}
+        dataloggerUsage={dataloggerUsage}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         showAddButton={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator'}

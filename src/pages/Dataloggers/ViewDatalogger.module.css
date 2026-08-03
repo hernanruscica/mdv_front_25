@@ -1,11 +1,5 @@
 @import '../../index.css';
 
-.dataloggerInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 .description {
   font-size: 1.1rem;
   margin-bottom: 1rem;
@@ -25,68 +19,74 @@
   padding: 0 20px;
 }
 
-.highLightText {
-  background-color: yellow;
-  font-size: 1.1em;
-  padding: 8px 4px;
-}
-
-.sectionRow{
+.lastDataStatus {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  width: 100%;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
 }
 
-.gaugeContainer{
+.lastDataIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.lastDataText {
   display: flex;
   flex-direction: column;
-  padding: 8px;
-  justify-content: flex-start;
-
-  height: 100%;
+  gap: 4px;
+  min-width: 0;
 }
 
-.cardsContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  padding: 20px;
+.lastDataLabel {
+  margin: 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  font-weight: 600;
 }
 
-.cardGauge {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 320px;
-  padding: 16px 0px 8px 0px;
-  background-color: #EEE;
-  text-decoration: none;
-  color: #333;
-  text-align: flex-start;
-  display: flex;
-  flex-direction: column;
-  row-gap: 12px;
-  font-size: 14px;
-  h3 {
-    margin: 0;
-    font-weight: 300;
-    font-size: 1.3em;      
-    font-weight: 500;
-    padding-left: 1em;
-  }
-  p {
-    padding-left: 1.2em;
-    font-style: italic;
-  }
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  align-self: flex-start;
 }
-.cardGauge:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-  cursor: pointer;
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.status_online {
+  background-color: #22c55e;
+}
+
+.status_offline {
+  background-color: #ef4444;
+}
+
+.status_unknown {
+  background-color: #9ca3af;
+}
+
+.lastDataDate {
+  margin: 0;
+  color: #1f2937;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .pendingTasksBadge {
@@ -97,7 +97,7 @@
   color: #333;
   padding: 8px 12px;
   border-radius: 0 10px 10px 0;
-  border-left: 4px solid #dc3545; 
+  border-left: 4px solid #dc3545;
   font-size: 1.15rem;
   font-weight: 600;
   margin: 8px 0;

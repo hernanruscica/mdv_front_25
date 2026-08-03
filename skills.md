@@ -12,7 +12,7 @@ This document defines the specialized skills available to each agent. Skills are
 **Agents:** Frontend Agent
 **Purpose:** Create or modify React functional components
 
-**Pattern reference:** `src/components/CardInfo/CardInfo.jsx`, `src/components/LoadingSpinner/LoadingSpinner.jsx`
+**Pattern reference:** `src/components/CardInfo/CardInfo.jsx`, `src/components/LoadingSpinner/LoadingSpinner.jsx`, `src/components/BtnSmall/BtnSmall.jsx`
 
 **Capabilities:**
 - Create new component directory following `PascalCase/PascalCase.jsx` pattern
@@ -215,6 +215,7 @@ export default xxxService;
 - Validate that API services include auth headers via axiosClient
 - Audit Zustand stores for role-based conditional logic
 - Check that `/panel/verestadoalarma/:token` validates userId
+- Validate the navbar location switcher sourcing (`specs/auth-flow.md` §3.5): single source = `locationsStore` via `fetchLocations(user)` (all businesses for Owners, assigned otherwise); Owner detection via `businesses_roles.some(br => br.role === 'Owner')`; role subtitles in Spanish via `mappedCurrentRole`
 
 **RBAC rules to enforce:**
 | Route Pattern | Owner | Admin | Technician |

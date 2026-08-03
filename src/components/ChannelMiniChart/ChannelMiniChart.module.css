@@ -1,0 +1,24 @@
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 360px;
+  color: #999;
+  font-style: italic;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+}
+
+.chartContainer {
+  height: 360px;
+}
+
+@media (max-width: 768px) {
+  .placeholder {
+    height: 180px;
+  }
+
+  .chartContainer {
+    height: 180px;
+  }
+}

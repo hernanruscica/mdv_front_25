@@ -1,70 +1,61 @@
-import {useState, useEffect, useMemo} from 'react';
+import { useState, useMemo } from 'react';
 import CardInfo from '../CardInfo/CardInfo';
-import CardBtnSmall from '../CardBtnSmall/CardBtnSmall';
 import ButtonsBar from '../ButtonsBar/ButtonsBar';
 import { getIconFileName } from "../../utils/iconsDictionary";
 import styles from './ShowChannelsCards.module.css';
-import cardInfoStyles from "../CardInfo/CardInfo.module.css";
 import CustomTag from '../CustomTag/CustomTag';
-import { FormatearFechaCompleta } from '../../utils/FormatearFechaCompleta';
 import { LoadingSpinner } from '../LoadingSpinner/LoadingSpinner';
+import ChannelMiniChart from '../ChannelMiniChart/ChannelMiniChart';
+import AlarmLinkCard from '../AlarmLinkCard/AlarmLinkCard';
 
-
-const ShowChannelsCards = ({ 
-  channels, 
-  alarms, 
+const ShowChannelsCards = ({
+  channels,
+  alarms = [],
+  dataloggerUsage = null,
   searchTerm,
   onSearchChange,
   showAddButton = false,
-  maintenanceLogs = [] 
+  maintenanceLogs = []
 }) => {
+  const [showArchived, setShowArchived] = useState(false);
 
-  const [showArchived, setShowArchived] = useState(false);  
+  const pendingTasksByChannel = useMemo(() => {
+    if (!maintenanceLogs || maintenanceLogs.length === 0) return {};
+
+    const today = new Date().toISOString().split('T')[0];
+    const result = {};
+
+    maintenanceLogs.forEach(log => {
+      if (log.type !== 'task') return;
+
+      const isPending = log.status === 'pending' ||
+                       (log.scheduled_date && log.scheduled_date > today);
+
+      if (isPending && log.channel_uuid) {
+        result[log.channel_uuid] = (result[log.channel_uuid] || 0) + 1;
+      }
+    });
+
+    return result;
+  }, [maintenanceLogs]);
 
   if (!channels) {
-   return <LoadingSpinner message="Cargando datos..." />;
- }
+    return <LoadingSpinner message="Cargando datos..." />;
+  }
 
-  // Determine the base list of channels (active only, or all)
   const sourceChannels = showArchived && channels ? channels : channels.filter(channel => channel.is_active == 1);
 
-  // Filter the base list by the search term
-  const channelsToShow = (sourceChannels) ? sourceChannels.filter(channel => {
+  const channelsToShow = sourceChannels.filter(channel => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
       channel?.name.toLowerCase().includes(searchTermLower) ||
       channel?.description.toLowerCase().includes(searchTermLower)
     );
-  })
-  : [];
+  });
 
-  // Filtrar tareas pendientes por canal
-  const pendingTasksByChannel = useMemo(() => {
-    if (!maintenanceLogs || maintenanceLogs.length === 0) return {};
-    
-    const today = new Date().toISOString().split('T')[0];
-    const result = {};
-    
-    maintenanceLogs.forEach(log => {
-      if (log.type !== 'task') return;
-      
-      const isPending = log.status === 'pending' || 
-                       (log.scheduled_date && log.scheduled_date > today);
-      
-      if (isPending && log.channel_uuid) {
-        result[log.channel_uuid] = (result[log.channel_uuid] || 0) + 1;
-      }
-    });
-    
-    return result;
-  }, [maintenanceLogs]);
-
-
-  const oneChannel = channels ? channels[0] : undefined;
+  const oneChannel = channels[0];
   const dataloggerId = oneChannel ? oneChannel?.datalogger_id : null;
-  const businessUuid = oneChannel ? oneChannel?.business.uuid : null;  
-  //console.log('channels', channels);
-  
+  const businessUuid = oneChannel ? oneChannel?.business.uuid : null;
 
   return (
     <>
@@ -83,110 +74,82 @@ const ShowChannelsCards = ({
       </div>
 
       <div className={styles.cardsContainer}>
-        {channelsToShow.map(channel => {
-          const channelAlarms = alarms.filter(
-            alarm => alarm.channel_id == channel.uuid
-          );
-
-          return (
-            <CardInfo
-              key={channel.uuid}
-              iconSrc={`/icons/${getIconFileName('canales')}`}
-              title={channel.name}     
-              url={`/panel/ubicaciones/${businessUuid}/dataloggers/${channel.datalogger_id}/canales/${channel.uuid}`}   
-              size='normal'
-            >
-            <div className={cardInfoStyles.cardContent}>
-              <div className={cardInfoStyles.cardImage}>
-                <img
-                  src={channel?.img  ? `${channel.img}` : '/images/default-channel.webp'}
-                  alt={`Foto del canal ${channel?.name}`}
-                  title={`Este es el canal ${channel?.name}`}
-                  className={cardInfoStyles.image}
+        {channelsToShow.map(channel => (
+          <CardInfo
+            key={channel.uuid}
+            iconSrc={`/icons/${getIconFileName('canales')}`}
+            title={channel.name}
+            url={`/panel/ubicaciones/${businessUuid}/dataloggers/${channel.datalogger_id}/canales/${channel.uuid}`}
+            size='normal'
+          >
+            <div className={styles.cardGrid}>
+              <div className={styles.cardInfoCol}>
+                <div className={styles.cardImageWrap}>
+                  <img
+                    src={channel?.img ? `${channel.img}` : '/images/default-channel.webp'}
+                    alt={`Foto del canal ${channel?.name}`}
+                    title={`Este es el canal ${channel?.name}`}
+                    className={styles.cardImage}
                   />
-              </div>
-              <div className={cardInfoStyles.description}>
-                {
-                  channel.is_active == '0' && (
-                    <CustomTag 
+                </div>
+                <div className={styles.cardBody}>
+                  {channel.is_active == '0' && (
+                    <CustomTag
                       text="Archivado"
                       type="archive"
                       icon="/icons/archive-solid.svg"
                     />
-                  )
-                }                
-                <p className={cardInfoStyles.paragraph}>                 
-                  {channel.description}                  
-                </p>
-                <div className={styles.alarmsList}>
-                  <p className={cardInfoStyles.paragraph}>
-                    <strong>Alarmas configuradas ({alarms.filter(al => al.channel_uuid === channel.uuid).length}):</strong>
-                  </p>
-                  {alarms.length > 0 ? (
-                    <ul className={styles.alarmItems}>
-                      {alarms.filter(al => al.channel_uuid === channel.uuid)
-                        .map(alarm => (
-                        <li key={alarm.uuid} className={styles.alarmItem}>
-                          <CardBtnSmall
-                            title={alarm.name}
-                            url={`/panel/ubicaciones/${businessUuid}/dataloggers/${channel.datalogger_id}/canales/${channel.uuid}/alarmas/${alarm.uuid}`}
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className={styles.noAlarms}>No hay alarmas configuradas</p>
                   )}
+                  <p className={styles.cardDescription}>{channel.description}</p>
                 </div>
-{/*                 
-                <p className={cardInfoStyles.paragraph}>
-                  <strong>Total horas de uso:</strong>{" "} {channel?.totalData.total_time_on_hours} Hs. <br/> 
-                  Con datos desde <strong>{FormatearFechaCompleta(channel?.totalData.first_date)}</strong>:
-                </p>
-                 */}
-              </div>
-            </div>
-            <div >
-              {pendingTasksByChannel[channel.uuid] > 0 && (
+                {pendingTasksByChannel[channel.uuid] > 0 && (
                   <div className={styles.pendingTasksBadge}>
                     <img src="/icons/person-digging-solid.svg" alt="" />
                     <span>{pendingTasksByChannel[channel.uuid]} tareas pendientes</span>
                   </div>
                 )}
-              {/*
-              <div >               
-                {channel.data && channel.data.length > 0 ? (
-                  channel.nombre_columna.startsWith('d') ? (
-                    <DigitalPorcentageOn
-                      data={prepareDigitalData(channel.data)} 
-                      currentChannelName={channel?.canales_nombre}
-                      currentChannelTimeProm={channel?.tiempo_a_promediar} 
-                      customTimeRanges={timeRangesCards}
-                    />
-                  ) : channel.nombre_columna.startsWith('a') ? (
-                    <AnalogData
-                      data={channel.data}
-                      mult={channel.multiplicador} // Ajusta este valor según necesites
-                    />
-                  ) : (
-                    <p className={cardInfoStyles.noData}>Tipo de canal no soportado</p>
-                  )
-                ) : (
-                  <p className={cardInfoStyles.noData}>No hay datos disponibles</p>
-                )}
+                <div className={styles.alarmCardsList}>
+                  {alarms
+                    .filter(alarm => alarm.channel_uuid === channel.uuid)
+                    .filter(alarm => alarm.is_active === 1 && alarm.alarm_type === 'porcentage_on')
+                    .map(alarm => {
+                      const currentChannel = dataloggerUsage?.channels?.find(ch => ch.uuid == alarm?.channel_uuid);
+                      const currentValue = currentChannel?.lastData?.porcentageUsagePeriod || '--';
+
+                      let currentMin = null;
+                      let currentMax = null;
+                      if (alarm?.condition_logic?.includes('>')) {
+                        currentMin = 0;
+                        currentMax = alarm?.var01;
+                      } else {
+                        currentMin = alarm?.var01;
+                        currentMax = 100;
+                      }
+
+                      return (
+                        <AlarmLinkCard
+                          key={alarm.uuid}
+                          alarm={alarm}
+                          currentValue={currentValue}
+                          currentMin={currentMin}
+                          currentMax={currentMax}
+                        />
+                      );
+                    })}
+                </div>
               </div>
-               <p className={cardInfoStyles.paragraph}>
-                Este es el pie de pagina del grafico
-              </p> */}
+              <div className={styles.cardChartCol}>
+                <ChannelMiniChart
+                  businessUuid={businessUuid}
+                  channelUuid={channel.uuid}
+                />
+              </div>
             </div>
-            </CardInfo>
-          );
-        })}
+          </CardInfo>
+        ))}
       </div>
     </>
   );
 };
 
 export default ShowChannelsCards;
-
-

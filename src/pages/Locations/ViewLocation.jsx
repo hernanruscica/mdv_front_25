@@ -10,6 +10,7 @@ import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import CardImage from '../../components/CardImage/CardImage';
 import styles from './ViewLocation.module.css';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
+import BtnSmall from '../../components/BtnSmall/BtnSmall';
 import CardBtnSmall from '../../components/CardBtnSmall/CardBtnSmall';
 import ShowDataloggersCards from '../../components/ShowDataloggersCards/ShowDataloggersCards';
 import CustomTag from '../../components/CustomTag/CustomTag';
@@ -69,12 +70,13 @@ const ViewLocation = () => {
     <>      
       { selectedLocation?.is_active == 1 ? (
       <>
-        <BtnCallToAction
+        <BtnSmall
           text="Editar"
-          icon="edit-regular.svg"          
+          icon="edit-regular.svg"
+          type="warning"
           url={`/panel/ubicaciones/${selectedLocation?.uuid}/editar`}
         />  
-        <BtnCallToAction
+        <BtnSmall
           text="Archivar"
           icon="archive-solid.svg"
           type="danger"
@@ -83,9 +85,9 @@ const ViewLocation = () => {
       </>
       ) : 
       (<>
-        <BtnCallToAction
+        <BtnSmall
           text="Desarchivar"
-          icon="save-regular.svg"          
+          icon="save-regular.svg"
           onClick={() => setModalOpen(true)}
         />
       </>)  
@@ -127,45 +129,75 @@ const ViewLocation = () => {
           {selectedLocation?.is_active == '0' && (
             <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
           )}
-          <p><strong>Descripción:</strong> {selectedLocation?.description}</p>
-          <p><strong>Dirección:</strong> {selectedLocation?.address.street}</p>
-          <p><strong>Teléfono:</strong> {selectedLocation?.phone}</p>
-          <p><strong>Email:</strong> {selectedLocation?.email}</p>
-          <p><strong>Estado:</strong> {selectedLocation?.is_active ? 'Activo' : 'Inactivo'}</p>
-          <p><strong>Fecha de creación:</strong> {selectedLocation?.created_at ? FormatearFechaCompleta(selectedLocation?.created_at) : 'No disponible'}</p>
 
-          <p><strong>Dataloggers Asociados: {`${selectedLocation?.dataloggers?.length || 0}`}</strong></p>
-    
-          <div className={styles.btnContainer}>
-            {!selectedLocation?.dataloggers || selectedLocation.dataloggers.length === 0 ? (
-              'No tiene'
-            ) : 
-            selectedLocation.dataloggers.map(datalogger => (
-              <CardBtnSmall
-                key={datalogger.uuid}
-                title={datalogger.name}
-                url={`/panel/ubicaciones/${selectedLocation?.uuid}/dataloggers/${datalogger.uuid}`}
-              />              
-            ))
-            }
+          <div className={styles.infoColumns}>
+            <div className={styles.infoColumn}>
+              <div className={styles.infoRow}>
+                <img className={styles.infoIcon} src="/icons/folder-open-regular.svg" alt="" />
+                <p><strong>Descripción:</strong> {selectedLocation?.description}</p>
+              </div>
+              <div className={styles.infoRow}>
+                <img className={styles.infoIcon} src="/icons/home-solid.svg" alt="" />
+                <p><strong>Dirección:</strong> {selectedLocation?.address.street}</p>
+              </div>
+              <div className={styles.infoRow}>
+                <p><strong>Teléfono:</strong> {selectedLocation?.phone}</p>
+              </div>
+              <div className={styles.infoRow}>
+                <img className={styles.infoIcon} src="/icons/envelope-regular.svg" alt="" />
+                <p><strong>Email:</strong> {selectedLocation?.email}</p>
+              </div>
+              <div className={styles.infoRow}>
+                <img className={styles.infoIcon} src="/icons/calendar-solid.svg" alt="" />
+                <p><strong>Fecha de creación:</strong> {selectedLocation?.created_at ? FormatearFechaCompleta(selectedLocation?.created_at) : 'No disponible'}</p>
+              </div>
+            </div>
+
+            <div className={styles.infoColumn}>
+              <div className={styles.infoRow}>
+                <img className={styles.infoIcon} src="/icons/microchip-solid.svg" alt="" />
+                <div className={styles.infoRowContent}>
+                  <p><strong>Dataloggers Asociados: {`${selectedLocation?.dataloggers?.length || 0}`}</strong></p>
+                  <div className={styles.btnContainer}>
+                    {!selectedLocation?.dataloggers || selectedLocation.dataloggers.length === 0 ? (
+                      'No tiene'
+                    ) : 
+                    selectedLocation.dataloggers.map(datalogger => (
+                      <CardBtnSmall
+                        key={datalogger.uuid}
+                        title={datalogger.name}
+                        url={`/panel/ubicaciones/${selectedLocation?.uuid}/dataloggers/${datalogger.uuid}`}
+                      />              
+                    ))
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.infoRow}>
+                <img className={styles.infoIcon} src="/icons/bell-regular.svg" alt="" />
+                <p><strong>Alarmas Activas:</strong>{" "}
+                  {alarmsQuantity === 0 ? (
+                    'No hay alarmas activas'
+                  ) : (
+                    <CardBtnSmall 
+                      title={`Ver ${alarmsQuantity} alarmas`}
+                      url={`/panel/ubicaciones/${selectedLocation?.uuid}/alarmas`}
+                    />
+                  )}
+                </p> 
+              </div>
+              <div className={styles.infoRow}>
+                <img className={styles.infoIcon} src="/icons/user-regular.svg" alt="" />
+                <p><strong>Usuarios asociados:</strong>{" "}
+                  <CardBtnSmall 
+                    title={`Ver usuarios de ${selectedLocation?.name}`}
+                    url={`/panel/ubicaciones/${selectedLocation?.uuid}/usuarios`}
+                  />            
+                </p>           
+              </div>
+            </div>
           </div>
-
-          <p><strong>Alarmas Activas:</strong>{" "}
-            {alarmsQuantity === 0 ? (
-              'No hay alarmas activas'
-            ) : (
-              <CardBtnSmall 
-                title={`Ver ${alarmsQuantity} alarmas`}
-                url={`/panel/ubicaciones/${selectedLocation?.uuid}/alarmas`}
-              />
-            )}
-          </p> 
-          <p><strong>Usuarios asociados:</strong>{" "}
-            <CardBtnSmall 
-              title={`Ver usuarios de ${selectedLocation?.name}`}
-              url={`/panel/ubicaciones/${selectedLocation?.uuid}/usuarios`}
-            />            
-          </p>           
         </div>
       </CardImage>
 

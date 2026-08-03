@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import BtnCallToAction from "../BtnCallToAction/BtnCallToAction.jsx";
 import { useAuthStore } from "../../store/authStore";
+import { useLocationsStore } from "../../store/locationsStore";
+import { mappedCurrentRole } from "../../utils/userRoles";
 
 const Header = () => {
   const [navbarVisible, setNavbarVisible] = useState(false);
@@ -12,6 +14,7 @@ const Header = () => {
   const logout = useAuthStore(state => state.logout);
   const location = useLocation();
   const navigate = useNavigate();
+  const { locations, fetchLocations } = useLocationsStore();
 
   const menuBtnHandler = () => {
     setNavbarVisible(!navbarVisible);
@@ -23,14 +26,29 @@ const Header = () => {
     navigate('/');
   }
 
+  const getLocationItems = () => {
+    if (!user) return [];
+    const source = locations?.length ? locations : (user.businesses_roles || []);
+    return source.map(item => {
+      const currentRole = user?.businesses_roles?.some(br => br.role === 'Owner')
+        ? 'Owner'
+        : user?.businesses_roles?.find(br => br.uuid === item.uuid)?.role;
+      return {
+        ...item,
+        role: mappedCurrentRole[currentRole] || currentRole,
+      };
+    });
+  };
+
   const getCurrentBusiness = () => {
-    if (!user?.businesses_roles?.length) return null;
+    const items = getLocationItems();
+    if (!items.length) return null;
     const segments = location.pathname.split('/');
     for (const seg of segments) {
-      const match = user.businesses_roles.find(br => br.uuid === seg);
+      const match = items.find(br => br.uuid === seg);
       if (match) return match;
     }
-    return user.businesses_roles[0];
+    return items[0];
   };
 
   const handleLocationSelect = (business) => {
@@ -49,7 +67,14 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      fetchLocations(user);
+    }
+  }, [user, fetchLocations]);
+
   const currentBusiness = getCurrentBusiness();
+  const locationItems = getLocationItems();
 
   return (
     <header className={styles.header}>
@@ -72,7 +97,7 @@ const Header = () => {
             <Link to={`/panel/alarmas/${user.uuid}`} className={`${styles.headerLink} ${location.pathname.startsWith('/panel/alarmas') ? styles.headerLinkSelected : ''}`} id='misAlarmas' onClick={menuBtnHandler}>
               MIS ALARMAS
             </Link>
-            {user?.businesses_roles?.length > 1 && (
+            {locationItems.length > 0 && (
               <div className={styles.locationSelector} ref={dropdownRef}>
                 <button
                   className={`${styles.headerLink} ${styles.locationBtn}`}
@@ -83,14 +108,14 @@ const Header = () => {
                 </button>
                 {locationDropdownOpen && (
                   <div className={styles.locationDropdown}>
-                    {user.businesses_roles.map(br => (
+                    {locationItems.map(item => (
                       <button
-                        key={br.uuid}
-                        className={`${styles.locationItem} ${br.uuid === currentBusiness?.uuid ? styles.locationItemActive : ''}`}
-                        onClick={() => handleLocationSelect(br)}
+                        key={item.uuid}
+                        className={`${styles.locationItem} ${item.uuid === currentBusiness?.uuid ? styles.locationItemActive : ''}`}
+                        onClick={() => handleLocationSelect(item)}
                       >
-                        <span className={styles.locationItemName}>{br.name}</span>
-                        <span className={styles.locationItemRole}>{br.role}</span>
+                        <span className={styles.locationItemName}>{item.name}</span>
+                        <span className={styles.locationItemRole}>{item.role}</span>
                       </button>
                     ))}
                   </div>

@@ -11,6 +11,7 @@ import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import CardImage from '../../components/CardImage/CardImage';
 import styles from './ViewUser.module.css';
 import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
+import BtnSmall from '../../components/BtnSmall/BtnSmall';
 
 import Table from '../../components/Table/Table';
 import CustomTag from '../../components/CustomTag/CustomTag';
@@ -64,19 +65,19 @@ const ViewUser = () => {
   const userButtons = (
     selectedUser?.is_active == 1 ?
     (<>
-      <BtnCallToAction
+      <BtnSmall
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
         url={`/panel/ubicaciones/${businessUuid}/usuarios/${selectedUser?.uuid}/editar`}
       />
-      <BtnCallToAction
+      <BtnSmall
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
         onClick={() => setModalOpen(true)}
       />
-      <BtnCallToAction
+      <BtnSmall
         text="Eliminar"
         icon="trash-alt-regular.svg"
         type="danger"
@@ -84,12 +85,12 @@ const ViewUser = () => {
       />
     </>):
     (<>
-      <BtnCallToAction
+      <BtnSmall
         text="Desarchivar"
         icon="archive-solid.svg"
         onClick={() => setModalOpen(true)}
       />
-      <BtnCallToAction
+      <BtnSmall
         text="Eliminar"
         icon="trash-alt-regular.svg"
         type="danger"
@@ -211,7 +212,7 @@ const ViewUser = () => {
               ? userButtons
               : (userCurrentRole?.name == 'Technician' && user.uuid == selectedUser.uuid )
               ?
-              <BtnCallToAction
+              <BtnSmall
                   text="Editar"
                   icon="edit-regular.svg"
                   type="warning"

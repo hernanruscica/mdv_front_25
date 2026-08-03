@@ -7,7 +7,7 @@ import BreadcrumbAuto from '../../components/Breadcrumb/BreadcrumbAuto';
 import { Title1 } from '../../components/Title1/Title1';
 import { Title2 } from '../../components/Title2/Title2';
 import CardImage from '../../components/CardImage/CardImage';
-import BtnCallToAction from '../../components/BtnCallToAction/BtnCallToAction';
+import BtnSmall from '../../components/BtnSmall/BtnSmall';
 import styles from './ViewChannel.module.css';
 import CustomTag from '../../components/CustomTag/CustomTag';
 import ModalSetArchive from '../../components/ModalSetArchive/ModalSetArchive';
@@ -131,26 +131,24 @@ const ViewChannel = () => {
   const channelButtons = (selectedChannel?.is_active == '1') ? (
     <>
       {canGenerateReport && (
-        <BtnCallToAction
+        <BtnSmall
           text="Generar Informe"
           icon="chart-line-solid.svg"
-          type="normal"
           url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
         />
       )}
-      <BtnCallToAction
+      <BtnSmall
         text="Ver Mantenimiento"
         icon="person-digging-solid.svg"
-        type="normal"
         onClick={scrollToMaintenance}
       />
-      <BtnCallToAction
+      <BtnSmall
         text="Editar"
         icon="edit-regular.svg"
         type="warning"
         url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/editar`}
       />
-      <BtnCallToAction
+      <BtnSmall
         text="Archivar"
         icon="archive-solid.svg"
         type="danger"
@@ -160,23 +158,20 @@ const ViewChannel = () => {
   ) : (
     <>
       {canGenerateReport && (
-        <BtnCallToAction
+        <BtnSmall
           text="Generar Informe"
           icon="chart-line-solid.svg"
-          type="normal"
           url={`/panel/ubicaciones/${selectedChannel?.business_uuid}/dataloggers/${selectedChannel?.datalogger_id}/canales/${selectedChannel?.uuid}/informe`}
         />
       )}
-      <BtnCallToAction
+      <BtnSmall
         text="Ver Mantenimiento"
         icon="person-digging-solid.svg"
-        type="normal"
         onClick={scrollToMaintenance}
       />
-      <BtnCallToAction
+      <BtnSmall
         text="Desarchivar"
         icon="archive-solid.svg"
-        type="normal"
         onClick={() => setModalOpen(true)}
       />
     </>
@@ -209,7 +204,6 @@ const ViewChannel = () => {
           <CardImage
             image={`${selectedChannel?.img}`}
             title={selectedChannel?.name}
-            buttons={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator' ? channelButtons : ''}
           >
             {selectedChannel?.is_active == '0' && (
               <CustomTag text="Archivado" type="archive" icon="/icons/archive-solid.svg" />
@@ -217,11 +211,11 @@ const ViewChannel = () => {
             <ChannelInfo 
               channel={selectedChannel} 
               alarms={seletedChannelAlarms.filter(alarm => alarm.is_active == '1')} 
-              datalogger={selectedChannel?.datalogger}
               totalTime={channelUsage?.totalData?.total_time_on_hours}
               firstDate={channelUsage?.totalData?.first_date}
               lastDate={channelUsage?.lastData?.last_record_date}
               totalAverageTime={channelUsage?.totalData?.average_usage_percentage}
+              buttons={userCurrentRole?.name === 'Owner' || userCurrentRole?.name === 'Administrator' ? channelButtons : null}
             />
           </CardImage>
       </div>

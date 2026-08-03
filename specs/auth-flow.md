@@ -213,6 +213,17 @@ When user selects Business B:
   - businessUuid: "def" → all API calls use this UUID
 ```
 
+### 3.5 Navbar Location Switcher
+
+**File:** `src/components/Header/Header.jsx`
+
+The location dropdown in the navbar is visible for every logged-in user with at least one accessible location (not only when they have multiple):
+
+- **Single source:** items come from `locationsStore.fetchLocations(user)`, which resolves all businesses for Owners and assigned businesses for other roles. The store fetch is triggered on `user` change (mirroring `Locations.jsx`).
+- **Owner detection:** a user is treated as Owner when `user.businesses_roles.some(br => br.role === 'Owner')` (NOT `user.isOwner == 1`), matching `GetUserCurrentRole` and `Dashboard.jsx`. Owners see all businesses even if not listed in `businesses_roles`.
+- **Role subtitle in Spanish:** per-item role is resolved with the `Dashboard.jsx` pattern and mapped via `mappedCurrentRole` (`Owner` → Propietario, `Administrator` → Administrador, `Technician` → Operario).
+- `getCurrentBusiness()` matches the URL's `businessUuid` segment against the same source, falling back to the first item.
+
 ---
 
 ## 4. Axios Client Interceptors
