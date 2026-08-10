@@ -194,7 +194,7 @@ export const CHANNELS_LIST_INFO = {
 
 export const ALARMS_LIST_INFO = {
   Owner: {
-    title: `${titlePrefix}"Gestión de Alarmas"`, 
+    title: `${titlePrefix}"Gestión de Alarmas y configuración"`, 
     paragraphs: [
       "Usted se encuentra en la página para visualizar el listado de alarmas según el filtro seleccionado.",
       "Como propietario, tiene acceso completo para administrar todas las ubicaciones, usuarios y dataloggers en el sistema."
@@ -308,4 +308,17 @@ export const DASHBOARD_INFO = {
       "Desde aquí puede supervisar el estado de sus equipos y administrar los recursos según los permisos asignados a su rol."
     ]
   }
+};
+
+export const HELP_INFO = {
+  title: `${titlePrefix}"Centro de Ayuda"`,
+  paragraphs: [
+    "Este es el centro de ayuda del sistema, donde encontrará artículos y guías para utilizar la plataforma según su rol.",
+    "Haga clic sobre un artículo para abrirlo y consultar su contenido completo."
+  ],
+  actions: [
+    "Explorar el índice de artículos disponibles.",
+    "Abrir un artículo haciendo [CLICK] sobre su tarjeta o el botón 'Ver detalles'.",
+    "Usar el menú de navegación superior para volver a las secciones del panel."
+  ]
 };

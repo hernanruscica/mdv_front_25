@@ -19,3 +19,5 @@ export { default as CreatePage } from './CreatePage/CreatePage';
 export { default as ViewStateAlarm } from './ViewStateAlarm/ViewStateAlarm';
 export { default as UnderConstruction } from './UnderConstruction/UnderContruction';
 export { default as BackendLogs } from './BackendLogs/BackendLogs';
+export { default as Help } from './Help/Help';
+export { default as HelpArticle } from './Help/HelpArticle';

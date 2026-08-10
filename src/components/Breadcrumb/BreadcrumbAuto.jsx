@@ -17,6 +17,8 @@ const PATH_LABELS = {
   'alarmas': 'Alarmas',
   'agregar': 'Agregar',
   'editar': 'Edición',
+  'ayuda': 'Ayuda',
+  'tutorial-operario': 'Tutorial Operario',
 };
 
 const PATH_ICONS = {
@@ -28,6 +30,7 @@ const PATH_ICONS = {
   'alarmas': 'alarm',
   'agregar': 'plus',
   'editar': 'edit',
+  'ayuda': 'unknown',
 };
 
 const Icons = {

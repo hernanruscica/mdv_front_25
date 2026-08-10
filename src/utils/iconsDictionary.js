@@ -13,7 +13,8 @@ export const iconsDictionary = {
     inicio: 'flag-checkered-solid.svg',
     contacto: 'envelope-regular.svg',
     alarmaDisparada: 'triangle-exclamation.svg',
-    mantenimiento: 'person-digging-solid.svg'
+    mantenimiento: 'person-digging-solid.svg',
+    ayuda: 'circle-question.svg'
 };
 
 export const getIconFileName = (type) => {

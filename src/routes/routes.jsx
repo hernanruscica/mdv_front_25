@@ -1,7 +1,7 @@
 import { UnderConstruction, Home, Contact, Login, Dashboard, Users, Dataloggers, 
   Channels, ViewChannel, CreateReport, ViewUser, ActivateUser, Locations, ViewLocation, 
   ViewDatalogger, Alarms, ViewAlarm, CreatePage, SendActivationEmail, 
-  ViewStateAlarm, BackendLogs } from '../pages';
+  ViewStateAlarm, BackendLogs, Help, HelpArticle } from '../pages';
 
 export const routes = [
   { path: "/", element: <Home /> },//sin breadcumb
@@ -10,6 +10,10 @@ export const routes = [
   { path: "/contacto", element: <Contact /> },//sin breadcumb
   { path: "/panel", element: <Dashboard />, private: true },//nuevo breadcrumb
   { path: "/panel/verestadoalarma/:token", element: <ViewStateAlarm />, private: true },//sin breadcumb
+
+  // Help routes
+  { path: "/ayuda", element: <Help />, private: true },
+  { path: "/ayuda/:articleSlug", element: <HelpArticle />, private: true },
   
   // Locations routes
   { path: "/panel/ubicaciones", element: <Locations />, private: true },//nuevo breadcrumb

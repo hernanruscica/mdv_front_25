@@ -50,6 +50,11 @@ const Home = () => {
             type="normal"
             url={`/panel/ubicaciones/${user?.businesses_roles[0]?.uuid}/usuarios/${user.uuid}`} />
           <BtnCallToAction
+            text="Centro de ayuda"
+            icon="circle-question.svg"
+            type="normal"
+            url={`/ayuda`} />
+          <BtnCallToAction
             text="Enviarnos un mensaje"
             icon="envelope-regular.svg"
             type="normal"

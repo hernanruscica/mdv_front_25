@@ -36,27 +36,27 @@ export const useAlarmsStrategy = ({ businessUuid, userId, dataloggerId, channelI
     switch (strategy) {
       case 'CHANNEL':
         return { 
-          title: `Alarmas del Canal actual`,
+          title: `Alarmas configuradas del Canal actual`,
           context: 'canal'
         };
       case 'DATALOGGER':
         return { 
-          title: `Alarmas del Datalogger actual`,
+          title: `Alarmas configuradas del Datalogger actual`,
           context: 'datalogger'
         };
       case 'USER':
         return { 
-          title: 'Alarmas del Usuario actual',
+          title: 'Alarmas configuradas del Usuario actual',
           context: 'usuario'
         };
       case 'USER_UUID':
         return { 
-          title: 'Alarmas asignadas al usuario',
+          title: 'Alarmas configuradas asignadas al usuario',
           context: 'usuario_uuid'
         };
       case 'LOCATION':
         return { 
-          title: 'Alarmas de la Ubicación actual',
+          title: 'Alarmas configuradas de la Ubicación actual',
           context: 'ubicacion'
         };
       default:
