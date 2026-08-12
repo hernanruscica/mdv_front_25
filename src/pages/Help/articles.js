@@ -1,4 +1,5 @@
 import tutorialMd from '../../../docs/tutorial-operario.md?raw';
+import crearUsuarioMd from '../../../docs/tutorial-crear-usuario.md?raw';
 
 const stripEditorNote = (raw) => {
   return raw.replace(/^> \*\*Nota sobre las imágenes:\*\*.*\n?/, '').trim();
@@ -26,6 +27,7 @@ export const extractSections = (md) => {
 };
 
 const tutorialMdContent = stripEditorNote(tutorialMd);
+const crearUsuarioMdContent = stripEditorNote(crearUsuarioMd);
 
 export const helpArticles = [
   {
@@ -36,6 +38,15 @@ export const helpArticles = [
     iconSrc: '/icons/circle-question.svg',
     md: tutorialMdContent,
     sections: extractSections(tutorialMdContent),
+  },
+  {
+    slug: 'crear-usuario',
+    title: 'Creación de Usuario',
+    description:
+      'Guía para Propietarios y Administradores: cómo crear un nuevo usuario, qué correo de activación recibe la persona y cómo completa la activación de su cuenta.',
+    iconSrc: '/icons/user-regular.svg',
+    md: crearUsuarioMdContent,
+    sections: extractSections(crearUsuarioMdContent),
   },
 ];
 

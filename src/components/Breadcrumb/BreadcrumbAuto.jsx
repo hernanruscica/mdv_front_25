@@ -19,6 +19,7 @@ const PATH_LABELS = {
   'editar': 'Edición',
   'ayuda': 'Ayuda',
   'tutorial-operario': 'Tutorial Operario',
+  'crear-usuario': 'Crear Usuario',
 };
 
 const PATH_ICONS = {
@@ -31,6 +32,8 @@ const PATH_ICONS = {
   'agregar': 'plus',
   'editar': 'edit',
   'ayuda': 'unknown',
+  'tutorial-operario': 'unknown',
+  'crear-usuario': 'users',
 };
 
 const Icons = {

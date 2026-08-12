@@ -10,6 +10,25 @@ import { useNavigate } from 'react-router-dom';
 import {mappedCurrentRole} from '../../utils/userRoles.js';
 import { PATTERNS, validateField, sanitizeInput } from '../../utils/validation';
 
+const generateTemporaryPassword = (length = 16) => {
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const digits = '0123456789';
+  const all = upper + lower + digits;
+  const randomChar = (set) => {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    return set[arr[0] % set.length];
+  };
+  const restLength = Math.max(length - 3, 0);
+  return (
+    randomChar(upper) +
+    randomChar(lower) +
+    randomChar(digits) +
+    Array.from({ length: restLength }, () => randomChar(all)).join('')
+  );
+};
+
 
 export const UserCreateForm = ({ userId, userData, locationData, isEditing }) => {
     const { user: userStore, userRoles } = useAuthStore();
@@ -201,7 +220,7 @@ export const UserCreateForm = ({ userId, userData, locationData, isEditing }) =>
         formData.append("email", sanitizeInput(user.email));
         formData.append("phone", sanitizeInput(user.phone));
         formData.append("dni", sanitizeInput(user.dni));
-        formData.append("password", user.password || crypto.randomUUID());
+        formData.append("password", generateTemporaryPassword());
         formData.append("street", sanitizeInput(user.street));
         formData.append("city", sanitizeInput(user.city));
         formData.append("state", sanitizeInput(user.state));
